@@ -11,16 +11,42 @@ public class PentInfo : MonoBehaviour
     Mesh mesh;
     public GameObject InputBit;
     public Material mat;
+    float h = 0;
 
 	void Start()
 	{
 		MeshSetup();
+        SpawnHexs();
+        //Fill this pentagon in with hexagons.
+
 	}
-	
-	void MeshSetup()
-	{
-        #region verts
+
+    void SpawnHexs()
+    {
+        GameObject hex = new GameObject("A hexagon");
+        HexInfo hexinf = hex.AddComponent<HexInfo>();
+        hexinf.mat = mat;
+        hex.transform.Translate(h, 1, 0);
+        h++;
+        /*bool outOfBounds = false;
+        while (!outOfBounds)
+        {
+            if (mesh.bounds.Contains(hex.transform.position))
+            {
+                outOfBounds = false;
+            }
+            else
+            {
+                outOfBounds = true;
+            }
+        }*/
+    }
         
+
+    void MeshSetup()
+    {
+        #region verts
+
         float floorLevel = 0;
         Vector3[] pentVerts =
         {
@@ -87,7 +113,8 @@ public class PentInfo : MonoBehaviour
         InputField tweetData = InputBit.GetComponent<InputField>();
         updateMesh(tweetData.text);
 
-        Bounds meshBounds = mesh.bounds;
+        //SpawnHexs();
+       
         if (mesh.bounds.Contains(GameObject.FindGameObjectWithTag("TEST").transform.position))
         {
             Debug.Log("DJAKSDJALSK");
@@ -121,6 +148,7 @@ public class PentInfo : MonoBehaviour
             new Vector3(-2 - 0.5f*vowelCount[4], 0f, -4f - vowelCount[4]),
         };
         mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
 
         mesh.vertices = tempVerts;
     }

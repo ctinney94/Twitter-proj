@@ -7,21 +7,20 @@ public class HexInfo : MonoBehaviour
 	public Vector3[] Vertices;
 	public Vector2[] uv;
 	public int[] Triangles;
+    public Material mat;
 	
 	void Start()
 	{
-		MeshSetup();
+        MeshSetup();
 	}
 	
-	void MeshSetup()
+	public void MeshSetup()
 	{
         #region verts
-
-
-        float floorLevel = 0;
+        float floorLevel = 0.1f;
         Vector3[] vertices =  
         {
-            new Vector3(-1f , floorLevel, -.5f),
+            new Vector3(-1f, floorLevel, -.5f),
             new Vector3(-1f, floorLevel, .5f),
             new Vector3(0f, floorLevel, 1f),
             new Vector3(1f, floorLevel, .5f),
@@ -57,8 +56,8 @@ public class HexInfo : MonoBehaviour
 
         //add a mesh filter to the GameObject the script is attached to; cache it for later
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         //add a mesh renderer to the GO the script is attached to
-        gameObject.AddComponent<MeshRenderer>();
 
         //create a mesh object to pass our data into
         Mesh mesh = new Mesh();
@@ -70,6 +69,9 @@ public class HexInfo : MonoBehaviour
         //add out UV coordinates to the mesh
         mesh.uv = uv;
 
+        //and material
+        meshRenderer.material = mat;
+        
         //make it play nicely with lighting
         mesh.RecalculateNormals();
 
