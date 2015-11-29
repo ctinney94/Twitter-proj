@@ -1,0 +1,49 @@
+fileFormatVersion: 2
+guid: 57138ad640a21b64c89a32d94ebb4f64
+labels:
+- profile
+- facebook
+- twitter
+- google plus
+- google+
+- social
+- social login
+- facebook connect
+- rate app
+- app store rating
+- rating
+- sharing
+- sharing plugin
+- post to wall
+- post to feed
+- fb wall
+- fb plugin
+- like
+- like button
+- share
+- share button
+- gifting
+- friends
+- friends list
+- leaderboard
+- cloudsave
+- photon
+- stan
+- stans assets
+- prime31
+PluginImporter:
+  serializedVersion: 1
+  iconMap: {}
+  executionOrder: {}
+  isPreloaded: 0
+  platformData:
+    Any:
+      enabled: 1
+      settings: {}
+    Editor:
+      enabled: 0
+      settings:
+        DefaultValueInitialized: true
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

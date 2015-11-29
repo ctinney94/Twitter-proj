@@ -12,7 +12,7 @@ public class PentInfo : MonoBehaviour
     public GameObject InputBit;
     public Material mat;
     float h = 0;
-
+    
 	void Start()
 	{
 		MeshSetup();
@@ -117,10 +117,10 @@ public class PentInfo : MonoBehaviour
        
         if (mesh.bounds.Contains(GameObject.FindGameObjectWithTag("TEST").transform.position))
         {
-            Debug.Log("DJAKSDJALSK");
+            GameObject.FindGameObjectWithTag("TEST").GetComponent<Renderer>().material.color = Color.green;
         }
         else
-            Debug.Log("naw");
+            GameObject.FindGameObjectWithTag("TEST").GetComponent<Renderer>().material.color = Color.red;
     }
 
     void updateMesh(string inputText)

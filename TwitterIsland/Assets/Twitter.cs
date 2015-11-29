@@ -35,6 +35,7 @@ namespace Twitter
 
     public class API
     {
+
         #region OAuth Token Methods
         // 1. Get Request-Token From Twitter
         // 2. Get PIN from User
@@ -175,12 +176,14 @@ namespace Twitter
 
         public static IEnumerator PostTweet(string text, string consumerKey, string consumerSecret, AccessTokenResponse response, PostTweetCallback callback)
         {
+            //Is tweet within allowed bounds?
             if (string.IsNullOrEmpty(text) || text.Length > 140)
             {
                 Debug.Log(string.Format("PostTweet - text[{0}] is empty or too long.", text));
 
                 callback(false);
             }
+            //Time to post a tweet
             else
             {
                 Dictionary<string, string> parameters = new Dictionary<string, string>();
@@ -190,17 +193,18 @@ namespace Twitter
                 WWWForm form = new WWWForm();
                 form.AddField("status", text);
 
-				// HTTP header
-				var headers = new Dictionary<string, string>();
+                // HTTP header
+                var headers = new Dictionary<string, string>();
                 headers["Authorization"] = GetHeaderWithAccessToken("POST", PostTweetURL, consumerKey, consumerSecret, response, parameters);
 
+                //Time to do an internet!
                 WWW web = new WWW(PostTweetURL, form.data, headers);
-                yield return web;
+                yield return web;//Wait until the line above has gone through
 
                 if (!string.IsNullOrEmpty(web.error))
                 {
-					Debug.Log(string.Format("PostTweet - failed. {0}\n{1}", web.error, web.text));
-					callback(false);
+                    Debug.Log(string.Format("PostTweet - failed. {0}\n{1}", web.error, web.text));
+                    callback(false);
                 }
                 else
                 {
@@ -218,6 +222,65 @@ namespace Twitter
                 }
             }
         }
+            /*public static IEnumerator GetTimeline(string text, string consumerKey, string consumerSecret, AccessTokenResponse response, PostTweetCallback callback)
+        {
+            #region stupid shit
+            var oAuthConsumerKey = "superSecretKey";
+            var oAuthConsumerSecret = "superSecretSecret";
+            var oAuthUrl = "https://api.twitter.com/oauth2/token";
+            var screenname = "aScreenName";
+
+            // Do the Authenticate
+            var authHeaderFormat = "Basic {0}";
+
+            var authHeader = string.Format(authHeaderFormat,
+                Convert.ToBase64String(Encoding.UTF8.GetBytes(Uri.EscapeDataString(oAuthConsumerKey) + ":" +
+                Uri.EscapeDataString((oAuthConsumerSecret)))
+            ));
+
+            var postBody = "grant_type=client_credentials";
+
+            HttpWebRequest authRequest = (HttpWebRequest)WebRequest.Create(oAuthUrl);
+            authRequest.Headers.Add("Authorization", authHeader);
+            authRequest.Method = "POST";
+            authRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
+            authRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+            using (Stream stream = authRequest.GetRequestStream())
+            {
+                byte[] content = ASCIIEncoding.ASCII.GetBytes(postBody);
+                stream.Write(content, 0, content.Length);
+            }
+
+            authRequest.Headers.Add("Accept-Encoding", "gzip");
+
+            WebResponse authResponse = authRequest.GetResponse();
+            #endregion 
+
+            // Do the timeline
+            var timelineFormat = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name={0}&include_rts=1&exclude_replies=1&count=50";
+            var timelineUrl = string.Format(timelineFormat, screenname);
+            HttpWebRequest timeLineRequest = (HttpWebRequest)WebRequest.Create(timelineUrl);
+            var timelineHeaderFormat = "{0} {1}";
+            timeLineRequest.Headers.Add("Authorization", string.Format(timelineHeaderFormat, twitAuthResponse.token_type, twitAuthResponse.access_token));
+            timeLineRequest.Method = "Get";
+            WebResponse timeLineResponse = timeLineRequest.GetResponse();
+            var timeLineJson = string.Empty;
+            using (timeLineResponse)
+            {
+                using (var reader = new StreamReader(timeLineResponse.GetResponseStream()))
+                {
+                    timeLineJson = reader.ReadToEnd();
+                }
+            }
+
+
+public class TwitAuthenticateResponse
+        {
+            public string token_type { get; set; }
+            public string access_token { get; set; }
+        }
+    }*/
 
         #endregion
 
