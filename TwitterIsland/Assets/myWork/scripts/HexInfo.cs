@@ -59,6 +59,8 @@ public class HexInfo : MonoBehaviour
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         //add a mesh renderer to the GO the script is attached to
 
+        MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
+
         //create a mesh object to pass our data into
         Mesh mesh = new Mesh();
 
@@ -77,11 +79,17 @@ public class HexInfo : MonoBehaviour
 
         //set the GO's meshFilter's mesh to be the one we just made
         meshFilter.mesh = mesh;
+        meshCol.sharedMesh = mesh;
 
         //UV TESTING
         //renderer.material.mainTexture = texture;
         
         #endregion
+
+    }
+
+    void OnCollisionStay(Collision col)
+    {
 
     }
 }

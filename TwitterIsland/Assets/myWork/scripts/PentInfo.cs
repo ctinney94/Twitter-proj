@@ -15,31 +15,24 @@ public class PentInfo : MonoBehaviour
     
 	void Start()
 	{
-		MeshSetup();
-        SpawnHexs();
+        MeshSetup();
         //Fill this pentagon in with hexagons.
 
 	}
 
     void SpawnHexs()
     {
-        GameObject hex = new GameObject("A hexagon");
-        HexInfo hexinf = hex.AddComponent<HexInfo>();
-        hexinf.mat = mat;
-        hex.transform.Translate(h, 1, 0);
-        h++;
-        /*bool outOfBounds = false;
-        while (!outOfBounds)
+        bool insidePent= false;
+        //Create a new hexagon
+        while (insidePent)
         {
-            if (mesh.bounds.Contains(hex.transform.position))
-            {
-                outOfBounds = false;
-            }
-            else
-            {
-                outOfBounds = true;
-            }
-        }*/
+            GameObject hex = new GameObject("A hexagon");
+            HexInfo hexinf = hex.AddComponent<HexInfo>();
+            hexinf.mat = mat;
+            //Move it into position
+            hex.transform.Translate(h * 2, 0.2f, 0);
+            h++;
+        }
     }
         
 
@@ -86,6 +79,9 @@ public class PentInfo : MonoBehaviour
         //add a mesh renderer to the GO the script is attached to
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         mesh = new Mesh();
+
+        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
+       
         //add our vertices to the mesh
         mesh.vertices = pentVerts;
         //add our triangles to the mesh
@@ -98,9 +94,10 @@ public class PentInfo : MonoBehaviour
 
         //make it play nicely with lighting
         mesh.RecalculateNormals();
-
+        mesh.name = "Pentagonal";
         //set the GO's meshFilter's mesh to be the one we just made
         meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
 
         //UV TESTING
         //renderer.material.mainTexture = texture;
@@ -141,15 +138,29 @@ public class PentInfo : MonoBehaviour
         }
         Vector3[] tempVerts =
         {
-            new Vector3(-3.0f - 0.5f*vowelCount[0], 0.0f, 0.0f),
-            new Vector3(0f, 0f, 2f + 0.5f*vowelCount[1]),
-            new Vector3(3f + 0.5f*vowelCount[2], 0.0f, 0f),
-            new Vector3(2f + 0.5f*vowelCount[3], 0f, -4f - vowelCount[3]),
-            new Vector3(-2 - 0.5f*vowelCount[4], 0f, -4f - vowelCount[4]),
+            new Vector3(-3.0f - 0.33f*vowelCount[0], 0.0f, 0.0f),
+            new Vector3(0f, 0f, 2f + 0.2f*vowelCount[1]),
+            new Vector3(3f + 0.33f*vowelCount[2], 0.0f, 0f),
+            new Vector3(2f + 0.2f*vowelCount[3], 0f, -4f - 0.4f*vowelCount[3]),
+            new Vector3(-2 - 0.2f*vowelCount[4], 0f, -4f - 0.4f*vowelCount[4]),
         };
+
+        /*mesh.vertices[0] = new Vector3(-3.0f - 0.33f * vowelCount[0], 0.0f, 0.0f);
+        mesh.vertices[1] = new Vector3(0f, 0f, 2f + 0.2f * vowelCount[1]);
+        mesh.vertices[2] = new Vector3(3f + 0.33f * vowelCount[2], 0.0f, 0f);
+        mesh.vertices[3] = new Vector3(2f + 0.2f * vowelCount[3], 0f, -4f - 0.4f * vowelCount[3]);
+        mesh.vertices[4] = new Vector3(-2 - 0.2f * vowelCount[4], 0f, -4f - 0.4f * vowelCount[4]);*/
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-
         mesh.vertices = tempVerts;
+
+        //Is this line actually did something, that'd be fucking marvelous, but noooo
+        //gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+
+        //I am destorying and remaking the collider EVERY FRAME
+        //If anyone find this I want them to know I'm not proud of what I've done here
+        Destroy(GetComponent<MeshCollider>());
+        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = mesh;
     }
 }
