@@ -8,8 +8,9 @@ public class HexInfo : MonoBehaviour
 	public Vector2[] uv;
 	public int[] Triangles;
     public Material mat;
-	
-	void Start()
+    public float scale = 0.25f;
+
+    void Start()
 	{
         MeshSetup();
 	}
@@ -17,17 +18,22 @@ public class HexInfo : MonoBehaviour
 	public void MeshSetup()
 	{
         #region verts
-        float floorLevel = 0.1f;
-        Vector3[] vertices =  
+        float floorLevel = 0f;
+        Vector3[] vertices =
         {
-            new Vector3(-1f, floorLevel, -.5f),
-            new Vector3(-1f, floorLevel, .5f),
-            new Vector3(0f, floorLevel, 1f),
-            new Vector3(1f, floorLevel, .5f),
-            new Vector3(1f, floorLevel, -.5f),
-            new Vector3(0f, floorLevel, -1f)
+            new Vector3(-3f, floorLevel, -Mathf.Sqrt(36-9)),    //0
+            new Vector3(-6f, floorLevel, 0),                    //1
+            new Vector3(-3f, floorLevel, Mathf.Sqrt(36-9)),     //2
+            new Vector3(3f, floorLevel, Mathf.Sqrt(36-9)),      //3
+            new Vector3(6f, floorLevel, 0),                     //4
+            new Vector3(3f, floorLevel, -Mathf.Sqrt(36-9))      //5
         };
+        //Based off this hex here:
+        //https://s-media-cache-ak0.pinimg.com/236x/7e/f2/a7/7ef2a733a6fa0fe4ae0d64cfbb1f5b2c.jpg
         #endregion
+
+        for (int i = 0; i < vertices.Length; i++)
+            vertices[i] = Vector3.Scale(vertices[i], new Vector3(scale, scale, scale));
 
         #region triangles
 
@@ -80,16 +86,13 @@ public class HexInfo : MonoBehaviour
         //set the GO's meshFilter's mesh to be the one we just made
         meshFilter.mesh = mesh;
         meshCol.sharedMesh = mesh;
+        meshCol.sharedMesh = mesh;
 
         //UV TESTING
         //renderer.material.mainTexture = texture;
-        
+
         #endregion
 
     }
-
-    void OnCollisionStay(Collision col)
-    {
-
-    }
+    
 }
