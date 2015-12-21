@@ -3,18 +3,39 @@ using System.Collections;
 
 public class Camera : MonoBehaviour {
 
-    public Transform target;
-    public float cameraSpeed;
+    public GameObject target;
+    float cameraSpeed = 0.25f;
+    float zoom = 15, camHeight = 10;
 
 	// Update is called once per frame
-	void Update () {
-        transform.LookAt(target);
+	void Update ()
+    {
+        var max = target.GetComponent<PentInfo>().mesh.bounds.center;
+        transform.LookAt(max);
         moveCamera();
 	}
 
+    float timeCounter =0;
+
+    public void setZoom(float newOffset)
+    {
+        zoom = newOffset;
+    }
+    public void setCamHeight(float newOffset)
+    {
+        camHeight = newOffset;
+    }
+
+    public void changeCameraSpeed(float speed)
+    {
+        cameraSpeed = speed;
+    }
+
     void moveCamera()
     {
-        transform.Translate(new Vector3(cameraSpeed, 0, 0) * Time.deltaTime);
+        timeCounter += Time.deltaTime;
+        transform.position = new Vector3(Mathf.Cos(timeCounter * cameraSpeed) * zoom, camHeight, Mathf.Sin(timeCounter*cameraSpeed)*zoom);
+        //transform.Translate(new Vector3(cameraSpeed*Time.deltaTime, 0, 0)*  transform.localRotation.eulerAngles.y);
     }
 
 }
