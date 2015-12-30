@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class HexInfo : MonoBehaviour
 {
@@ -11,7 +12,12 @@ public class HexInfo : MonoBehaviour
     public Rigidbody rig;
     //public float scale = 0.25f;
 
+    void Update()
+    {
+    }
+
     public bool above, below, upperLeft, upperRight, lowerRight, lowerLeft;
+    public GameObject[] pals = { null, null, null, null, null, null };    
 
     void OnMouseEnter()
     {
@@ -163,9 +169,87 @@ public class HexInfo : MonoBehaviour
         //  Height
         //  Number of boundering hexagons, and where
 
+        if (above)
+        {
+            moveVert(2, 0.5f);
+            moveVert(3, 0.5f);
+            moveVert(6, 0.25f);
+        }
+        if (upperLeft)
+        {
+            moveVert(2, 0.5f);
+            moveVert(1, 0.5f);
+            moveVert(6, 0.25f);
+        }
+        if (lowerLeft)
+        {
+            moveVert(0, 0.5f);
+            moveVert(1, 0.5f);
+            moveVert(6, 0.25f);
+        }
+        if (below)
+        {
+            moveVert(0, 0.5f);
+            moveVert(5, 0.5f);
+            moveVert(6, 0.25f);
+        }
+        if (lowerRight)
+        {
+            moveVert(4, 0.5f);
+            moveVert(5, 0.5f);
+            moveVert(6, 0.25f);
+        }
+        if (upperRight)
+        {
+            moveVert(3, 0.5f);
+            moveVert(4, 0.5f);
+            moveVert(6, 0.25f);
+        }
+
         //Add height to vertices
         //First try with an entire hexagons
         //Then try moving the corresponding vertices of surrounding 
     }
 
+    public void moveVert(int vertNum, float height)
+    {
+
+        Mesh mesh = GetComponent<MeshFilter>().mesh;
+        Vector3[] oldVerts = mesh.vertices;
+
+        float[] Heights =
+            {
+            oldVerts[0].y,
+            oldVerts[1].y,
+            oldVerts[2].y,
+            oldVerts[3].y,
+            oldVerts[4].y,
+            oldVerts[5].y,
+            oldVerts[6].y
+        };
+
+        Heights[vertNum] += height;
+
+        Vector3[] newVerts =
+        {
+            new Vector3(oldVerts[0].x, Heights[0], oldVerts[0].z),    //0
+            new Vector3(oldVerts[1].x, Heights[1], oldVerts[1].z),    //1
+            new Vector3(oldVerts[2].x, Heights[2], oldVerts[2].z),    //2
+            new Vector3(oldVerts[3].x, Heights[3], oldVerts[3].z),    //3
+            new Vector3(oldVerts[4].x, Heights[4], oldVerts[4].z),    //4
+            new Vector3(oldVerts[5].x, Heights[5], oldVerts[5].z),    //5
+            new Vector3(oldVerts[6].x, Heights[6], oldVerts[6].z),    //6
+        };
+
+        mesh.vertices = newVerts;
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+
+        //Don't need this for the time being
+        /*DestroyImmediate(GetComponent<MeshCollider>());
+        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = mesh;
+        meshCollider.convex = true;
+        meshCollider.isTrigger = true;*/
+    }
 }

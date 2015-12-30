@@ -146,6 +146,17 @@ public class PentInfo : MonoBehaviour
         itemsToDestroy.Remove(col.gameObject);
     }
 
+    public void heights()
+    {
+        for (int i=0;i<hexs.Count;i++)
+        {
+            hexs[i].GetComponent<HexInfo>().workOnMe();
+        }
+
+        //normalise edges
+        //for ech hex, check if 
+    }
+
     public void UpdatePentMesh()
     {
         InputField tweetData = InputBit.GetComponent<InputField>();
@@ -232,8 +243,10 @@ public class PentInfo : MonoBehaviour
             hex.transform.Translate(x, .5f, y);
             #endregion
 
+            //If we've reached the edge of the pentagon bounding box
             if (hex.transform.position.x > max.x + 2 * (hexScale * Mathf.Sqrt(36 - 9)))
             {
+                //Start a new line
                 h++;
                 w = 0;
                 Destroy(hex);
@@ -266,11 +279,13 @@ public class PentInfo : MonoBehaviour
         }
         itemsToDestroy.Clear();
 
-        for (int i = 0; i < hexs.Count; i++)
+        //Delete rigidbody
+        /*for (int i = 0; i < hexs.Count; i++)
         {
             if (hexs[i] !=null)
             Destroy(hexs[i].GetComponent<HexInfo>().rig);
-        }
+        }*/
+
         /*
         #region combine mesh
         CombineInstance[] combine = new CombineInstance[hexs.Count];
@@ -329,30 +344,51 @@ public class PentInfo : MonoBehaviour
             Vector3 lowerRight = hexOrigin - new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
             Vector3 lowerLeft = hexOrigin - new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
 
-            if (Physics.CheckSphere(above, hexScale))
+            RaycastHit hit;
+            Ray ray;
+            hexOrigin += new Vector3(0, 1, 0);
+            ray = new Ray(hexOrigin, lowerLeft - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
-                hexs[i].GetComponent<HexInfo>().above = true;
-            }
-            if (Physics.CheckSphere(below, hexScale))
-            {
-                hexs[i].GetComponent<HexInfo>().below = true;
-            }
-            if (Physics.CheckSphere(upperLeft, hexScale))
-            {
-                hexs[i].GetComponent<HexInfo>().upperLeft = true;
-            }
-            if (Physics.CheckSphere(upperRight, hexScale))
-            {
-                hexs[i].GetComponent<HexInfo>().upperRight = true;
-            }
-            if (Physics.CheckSphere(lowerLeft, hexScale))
-            {
+                hexs[i].GetComponent<HexInfo>().pals[0] = hit.transform.gameObject;
                 hexs[i].GetComponent<HexInfo>().lowerLeft = true;
             }
-            if (Physics.CheckSphere(lowerRight, hexScale))
+
+            ray = new Ray(hexOrigin, upperLeft - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
+                hexs[i].GetComponent<HexInfo>().pals[1] = hit.transform.gameObject;
+                hexs[i].GetComponent<HexInfo>().upperLeft = true;
+            }
+
+            ray = new Ray(hexOrigin, above - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[2] = hit.transform.gameObject;
+                hexs[i].GetComponent<HexInfo>().above = true;
+            }
+
+            ray = new Ray(hexOrigin, upperRight - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[3] = hit.transform.gameObject;
+                hexs[i].GetComponent<HexInfo>().upperRight = true;
+            }
+
+            ray = new Ray(hexOrigin, lowerRight - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[4] = hit.transform.gameObject;
                 hexs[i].GetComponent<HexInfo>().lowerRight = true;
             }
+
+            ray = new Ray(hexOrigin, below - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[5] = hit.transform.gameObject;
+                hexs[i].GetComponent<HexInfo>().below = true;
+            }
+
             hexs[i].GetComponent<HexInfo>().nameMe();
         }
     }
