@@ -31,7 +31,7 @@
 				#pragma surface surf Lambert alpha
 
 				sampler2D _SubBaseTex;
-				fixed4 _SubTint;
+				float4 _SubTint;
 				float _SubAlpha;//, _SubClipping, _SubClipping2, _SubClipping3;
 
 				struct Input {
@@ -82,7 +82,7 @@
 			Blend SrcAlpha OneMinusSrcAlpha //Alpha blending 
 			LOD 200
 			CGPROGRAM
-				#pragma target 5.0
+				#pragma target 4.0
 				#include "UnityCG.cginc"
 				#include "wireframeFunctions.cginc"
 				#pragma vertex vert

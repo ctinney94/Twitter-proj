@@ -4,7 +4,7 @@ using System.Collections;
 public class Camera : MonoBehaviour {
 
     public GameObject target;
-    float cameraSpeed = 0.25f;
+    float cameraSpeed = 0.1f;
     float zoom = 15, camHeight = 10;
 
 	// Update is called once per frame

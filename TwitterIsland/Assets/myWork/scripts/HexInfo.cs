@@ -11,13 +11,15 @@ public class HexInfo : MonoBehaviour
     public Rigidbody rig;
     //public float scale = 0.25f;
 
+    public bool above, below, upperLeft, upperRight, lowerRight, lowerLeft;
+
     void OnMouseEnter()
     {
-        GetComponent<Renderer>().material.shader = Shader.Find("Custom/wireframe");
+        GetComponent<Renderer>().material = GameObject.Find("PentTest").GetComponent<PentInfo>().wireframeMat;
     }
     void OnMouseExit()
     {
-        GetComponent<Renderer>().material.shader = Shader.Find("Standard");
+        GetComponent<Renderer>().material = GameObject.Find("PentTest").GetComponent<PentInfo>().HexMat;
     }
 
     public void MeshSetup(float scale)
@@ -26,6 +28,7 @@ public class HexInfo : MonoBehaviour
         float floorLevel = 0f;
         Vector3[] vertices =
         {
+            //These are the values required to create a hexagon with a side length of 6
             new Vector3(-3f, floorLevel, -Mathf.Sqrt(36-9)),    //0
             new Vector3(-6f, floorLevel, 0),                    //1
             new Vector3(-3f, floorLevel, Mathf.Sqrt(36-9)),     //2
@@ -109,5 +112,60 @@ public class HexInfo : MonoBehaviour
         #endregion
 
     }
-    
+   
+    public void AddNoiseToMesh()
+    {
+        Mesh mesh = GetComponent<MeshFilter>().mesh;
+        
+        Vector3[] verts = mesh.vertices;
+        
+        for (int i=0; i < verts.Length; i++)
+        {
+            verts[i].y = SmoothRandom.Get(Random.Range(0,50));
+        }
+        mesh.vertices = verts;
+    }
+
+    public void nameMe()
+    {
+        int pals=0;
+
+        if (above)
+            pals++;
+        if (upperLeft)
+            pals++;
+        if (lowerLeft)
+            pals++;
+        if (below)
+            pals++;
+        if (lowerRight)
+            pals++;
+        if (upperRight)
+            pals++;
+
+        if (pals == 1)
+            GetComponent<Renderer>().material.SetFloat("_Blend1",0);
+        if (pals == 2)
+            GetComponent<Renderer>().material.SetFloat("_Blend1", 0.1f);
+        if (pals == 3)
+            GetComponent<Renderer>().material.SetFloat("_Blend1", 0.25f);
+        if (pals == 4)
+            GetComponent<Renderer>().material.SetFloat("_Blend1", 0.75f);
+        if (pals == 5)
+            GetComponent<Renderer>().material.SetFloat("_Blend1", 0.9f);
+        if (pals == 6)
+            GetComponent<Renderer>().material.SetFloat("_Blend1", 1f);
+    }
+
+    public void workOnMe()
+    {
+        //Create vertex colouring thats blends colours based on;
+        //  Height
+        //  Number of boundering hexagons, and where
+
+        //Add height to vertices
+        //First try with an entire hexagons
+        //Then try moving the corresponding vertices of surrounding 
+    }
+
 }
