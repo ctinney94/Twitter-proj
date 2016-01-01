@@ -148,13 +148,43 @@ public class PentInfo : MonoBehaviour
 
     public void heights()
     {
-        for (int i=0;i<hexs.Count;i++)
+        detectHexEdges();
+        for (int i = 0; i < hexs.Count; i++)
         {
-            hexs[i].GetComponent<HexInfo>().workOnMe();
+            hexs[i].GetComponent<HexInfo>().AddInitialHeight();
         }
 
-        //normalise edges
-        //for ech hex, check if 
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            hexs[i].GetComponent<HexInfo>().addHeightWeightings();
+        }
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            hexs[i].GetComponent<HexInfo>().addMountains();
+        }
+    }
+    
+    public void smooth()
+    {
+        //for (int i = 0; i < hexs.Count; i++)
+        for (int i = hexs.Count-1; i > -1; i--)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+                hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
+            }
+        }
+    }
+
+    public void blendColours()
+    {
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+                hexs[i].GetComponent<HexInfo>().blendCols(j);
+            }
+        }
     }
 
     public void UpdatePentMesh()
@@ -388,8 +418,6 @@ public class PentInfo : MonoBehaviour
                 hexs[i].GetComponent<HexInfo>().pals[5] = hit.transform.gameObject;
                 hexs[i].GetComponent<HexInfo>().below = true;
             }
-
-            hexs[i].GetComponent<HexInfo>().nameMe();
         }
     }
 }

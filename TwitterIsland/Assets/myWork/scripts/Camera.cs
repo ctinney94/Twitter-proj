@@ -23,7 +23,7 @@ public class Camera : MonoBehaviour {
     }
     public void setCamHeight(float newOffset)
     {
-        camHeight = newOffset;
+        camHeight = newOffset;        
     }
 
     public void changeCameraSpeed(float speed)
