@@ -202,7 +202,7 @@ public class HexInfo : MonoBehaviour
             //Inner perimeter!
             for (int i = 0; i < 7; i++)
             {
-                moveVert(i, 1f + (Random.value - 0.5f), grass);
+                moveVert(i, 1f + ((Random.value - 0.5f) * 0.5f), grass);
             }
 
             for (int i = 0; i < pals.Length; i++)
@@ -219,14 +219,14 @@ public class HexInfo : MonoBehaviour
                 {
                     for (int i = 0; i < 7; i++)
                     {
-                        moveVert(i, 2f+(Random.value-0.5f), grass);
+                        moveVert(i, 2 + ((Random.value - 0.5f) * 0.5f), grass);
                     }
                 }
                 else
                 {
                     for (int i = 0; i < 7; i++)
                     {
-                        moveVert(i, 2f + (Random.value - 0.5f), rock);
+                        moveVert(i, 2 + ((Random.value - 0.5f) * 0.5f), rock);
                     }
                 }
 
@@ -241,7 +241,7 @@ public class HexInfo : MonoBehaviour
         {
             for (int i = 0; i < pals.Length; i++)
             {
-                    if (pals[i].GetComponent<HexInfo>().weight == 42)
+                    if (pals[i].GetComponent<HexInfo>().weight >= 42)
                     {
                         secretInt++;
                     }
@@ -250,7 +250,7 @@ public class HexInfo : MonoBehaviour
             {
                 for (int i = 0; i < 7; i++)
                 {
-                    moveVert(i, 3f + (Random.value - 0.5f), rock);
+                    moveVert(i, 3f + ((Random.value - 0.5f) * 0.75f), rock);
                 }
             }
         }
