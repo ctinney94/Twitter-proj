@@ -187,6 +187,73 @@ public class PentInfo : MonoBehaviour
         }
     }
 
+    public void dirtPath()
+    {
+        bool dirtAdded = false;
+
+        while (!dirtAdded)
+        {
+            int pals = 0;
+
+            //pick a random hex which is nest to a border hex (first green hex inward)
+            var random = Random.Range(0, hexs.Count - 1);
+            var randomHex = hexs[random].GetComponent<HexInfo>();
+
+            if (randomHex.numOfPals == 6)
+            {
+                for (int i = 0; i < randomHex.numOfPals; i++)
+                {
+                    if (randomHex.pals[i].GetComponent<HexInfo>().numOfPals == 6)
+                    {
+                        //This random hex is AT LEAST 2 hexs inward
+                        pals++;
+                    }
+                }
+
+                if (pals == 6)
+                {
+                    List<int> superPals = new List<int>();
+
+                    for (int i = 0; i < randomHex.numOfPals; i++)
+                    {
+                        for (int j = 0; j < 6; j++)
+                        {
+                            if (randomHex.pals[i].GetComponent<HexInfo>().pals[j].GetComponent<HexInfo>().numOfPals != 6)
+                            {
+                                //This hex
+                                superPals.Add(i);
+                            }
+                        }
+                    }
+                    if (superPals.Count != 0)
+                    {
+                        //We have a hex we can use!
+                        var startingHex = (int)Random.Range(0, superPals.Count);
+                        //This elects a randomin hex border to start bordering the dirt track from
+
+                        //This is the hex I want to edit
+                        //but which vertex
+                        int checkMe = superPals[startingHex];
+                        checkMe += 3;
+                        if (checkMe > 5)
+                            checkMe -= 6;
+
+                        int checkMe2 = superPals[startingHex];
+                        checkMe2 += 4;
+                        if (checkMe2 > 5)
+                            checkMe2 -= 6;
+                        
+                        //Add error checking
+                        randomHex.pals[superPals[startingHex]].GetComponent<HexInfo>().moveVert(checkMe, -99, new Color(0.96f, 0.64f, 0.38f));
+                        randomHex.pals[superPals[startingHex]].GetComponent<HexInfo>().moveVert(checkMe2, -99, new Color(0.96f, 0.64f, 0.38f));
+                        randomHex.dirtPath(superPals[startingHex]);
+                        dirtAdded = true;
+                    }
+                }
+            }
+        }
+    }
+
     public void UpdatePentMesh()
     {
         InputField tweetData = InputBit.GetComponent<InputField>();

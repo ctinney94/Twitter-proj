@@ -18,6 +18,7 @@ public class HexInfo : MonoBehaviour
     Color sand = Color.Lerp(Color.yellow, Color.white,0.2f);
     Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
     Color rock = Color.gray;
+    public Color dirt = new Color(0.96f, 0.64f, 0.38f);
 
     public bool above, below, upperLeft, upperRight, lowerRight, lowerLeft;
     public GameObject[] pals = { null, null, null, null, null, null };    
@@ -591,9 +592,69 @@ public class HexInfo : MonoBehaviour
         }
     }
     
+    public void dirtPath(int start)
+    {
+        Vector3[] myVerts = GetComponent<MeshFilter>().mesh.vertices;
+        Debug.Log("Dirt path has been started on " + gameObject.name + " at " + start);
+
+        #region Colour starting dirt and centre point
+
+        moveVert(start, myVerts[start].y, dirt);
+
+        if (start != 5)
+            moveVert(start + 1, myVerts[start + 1].y, dirt);
+        else
+            moveVert(0, myVerts[0].y, dirt);
+
+        moveVert(6, myVerts[6].y, dirt);
+
+        #endregion
+
+        //Now choose a random vert to go in the direction of
+        //Must not be the starting point, the centre or either vertex to the sode of the starting point
+        #region Choose a direction to go
+        int randomNum = start;
+        while (randomNum == start || randomNum == start + 1 || randomNum == start - 1)
+        {
+            randomNum = (int)Random.Range(-0.49f, 5.49f);
+                int temp = start + 2;
+                if (temp > 5)
+                    temp -= 6;
+                if (randomNum == temp)
+                    randomNum = start;
+        }
+        #endregion
+
+        moveVert(randomNum, myVerts[randomNum].y, dirt);
+        if (randomNum != 5)
+            moveVert(randomNum + 1, myVerts[randomNum + 1].y, dirt);
+        else
+            moveVert(0, myVerts[0].y, dirt);
+
+        var nextVert = randomNum - 3;
+        if (nextVert < 0)
+            nextVert += 6;
+
+        //If the next pal only has 
+        if (pals[randomNum].GetComponent<HexInfo>().numOfPals == 6)
+        {
+            int superPals = 0;
+            for (int j = 0; j < 6; j++)
+            {
+                if (pals[randomNum].GetComponent<HexInfo>().pals[j].GetComponent<HexInfo>().numOfPals == 6)
+                {
+                    superPals++;
+                }
+            }
+
+            if (superPals == 6)
+                pals[randomNum].GetComponent<HexInfo>().dirtPath(nextVert);
+        }
+
+    }
+
     public void moveVert(int vertNum, float height, Color newColour)
     {
-
         Mesh mesh = GetComponent<MeshFilter>().mesh;
         Vector3[] oldVerts = mesh.vertices;
 
@@ -608,7 +669,8 @@ public class HexInfo : MonoBehaviour
             oldVerts[6].y
         };
 
-        Heights[vertNum] = height;
+        if (height != -99)
+            Heights[vertNum] = height;
 
         Vector3[] newVerts =
         {
