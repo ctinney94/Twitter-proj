@@ -19,8 +19,7 @@ public class HexInfo : MonoBehaviour
     Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
     Color rock = Color.gray;
     public Color dirt = new Color(0.96f, 0.64f, 0.38f);
-
-    public bool above, below, upperLeft, upperRight, lowerRight, lowerLeft;
+    
     public GameObject[] pals = { null, null, null, null, null, null };    
 
     void OnMouseEnter()
@@ -132,7 +131,7 @@ public class HexInfo : MonoBehaviour
         #endregion
 
     }
-   
+
     /*public void AddNoiseToMesh()
     {
         Mesh mesh = GetComponent<MeshFilter>().mesh;
@@ -145,99 +144,144 @@ public class HexInfo : MonoBehaviour
         }
         mesh.vertices = verts;
     }*/
-    
-    public void AddInitialHeight()
-    {
-        //Finding numeber of pals will have to be a seperate function so..
-        //..it can be called before the next bit.
-        if (above)
-            numOfPals++;
-        if (below)
-            numOfPals++;
-        if (upperLeft)
-            numOfPals++;
-        if (upperRight)
-            numOfPals++;
-        if (lowerLeft)
-            numOfPals++;
-        if (lowerRight)
-            numOfPals++;
 
-        if (numOfPals == 6)
+    public int[] dirWeightings = { 0, 0, 0, 0, 0, 0 };
+    public float avg, most, least;
+    int total;
+    public void hexWeighter(int totalHexs)
+    {
+        for (int i = 0; i < pals.Length; i++)
+        {
+            if (pals[i] != null)
+                numOfPals++;
+        }
+
+        for (int i = 0; i < pals.Length; i++)
+        {
+            if (pals[i] != null)
+            {
+                dirWeightings[i]++;//We have at least 1 pal in this direction :)
+
+                var nextHex = getNextPals(pals[i], i);
+                do
+                {
+                    if (nextHex != null)
+                    {
+                        dirWeightings[i]++;
+                        nextHex = getNextPals(nextHex, i);
+                    }
+                } while (nextHex != null);
+            }
+        }
+        avg = (dirWeightings[0] + dirWeightings[1] + dirWeightings[2] + dirWeightings[3] + dirWeightings[4] + dirWeightings[5]) / 6;
+        for (int i = 0; i < 6; i++)
+        {
+            if (dirWeightings[i] > most)
+                most = dirWeightings[i];
+        }
+
+        least = 1000;
+        for (int i = 0; i < 6; i++)
+        {
+            if (dirWeightings[i] < least)
+                least = dirWeightings[i];
+        }
+        total = totalHexs;
+    }
+
+    public void addHeight(float offset)
+    {
+        if (least < 2)
         {
             for (int i = 0; i < 7; i++)
             {
-                moveVert(i, .2f + ((Random.value - 0.5f)*.25f), sand);
+                moveVert(i, least / 5, sand);
             }
+        }
+        else if (least > 1 && least < 4)
+        {
+            for (int i = 0; i < 7; i++)
+                moveVert(i, least / 3, grass);
         }
         else
         {
             for (int i = 0; i < 7; i++)
             {
-                moveVert(i, 0f, sand);
+                //this peaks should rise exptonentially
+                //well not quite exponentially, but it sho
+                moveVert(i, ((least*least) * .1f) + ((avg - offset - 2) * .3f), rock);
             }
         }
     }
 
-    public int weight = 0;
-    public void addHeightWeightings()
+    public void heightColour()
     {
-        //Determine if this is the outer edge, 1 hex in etc.
-        if (numOfPals == 6)
+        Vertices = getVerts();
+
+        var ran = Random.value;
+        //Add basic colours for sand, grass and the wetsand around the base of the island
+        for (int i = 0; i < 7; i++)
         {
-            for (int i = 0; i < pals.Length; i++)
+            if (Vertices[i].y < 0.6f)
             {
-                if (pals[i] != null)
-                {
-                    if (pals[i].GetComponent<HexInfo>().numOfPals == 6)//This is an edge of some sort
-                    {
-                        weight++;
-                    }
-                }
+
+                if (ran > 0.25f)
+                    moveVert(i, -99, sand);
+                else
+                    moveVert(i, -99, Color.Lerp(Color.white, sand, 0.75f));
+            }
+            if (Vertices[i].y < -0.1f)
+                moveVert(i, -99, wetSand);
+            if (Vertices[i].y > 0.5f && Vertices[i].y < 6)
+            {
+                if (ran > 0.25f)
+                    moveVert(i, -99, grass);
+                else
+                    moveVert(i, -99, Color.Lerp(Color.black, grass, 0.8f));
             }
         }
 
-        if (weight == 6)//If we have 6 pals that each have 6 pals themsleves...
+        //If gradient is mighty big, add some rocky hillide
+        for (int i = 0; i < 7; i++)
         {
-            //Inner perimeter!
-            for (int i = 0; i < 7; i++)
-            {
-                moveVert(i, 1f + ((Random.value - 0.5f) * 0.5f), grass);
-            }
+            int vertTocCheck = i + 3;
+            if (vertTocCheck > 5)
+                vertTocCheck -= 6;
+            float gradient = Vertices[vertTocCheck].y - Vertices[i].y;
 
-            for (int i = 0; i < pals.Length; i++)
+            if (gradient > 1f || gradient < -1f)
             {
-                for (int j = 0; j < pals.Length; j++)
+                for (int j = 0; j < 7; j++)
                 {
-                    if (pals[i].GetComponent<HexInfo>().pals[j].GetComponent<HexInfo>().numOfPals == 6)
-                    { weight++; }
+                    if (ran > 0.15f)
+                        moveVert(j, -99, rock);
+                    else
+                        moveVert(j, -99, Color.Lerp(Color.black, dirt, 0.5f));
                 }
+                break;
             }
-            if (weight==42)
-            {
-                if (Random.value < .5)
-                {
-                    for (int i = 0; i < 7; i++)
-                    {
-                        moveVert(i, 2 + ((Random.value - 0.5f) * 0.5f), grass);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < 7; i++)
-                    {
-                        moveVert(i, 2 + ((Random.value - 0.5f) * 0.5f), rock);
-                    }
-                }
+        }
 
-            }
+        //Sprinkle some now on top :)
+        for (int i = 0; i < 7; i++)
+        {
+            if (Vertices[i].y > 6f)
+                moveVert(i, -99, Color.white);
         }
     }
 
-    public void addMountains()
+    public GameObject getNextPals(GameObject hex, int direction)//Returns true if you can keep going that way, and false if you can't
+    {
+        if (hex.GetComponent<HexInfo>().pals[direction] != null)
+            return hex.GetComponent<HexInfo>().pals[direction];
+        else
+            return null;
+    }
+
+    /*public void addMountains()
     {
         int secretInt = 0;
-        if (above && below && upperLeft && upperRight && lowerLeft && lowerRight)
+        if (numOfPals ==6)
         {
             for (int i = 0; i < pals.Length; i++)
             {
@@ -248,15 +292,24 @@ public class HexInfo : MonoBehaviour
             }
             if (secretInt == 6)
             {
-                for (int i = 0; i < 7; i++)
+                if (Random.value < .9)
                 {
-                    moveVert(i, 3f + ((Random.value - 0.5f) * 0.75f), rock);
+                    for (int i = 0; i < 7; i++)
+                    {
+                        moveVert(i, 2f + ((Random.value - 0.5f) * 0.25f), grass);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        moveVert(i, 10f + ((Random.value - 0.5f) * 0.75f), rock);
+                    }
                 }
             }
         }
-    }
-
-    public Color yuk;
+    }*/
+    
     public void blendCols(int vertNum)
     {
         Color[] myCols = getColors();
@@ -266,7 +319,7 @@ public class HexInfo : MonoBehaviour
         {
             case 0:
                 #region 0
-                if (below && lowerLeft)
+                if (pals[5] != null && pals[0]!=null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
                     var borderHex2 = pals[0].GetComponent<HexInfo>();
@@ -285,7 +338,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 1:
                 #region 1
-                if (upperLeft && lowerLeft)
+                if (pals[1]!=null && pals[0] != null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
                     var borderHex2 = pals[0].GetComponent<HexInfo>();
@@ -304,7 +357,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 2:
                 #region 2
-                if (upperLeft && above)
+                if (pals[1] != null && pals[2]!=null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
                     var borderHex2 = pals[2].GetComponent<HexInfo>();
@@ -323,7 +376,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 3:
                 #region 3
-                if (upperRight && above)
+                if (pals[2] != null && pals[3] != null)
                 {
                     var borderHex = pals[2].GetComponent<HexInfo>();
                     var borderHex2 = pals[3].GetComponent<HexInfo>();
@@ -342,7 +395,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 4:
                 #region 4
-                if (upperRight && lowerRight)
+                if (pals[3] != null && pals[4] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
                     var borderHex2 = pals[4].GetComponent<HexInfo>();
@@ -361,7 +414,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 5:
                 #region 5
-                if (below && lowerRight)
+                if (pals[5] != null && pals[4]!=null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
                     var borderHex2 = pals[4].GetComponent<HexInfo>();
@@ -381,7 +434,6 @@ public class HexInfo : MonoBehaviour
             case 6:
                 var newColy = (myCols[0] + myCols[1] + myCols[2] + myCols[3] + myCols[4] + myCols[5]) / 6;
                 moveVert(6, myVerts[6].y, Color.Lerp(myCols[6], newColy, 0.5f));
-                yuk = newColy;
                 break;
         }
     }
@@ -394,8 +446,8 @@ public class HexInfo : MonoBehaviour
         {
             case 0:
                 #region 0
-                if (below && lowerLeft)
-                {
+                if (pals[5] != null && pals[0] != null)
+                { 
                     var borderHex = pals[5].GetComponent<HexInfo>();
                     Vector3[] borderVerts = borderHex.getVerts();
                     var borderHex2 = pals[0].GetComponent<HexInfo>();
@@ -407,13 +459,13 @@ public class HexInfo : MonoBehaviour
                     borderHex.moveVert(2, newPoint, Color.black);
                     borderHex2.moveVert(4, newPoint, Color.black);
                 }
-                else if (below)
+                else if (pals[5] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
                     borderHex.moveVert(2, -0.25f, wetSand);
                 }
-                else if (lowerLeft)
+                else if (pals[0] != null)
                 {
                     var borderHex = pals[0].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
@@ -428,7 +480,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 1:
                 #region 1
-                if (upperLeft && lowerLeft)
+                if (pals[0] != null && pals[1] != null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
                     Vector3[] borderVerts = borderHex.getVerts();
@@ -441,13 +493,13 @@ public class HexInfo : MonoBehaviour
                         borderHex.moveVert(5, newPoint, Color.black);
                         borderHex2.moveVert(3, newPoint, Color.black);
                 }
-                else if (upperLeft)
+                else if (pals[1] != null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
                     borderHex.moveVert(5, -0.25f, wetSand);
                 }
-                else if (lowerLeft)
+                else if (pals[1] != null)
                 {
                     var borderHex = pals[0].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
@@ -462,7 +514,7 @@ public class HexInfo : MonoBehaviour
             #endregion
             case 2:
                 #region 2
-                if (upperLeft && above)
+                if (pals[2] != null && pals[1] != null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
                     Vector3[] borderVerts = borderHex.getVerts();
@@ -475,14 +527,14 @@ public class HexInfo : MonoBehaviour
                     borderHex.moveVert(4, newPoint, Color.black);
                     borderHex2.moveVert(0, newPoint, Color.black);
                 }
-                else if (upperLeft)
+                else if (pals[1] != null)
                 {
                     //This is a beach border
                     var borderHex = pals[1].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
                     borderHex.moveVert(4, -0.25f, wetSand);
                 }
-                else if (above)
+                else if (pals[2] != null)
                 {
                     //This is a beach border
                     var borderHex = pals[2].GetComponent<HexInfo>();
@@ -495,7 +547,7 @@ public class HexInfo : MonoBehaviour
                 break;
             case 3:
                 #region 3
-                if (upperRight && above)
+                if (pals[2] != null && pals[3] != null)
                 {
                     var borderHex = pals[2].GetComponent<HexInfo>();
                     Vector3[] borderVerts = borderHex.getVerts();
@@ -508,13 +560,13 @@ public class HexInfo : MonoBehaviour
                     borderHex.moveVert(5, newPoint, Color.black);
                     borderHex2.moveVert(1, newPoint, Color.black);
                 }
-                else if (above)
+                else if (pals[2] != null)
                 {
                     var borderHex = pals[2].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
                     borderHex.moveVert(5, -0.25f, wetSand);
                 }
-                else if (upperRight)
+                else if (pals[3] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
@@ -526,7 +578,7 @@ public class HexInfo : MonoBehaviour
                 break;
             case 4:
                 #region 4
-                if (upperRight && lowerRight)
+                if (pals[3] != null && pals[4] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
                     Vector3[] borderVerts = borderHex.getVerts();
@@ -538,13 +590,13 @@ public class HexInfo : MonoBehaviour
                     borderHex.moveVert(0, newPoint, Color.black);
                     borderHex2.moveVert(2, newPoint, Color.black);
                 }
-                else if (upperRight)
+                else if (pals[3] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
                     borderHex.moveVert(0, -0.25f, wetSand);
                 }
-                else if (lowerRight)
+                else if (pals[4] != null)
                 {
                     var borderHex = pals[4].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
@@ -556,7 +608,7 @@ public class HexInfo : MonoBehaviour
                 break;
             case 5:
                 #region 5 
-                if (below && lowerRight)
+                if (pals[5] != null && pals[4] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
                     Vector3[] borderVerts = borderHex.getVerts();
@@ -569,13 +621,13 @@ public class HexInfo : MonoBehaviour
                     borderHex.moveVert(3, newPoint, Color.black);
                     borderHex2.moveVert(1, newPoint, Color.black);
                 }
-                else if (lowerRight)
+                else if (pals[4] != null)
                 {
                     var borderHex = pals[4].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
                     borderHex.moveVert(1, -0.25f, wetSand);
                 }
-                else if (below)
+                else if (pals[5] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
                     moveVert(vertNum, -0.25f, wetSand);
@@ -587,6 +639,7 @@ public class HexInfo : MonoBehaviour
                 break;
             case 6:
                 var newPointy = (myVerts[0].y + myVerts[1].y + myVerts[2].y + myVerts[3].y + myVerts[4].y + myVerts[5].y) / 6;
+                newPointy = (newPointy + myVerts[6].y )/ 2;
                 moveVert(6, newPointy, Color.black);
                 break;
         }

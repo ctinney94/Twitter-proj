@@ -151,16 +151,20 @@ public class PentInfo : MonoBehaviour
         detectHexEdges();
         for (int i = 0; i < hexs.Count; i++)
         {
-            hexs[i].GetComponent<HexInfo>().AddInitialHeight();
+            hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
         }
 
+        //Find the leaststs
+        float least = 1000;
         for (int i = 0; i < hexs.Count; i++)
         {
-            hexs[i].GetComponent<HexInfo>().addHeightWeightings();
+            if (hexs[i].GetComponent<HexInfo>().avg < least)
+                least = hexs[i].GetComponent<HexInfo>().avg;
+
         }
         for (int i = 0; i < hexs.Count; i++)
         {
-            hexs[i].GetComponent<HexInfo>().addMountains();
+            hexs[i].GetComponent<HexInfo>().addHeight(least);
         }
     }
     
@@ -173,6 +177,10 @@ public class PentInfo : MonoBehaviour
             {
                 hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
             }
+        }
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            hexs[i].GetComponent<HexInfo>().heightColour();
         }
     }
 
@@ -448,42 +456,36 @@ public class PentInfo : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 hexs[i].GetComponent<HexInfo>().pals[0] = hit.transform.gameObject;
-                hexs[i].GetComponent<HexInfo>().lowerLeft = true;
             }
 
             ray = new Ray(hexOrigin, upperLeft - hexOrigin);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 hexs[i].GetComponent<HexInfo>().pals[1] = hit.transform.gameObject;
-                hexs[i].GetComponent<HexInfo>().upperLeft = true;
             }
 
             ray = new Ray(hexOrigin, above - hexOrigin);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 hexs[i].GetComponent<HexInfo>().pals[2] = hit.transform.gameObject;
-                hexs[i].GetComponent<HexInfo>().above = true;
             }
 
             ray = new Ray(hexOrigin, upperRight - hexOrigin);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 hexs[i].GetComponent<HexInfo>().pals[3] = hit.transform.gameObject;
-                hexs[i].GetComponent<HexInfo>().upperRight = true;
             }
 
             ray = new Ray(hexOrigin, lowerRight - hexOrigin);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 hexs[i].GetComponent<HexInfo>().pals[4] = hit.transform.gameObject;
-                hexs[i].GetComponent<HexInfo>().lowerRight = true;
             }
 
             ray = new Ray(hexOrigin, below - hexOrigin);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 hexs[i].GetComponent<HexInfo>().pals[5] = hit.transform.gameObject;
-                hexs[i].GetComponent<HexInfo>().below = true;
             }
         }
     }
