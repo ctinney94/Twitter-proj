@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -42,10 +43,12 @@ public class HexInfo : MonoBehaviour
 
     public void MeshSetup(float scale)
 	{
-        #region verts
-        float floorLevel = 0f;
-        Vector3[] vertices =
+        if (name == "hex 0,0")
         {
+            #region verts
+            float floorLevel = 0f;
+            Vector3[] vertices =
+            {
             //These are the values required to create a hexagon with a side length of 6
             new Vector3(-3f, floorLevel, -Mathf.Sqrt(36-9)),    //0
             new Vector3(-6f, floorLevel, 0),                    //1
@@ -56,17 +59,16 @@ public class HexInfo : MonoBehaviour
             new Vector3(0,0,0),
         };
 
-        for (int i = 0; i < vertices.Length; i++)
-            vertices[i] = Vector3.Scale(vertices[i], new Vector3(scale, 1, scale));
-        //Based off this hex here:
-        //https://s-media-cache-ak0.pinimg.com/236x/7e/f2/a7/7ef2a733a6fa0fe4ae0d64cfbb1f5b2c.jpg
-        #endregion
+            for (int i = 0; i < vertices.Length; i++)
+                vertices[i] = Vector3.Scale(vertices[i], new Vector3(scale, 1, scale));
+            //Based off this hex here:
+            //https://s-media-cache-ak0.pinimg.com/236x/7e/f2/a7/7ef2a733a6fa0fe4ae0d64cfbb1f5b2c.jpg
+            #endregion
 
+            #region triangles
 
-        #region triangles
-
-        int[] triangles = 
-       {
+            int[] triangles =
+           {
             1,6,0,
             2,6,1,
             3,6,2,
@@ -79,11 +81,11 @@ public class HexInfo : MonoBehaviour
             1,2,4,
             2,3,4*/
        };
-        #endregion
+            #endregion
 
-        #region uv
-        uv = new Vector2[]
-        {
+            #region uv
+            uv = new Vector2[]
+            {
             new Vector2(0.25f,0),   //0
             new Vector2(0,0.5f),    //1
             new Vector2(0.25f,1),   //2
@@ -91,60 +93,62 @@ public class HexInfo : MonoBehaviour
             new Vector2(1f,0.5f),   //4
             new Vector2(0.75f,0),   //5
             new Vector2(0.5f,0.5f)  //6
-        };
-        #endregion
+            };
+            #endregion
 
-        #region finalize
+            #region finalize
 
-        //add a mesh filter to the GameObject the script is attached to; cache it for later
-        MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-        MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        //add a mesh renderer to the GO the script is attached to
+            //create a mesh object to pass our data into
+            Mesh mesh = new Mesh();
+            //add our vertices to the mesh
+            mesh.vertices = vertices;
+            //add our triangles to the mesh
+            mesh.triangles = triangles;
+            //add out UV coordinates to the mesh
+            mesh.uv = uv;
 
-        MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
+            //add a mesh filter to the GameObject the script is attached to; cache it for later
+            MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
+            MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            //add a mesh renderer to the GO the script is attached to
 
-        //create a mesh object to pass our data into
-        Mesh mesh = new Mesh();
+            MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
 
-        //add our vertices to the mesh
-        mesh.vertices = vertices;
-        //add our triangles to the mesh
-        mesh.triangles = triangles;
-        //add out UV coordinates to the mesh
-        mesh.uv = uv;
+            //and material
+            meshRenderer.material = mat;
 
-        //and material
-        meshRenderer.material = mat;
-        
-        //make it play nicely with lighting
-        mesh.RecalculateNormals();
+            //make it play nicely with lighting
+            mesh.RecalculateNormals();
 
-        //set the GO's meshFilter's mesh to be the one we just made
-        meshFilter.mesh = mesh;
-        rig = gameObject.AddComponent<Rigidbody>();
-        rig.isKinematic = true;
-        meshCol.sharedMesh = mesh;
-        //UV TESTING
-        //renderer.material.mainTexture = texture;
-        newColours = new Color[vertices.Length];
-        mesh.colors = newColours;
-        #endregion
-
-    }
-
-    /*public void AddNoiseToMesh()
-    {
-        Mesh mesh = GetComponent<MeshFilter>().mesh;
-        
-        Vector3[] verts = mesh.vertices;
-        
-        for (int i=0; i < verts.Length; i++)
-        {
-            verts[i].y = SmoothRandom.Get(Random.Range(0,50));
+            //set the GO's meshFilter's mesh to be the one we just made
+            meshFilter.mesh = mesh;
+            rig = gameObject.AddComponent<Rigidbody>();
+            rig.isKinematic = true;
+            meshCol.sharedMesh = mesh;
+            //UV TESTING
+            //renderer.material.mainTexture = texture;
+            newColours = new Color[vertices.Length];
+            mesh.colors = newColours;
+            #endregion
         }
-        mesh.vertices = verts;
-    }*/
+        else
+        { 
+            MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
+            MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
 
+            Mesh mesh = GameObject.Find("hex 0,0").GetComponent<MeshFilter>().mesh;
+            mesh.RecalculateNormals();
+            meshFilter.mesh = mesh;
+            meshRenderer.material = mat;
+            rig = gameObject.AddComponent<Rigidbody>();
+            rig.isKinematic = true;
+            meshCol.sharedMesh = mesh;
+            newColours = new Color[mesh.vertices.Length];
+            mesh.colors = newColours;
+        }
+    }
+    
     public int[] dirWeightings = { 0, 0, 0, 0, 0, 0 };
     public float avg, most, least;
     int total;
@@ -277,38 +281,6 @@ public class HexInfo : MonoBehaviour
         else
             return null;
     }
-
-    /*public void addMountains()
-    {
-        int secretInt = 0;
-        if (numOfPals ==6)
-        {
-            for (int i = 0; i < pals.Length; i++)
-            {
-                    if (pals[i].GetComponent<HexInfo>().weight >= 42)
-                    {
-                        secretInt++;
-                    }
-            }
-            if (secretInt == 6)
-            {
-                if (Random.value < .9)
-                {
-                    for (int i = 0; i < 7; i++)
-                    {
-                        moveVert(i, 2f + ((Random.value - 0.5f) * 0.25f), grass);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < 7; i++)
-                    {
-                        moveVert(i, 10f + ((Random.value - 0.5f) * 0.75f), rock);
-                    }
-                }
-            }
-        }
-    }*/
     
     public void blendCols(int vertNum)
     {

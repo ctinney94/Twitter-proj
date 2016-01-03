@@ -271,15 +271,9 @@ public class PentInfo : MonoBehaviour
         float[] vowelCount = new float[] { 1, 1, 1, 1, 1 };
 
         for (int i = 0; i < inputText.Length; i++)
-        {
             for (int v = 0; v < 5; v++)
-            {
                 if (inputText[i] == vowels[v])
-                {
                     ++vowelCount[v];
-                }
-            }
-        }
 
         Vector3[] tempVerts =
         {
@@ -310,15 +304,15 @@ public class PentInfo : MonoBehaviour
         meshCollider.sharedMesh = mesh;
         meshCollider.convex = true;
         meshCollider.isTrigger = true;
+        GameObject.Find("Particle effects").GetComponent<mood>().move(mesh.bounds.center);
     }
-
     #endregion
 
     void SpawnHexNEW()
     {
         Vector3 max = mesh.bounds.max;
         Vector3 min = mesh.bounds.min;
-
+        
         #region Hex creation
         while (CreateHexs)
         {
@@ -369,6 +363,9 @@ public class PentInfo : MonoBehaviour
                 hexs.Remove(hex);
                 Destroy(hex);
             }
+
+            if (hexs.Count > 4500)
+                CreateHexs = false;
         }
         #endregion
 
