@@ -18,6 +18,7 @@ public class PentInfo : MonoBehaviour
     public float favs=1;
     public float floorLevel;
 
+    GameObject flag;
     List<GameObject> itemsToDestroy = new List<GameObject>();
 
     bool CreateHexs = true;
@@ -148,6 +149,7 @@ public class PentInfo : MonoBehaviour
         itemsToDestroy.Remove(col.gameObject);
     }
 
+    [HideInInspector]
     public float LargestLowestValue = 0;
     public void heights()
     {
@@ -168,7 +170,7 @@ public class PentInfo : MonoBehaviour
             hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue,favs);
         }
     }
-    
+
     public void smooth()
     {
         //for (int i = 0; i < hexs.Count; i++)
@@ -183,6 +185,31 @@ public class PentInfo : MonoBehaviour
         {
             hexs[i].GetComponent<HexInfo>().heightColour();
         }
+
+
+        float highestPoint = 0;
+        Vector3 flagPos = Vector3.zero;
+
+        //Find highest point on map
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
+            {
+                Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
+                for (int j = 0; j < points.Length; j++)
+                {
+                    if (points[j].y > highestPoint)
+                    {
+                        highestPoint = points[j].y;
+                        flagPos = points[j] + hexs[i].transform.position;
+                    }
+                }
+            }
+        }
+
+        //Place flag at top point!
+        flag = Instantiate(Resources.Load("flagpole")) as GameObject;
+        flag.transform.position = flagPos + new Vector3(0, .75f, 0);
     }
 
     public void blendColours()
@@ -408,6 +435,7 @@ public class PentInfo : MonoBehaviour
         h = 0;
         w = 0;
         SpawnHexNEW();
+        Destroy(flag);
     }
 
     public void detectHexEdges()
