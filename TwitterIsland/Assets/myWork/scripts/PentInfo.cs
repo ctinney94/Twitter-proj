@@ -14,6 +14,8 @@ public class PentInfo : MonoBehaviour
     public Material PentMat, HexMat, wireframeMat;
 
     public float meshScale = 1, hexScale = 0.25f;
+    [Range(0.1f, 2)]
+    public float favs=1;
     public float floorLevel;
 
     List<GameObject> itemsToDestroy = new List<GameObject>();
@@ -146,6 +148,7 @@ public class PentInfo : MonoBehaviour
         itemsToDestroy.Remove(col.gameObject);
     }
 
+    public float LargestLowestValue = 0;
     public void heights()
     {
         detectHexEdges();
@@ -155,16 +158,14 @@ public class PentInfo : MonoBehaviour
         }
 
         //Find the leaststs
-        float least = 1000;
         for (int i = 0; i < hexs.Count; i++)
         {
-            if (hexs[i].GetComponent<HexInfo>().avg < least)
-                least = hexs[i].GetComponent<HexInfo>().avg;
-
+            if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
+                LargestLowestValue = hexs[i].GetComponent<HexInfo>().avg;
         }
         for (int i = 0; i < hexs.Count; i++)
         {
-            hexs[i].GetComponent<HexInfo>().addHeight(least);
+            hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue,favs);
         }
     }
     
@@ -201,61 +202,37 @@ public class PentInfo : MonoBehaviour
 
         while (!dirtAdded)
         {
-            int pals = 0;
-
             //pick a random hex which is nest to a border hex (first green hex inward)
             var random = Random.Range(0, hexs.Count - 1);
             var randomHex = hexs[random].GetComponent<HexInfo>();
 
-            if (randomHex.numOfPals == 6)
+            //Is the random hex one we can use to start a path?
+            if (((randomHex.least / LargestLowestValue) > 0.25f))
             {
-                for (int i = 0; i < randomHex.numOfPals; i++)
+                if (randomHex.least < ((int)(0.25 * LargestLowestValue)) + 2)
                 {
-                    if (randomHex.pals[i].GetComponent<HexInfo>().numOfPals == 6)
+                    //We have a hex we can use!
+                    while (!dirtAdded)
                     {
-                        //This random hex is AT LEAST 2 hexs inward
-                        pals++;
-                    }
-                }
-
-                if (pals == 6)
-                {
-                    List<int> superPals = new List<int>();
-
-                    for (int i = 0; i < randomHex.numOfPals; i++)
-                    {
-                        for (int j = 0; j < 6; j++)
-                        {
-                            if (randomHex.pals[i].GetComponent<HexInfo>().pals[j].GetComponent<HexInfo>().numOfPals != 6)
-                            {
-                                //This hex
-                                superPals.Add(i);
-                            }
-                        }
-                    }
-                    if (superPals.Count != 0)
-                    {
-                        //We have a hex we can use!
-                        var startingHex = (int)Random.Range(0, superPals.Count);
-                        //This elects a randomin hex border to start bordering the dirt track from
-
-                        //This is the hex I want to edit
-                        //but which vertex
-                        int checkMe = superPals[startingHex];
-                        checkMe += 3;
-                        if (checkMe > 5)
-                            checkMe -= 6;
-
-                        int checkMe2 = superPals[startingHex];
-                        checkMe2 += 4;
-                        if (checkMe2 > 5)
-                            checkMe2 -= 6;
+                        var startingHex = (int)Random.Range(0, randomHex.pals.Length);
                         
-                        //Add error checking
-                        randomHex.pals[superPals[startingHex]].GetComponent<HexInfo>().moveVert(checkMe, -99, new Color(0.96f, 0.64f, 0.38f));
-                        randomHex.pals[superPals[startingHex]].GetComponent<HexInfo>().moveVert(checkMe2, -99, new Color(0.96f, 0.64f, 0.38f));
-                        randomHex.dirtPath(superPals[startingHex]);
-                        dirtAdded = true;
+                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().least / LargestLowestValue <= 0.25f)
+                        {
+                            int temp2 = startingHex + 4;
+                            if (temp2 > 5)
+                                temp2 -= 6;
+                            int temp3 = startingHex + 3;
+                            if (temp3 > 5)
+                                temp3 -= 6;
+                            int pal = startingHex + 6;
+                                if (pal > 5)
+                                pal -= 6;
+
+                            randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp2, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                            randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                            randomHex.dirtPath(startingHex, LargestLowestValue, 1);
+                            dirtAdded = true;
+                        }
                     }
                 }
             }

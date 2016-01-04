@@ -14,7 +14,7 @@ public class HexInfo : MonoBehaviour
     //public float scale = 0.25f;
     Color[] newColours;
     public int numOfPals = 0;
-
+    
     Color grass = Color.Lerp(Color.green, Color.black, 0.5f);
     Color sand = Color.Lerp(Color.yellow, Color.white,0.2f);
     Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
@@ -193,27 +193,39 @@ public class HexInfo : MonoBehaviour
         total = totalHexs;
     }
 
-    public void addHeight(float offset)
+    public void addHeight(float maxLeast, float heightScale)
     {
-        if (least < 2)
+        //8 hex island
+        //2 beach
+        //2 grass
+        float dist = least / maxLeast;
+        //% of closeness to centre
+        //0 is beach
+        if (dist < 0.25f)
         {
             for (int i = 0; i < 7; i++)
             {
-                moveVert(i, least / 5, sand);
+                moveVert(i, (least / 5)*heightScale, sand);
             }
         }
-        else if (least > 1 && least < 4)
+        else if (dist > 0.249f && dist < 0.5f)
         {
             for (int i = 0; i < 7; i++)
-                moveVert(i, least / 3, grass);
+                moveVert(i, (least / 3)*heightScale, grass);
         }
         else
         {
             for (int i = 0; i < 7; i++)
             {
+                var random=0f;
                 //this peaks should rise exptonentially
                 //well not quite exponentially, but it sho
-                moveVert(i, ((least*least) * .1f) + ((avg - offset - 2) * .3f), rock);
+                //moveVert(i, ((least * least) * .1f) + ((avg - offset - 2) * .3f) + random, rock);
+
+                float startingPoint = (maxLeast/2);
+
+                float hexsIn = least - startingPoint;
+                moveVert(i, ((least/3)*heightScale) +((hexsIn * 2)*heightScale), rock);
             }
         }
     }
@@ -617,65 +629,130 @@ public class HexInfo : MonoBehaviour
         }
     }
     
-    public void dirtPath(int start)
+    public void dirtPath(int start, float maxLeast, int length)
     {
         Vector3[] myVerts = GetComponent<MeshFilter>().mesh.vertices;
-        Debug.Log("Dirt path has been started on " + gameObject.name + " at " + start);
-
+        
         #region Colour starting dirt and centre point
+        
+        moveVert(start, myVerts[start].y, Color.Lerp(Color.black, dirt, 0.75f));
 
-        moveVert(start, myVerts[start].y, dirt);
+        int temp_ = start + 1;
+        if (temp_ > 5)
+            temp_ -= 6;
+        int temp2_ = start + 2;
+        if (temp2_ > 5)
+            temp2_ -= 6;
+        int temp5_ = start + 5;
+        if (temp5_ > 5)
+            temp5_ -= 6;
+
+        pals[temp5_].GetComponent<HexInfo>().moveVert(temp2_, -99, Color.Lerp(Color.black, dirt, 0.75f));
+        pals[temp_].GetComponent<HexInfo>().moveVert(temp5_, -99, Color.Lerp(Color.black, dirt, 0.75f));
 
         if (start != 5)
-            moveVert(start + 1, myVerts[start + 1].y, dirt);
+            moveVert(start + 1, myVerts[start + 1].y, Color.Lerp(Color.black, dirt, 0.75f));
         else
-            moveVert(0, myVerts[0].y, dirt);
+            moveVert(0, myVerts[0].y, Color.Lerp(Color.black, dirt, 0.75f));
 
-        moveVert(6, myVerts[6].y, dirt);
-
+        moveVert(6, myVerts[6].y, Color.Lerp(Color.black, dirt, 0.75f));
+        
         #endregion
-
         //Now choose a random vert to go in the direction of
         //Must not be the starting point, the centre or either vertex to the sode of the starting point
         #region Choose a direction to go
-        int randomNum = start;
-        while (randomNum == start || randomNum == start + 1 || randomNum == start - 1)
+        int randomDir = start, noGos=0;
+        while (randomDir == start || randomDir == start + 1 || randomDir == start - 1)
         {
-            randomNum = (int)Random.Range(-0.49f, 5.49f);
-                int temp = start + 2;
-                if (temp > 5)
-                    temp -= 6;
-                if (randomNum == temp)
-                    randomNum = start;
+            randomDir = (int)Random.Range(-0.49f, 5.49f);
+            int temp = start + 2;
+            if (temp > 5)
+                temp -= 6;
+            if (randomDir == temp)
+                randomDir = start;
+
+            //If it's too steep
+            if (pals[randomDir].GetComponent<HexInfo>().Vertices[6].y > Vertices[6].y + 1)
+            {
+                noGos++;
+                randomDir = start;
+            }
+            if (noGos==3)
+            {
+                randomDir = 99;//You've been very naughty, time for you to get fucked up.
+            }
         }
         #endregion
 
-        moveVert(randomNum, myVerts[randomNum].y, dirt);
-        if (randomNum != 5)
-            moveVert(randomNum + 1, myVerts[randomNum + 1].y, dirt);
-        else
-            moveVert(0, myVerts[0].y, dirt);
-
-        var nextVert = randomNum - 3;
-        if (nextVert < 0)
-            nextVert += 6;
-
-        //If the next pal only has 
-        if (pals[randomNum].GetComponent<HexInfo>().numOfPals == 6)
+        if (randomDir != 99)
         {
-            int superPals = 0;
-            for (int j = 0; j < 6; j++)
+            moveVert(randomDir, myVerts[randomDir].y, Color.Lerp(Color.black, dirt, 0.75f));
+            if (randomDir != 5)
+                moveVert(randomDir + 1, myVerts[randomDir + 1].y, Color.Lerp(Color.black, dirt, 0.75f));
+            else
+                moveVert(0, myVerts[0].y, Color.Lerp(Color.black, dirt, 0.75f));
+
+            var nextVert = randomDir - 3;
+            if (nextVert < 0)
+                nextVert += 6;
+
+            //If the nextvert Isn't like the one I was just checking for, keep going
+            if ((pals[randomDir].GetComponent<HexInfo>().least / maxLeast) >= 0.25f)
             {
-                if (pals[randomNum].GetComponent<HexInfo>().pals[j].GetComponent<HexInfo>().numOfPals == 6)
+                length++;
+                pals[randomDir].GetComponent<HexInfo>().dirtPath(nextVert, maxLeast, length);
+            }
+            else
+            {
+                //The dirt path has ended
+                if (length < 5)
                 {
-                    superPals++;
+                    int temp4 = randomDir + 4;
+                    if (temp4 > 5)
+                        temp4 -= 6;
+                    int temp3 = randomDir + 3;
+                    if (temp3 > 5)
+                        temp3 -= 6;
+                    int temp2 = randomDir + 2;
+                    if (temp2 > 5)
+                        temp2 -= 6;
+                    int pal = randomDir + 6;
+                    if (pal > 5)
+                        pal -= 6;
+                    int palPlusOne = randomDir +5;
+                    if (palPlusOne > 5)
+                        palPlusOne -= 6;
+
+                    pals[pal].GetComponent<HexInfo>().moveVert(temp4, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                    pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                    pals[randomDir].GetComponent<HexInfo>().moveVert(temp4, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                    pals[palPlusOne].GetComponent<HexInfo>().moveVert(temp2,-99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                    GameObject.Find("PentTest").GetComponent<PentInfo>().dirtPath();
+                }
+                else
+                {
+                    //We did good! Let's celebrate with a cube!
+                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    Debug.Log(getVerts()[6]);
+                    Debug.Log(transform.position);
+                    cube.transform.position = getVerts()[6] + transform.position+ new Vector3(0,.25f,0);
+                    cube.GetComponent<Renderer>().material.color = Color.red;
+                    for (int i = 0; i < 6; i++)
+                    {
+                        moveVert(i, -99, Color.Lerp(Color.black, dirt, 0.75f));
+
+                        int temp3_ = i + 3;
+                        if (temp3_ > 5)
+                            temp3_ -= 6;
+                        int temp4_ = i + 4;
+                        if (temp4_ > 5)
+                            temp4_ -= 6;
+                        pals[i].GetComponent<HexInfo>().moveVert(temp3_, -99, Color.Lerp(Color.black, dirt, 0.75f));
+                        pals[i].GetComponent<HexInfo>().moveVert(temp4_, -99, Color.Lerp(Color.black, dirt, 0.75f));
+                    }
                 }
             }
-
-            if (superPals == 6)
-                pals[randomNum].GetComponent<HexInfo>().dirtPath(nextVert);
         }
-
     }
 
     public void moveVert(int vertNum, float height, Color newColour)
