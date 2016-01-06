@@ -21,7 +21,7 @@ public class mood : MonoBehaviour {
 
     public void move(Vector3 newPos)
     {
-        gameObject.transform.position = newPos + new Vector3(0, 7, 0);
+        gameObject.transform.position = newPos + new Vector3(0, 14, 0);
         //Change energy, size and emission
         //mb also rnd velocity
     }

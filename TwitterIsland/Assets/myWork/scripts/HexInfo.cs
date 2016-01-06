@@ -20,9 +20,10 @@ public class HexInfo : MonoBehaviour
     Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
     Color rock = Color.gray;
     public Color dirt = new Color(0.96f, 0.64f, 0.38f);
-    
-    public GameObject[] pals = { null, null, null, null, null, null };    
+    GameObject camp;
 
+    public GameObject[] pals = { null, null, null, null, null, null };    
+    /*
     void OnMouseEnter()
     {
         GetComponent<Renderer>().material = GameObject.Find("PentTest").GetComponent<PentInfo>().wireframeMat;
@@ -31,6 +32,7 @@ public class HexInfo : MonoBehaviour
     {
         GetComponent<Renderer>().material = GameObject.Find("PentTest").GetComponent<PentInfo>().HexMat;
     }
+    */
     public Vector3[] getVerts()
     {
         return GetComponent<MeshFilter>().mesh.vertices;
@@ -39,8 +41,7 @@ public class HexInfo : MonoBehaviour
     {
         return GetComponent<MeshFilter>().mesh.colors;
     }
-
-
+    
     public void MeshSetup(float scale)
 	{
         if (name == "hex 0,0")
@@ -201,23 +202,29 @@ public class HexInfo : MonoBehaviour
         float dist = least / maxLeast;
         //% of closeness to centre
         //0 is beach
+        int random = 0;
+        if (Random.value > 0.8f)
+        {
+            random++;
+        }
         if (dist < 0.25f)
         {
             for (int i = 0; i < 7; i++)
             {
-                moveVert(i, (least / 5)*heightScale, sand);
+                moveVert(i, ((least / 5) * heightScale ), sand);
             }
         }
         else if (dist > 0.249f && dist < 0.5f)
         {
             for (int i = 0; i < 7; i++)
-                moveVert(i, (least / 3)*heightScale, grass);
+            {
+                moveVert(i, ((least / 3) * heightScale )+ random, grass);
+            }
         }
         else
         {
             for (int i = 0; i < 7; i++)
             {
-                var random=0f;
                 //this peaks should rise exptonentially
                 //well not quite exponentially, but it sho
                 //moveVert(i, ((least * least) * .1f) + ((avg - offset - 2) * .3f) + random, rock);
@@ -225,12 +232,12 @@ public class HexInfo : MonoBehaviour
                 float startingPoint = (maxLeast/2);
 
                 float hexsIn = least - startingPoint;
-                moveVert(i, ((least/3)*heightScale) +((hexsIn * 2)*heightScale), rock);
+                moveVert(i, (((least/3)*heightScale) +((hexsIn * 2)*heightScale))+random, rock);
             }
         }
     }
 
-    public void heightColour()
+    public void heightColour(float maxLeast)
     {
         Vertices = getVerts();
 
@@ -238,6 +245,14 @@ public class HexInfo : MonoBehaviour
         //Add basic colours for sand, grass and the wetsand around the base of the island
         for (int i = 0; i < 7; i++)
         {
+            
+            if (Vertices[i].y > 0.5f && Vertices[i].y < 6 || (least / maxLeast) > 0.25f)
+            {
+                if (ran > 0.25f)
+                    moveVert(i, -99, grass);
+                else
+                    moveVert(i, -99, Color.Lerp(Color.black, grass, 0.8f));
+            }
             if (Vertices[i].y < 0.6f)
             {
 
@@ -245,15 +260,6 @@ public class HexInfo : MonoBehaviour
                     moveVert(i, -99, sand);
                 else
                     moveVert(i, -99, Color.Lerp(Color.white, sand, 0.75f));
-            }
-            if (Vertices[i].y < -0.1f)
-                moveVert(i, -99, wetSand);
-            if (Vertices[i].y > 0.5f && Vertices[i].y < 6)
-            {
-                if (ran > 0.25f)
-                    moveVert(i, -99, grass);
-                else
-                    moveVert(i, -99, Color.Lerp(Color.black, grass, 0.8f));
             }
         }
 
@@ -281,6 +287,8 @@ public class HexInfo : MonoBehaviour
         //Sprinkle some now on top :)
         for (int i = 0; i < 7; i++)
         {
+            if (Vertices[i].y < -0.1f)
+                moveVert(i, -99, wetSand);
             if (Vertices[i].y > 6f)
                 moveVert(i, -99, Color.white);
         }
@@ -704,8 +712,9 @@ public class HexInfo : MonoBehaviour
             }
             else
             {
+                GameObject.Find("PentTest").GetComponent<PentInfo>().dirtFailures++;
                 //The dirt path has ended
-                if (length < 5)
+                if (length < 3)
                 {
                     int temp4 = randomDir + 4;
                     if (temp4 > 5)
@@ -727,16 +736,13 @@ public class HexInfo : MonoBehaviour
                     pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
                     pals[randomDir].GetComponent<HexInfo>().moveVert(temp4, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
                     pals[palPlusOne].GetComponent<HexInfo>().moveVert(temp2,-99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
-                    GameObject.Find("PentTest").GetComponent<PentInfo>().dirtPath();
+                    if (GameObject.Find("PentTest").GetComponent<PentInfo>().dirtFailures < 4)
+                        GameObject.Find("PentTest").GetComponent<PentInfo>().dirtPath();
+                    else
+                        Debug.Log("3 dirt paths were created, and they were all less the 3 in length :(");
                 }
                 else
                 {
-                    //We did good! Let's celebrate with a cube!
-                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    Debug.Log(getVerts()[6]);
-                    Debug.Log(transform.position);
-                    cube.transform.position = getVerts()[6] + transform.position+ new Vector3(0,.25f,0);
-                    cube.GetComponent<Renderer>().material.color = Color.red;
                     for (int i = 0; i < 6; i++)
                     {
                         moveVert(i, -99, Color.Lerp(Color.black, dirt, 0.75f));
@@ -750,7 +756,33 @@ public class HexInfo : MonoBehaviour
                         pals[i].GetComponent<HexInfo>().moveVert(temp3_, -99, Color.Lerp(Color.black, dirt, 0.75f));
                         pals[i].GetComponent<HexInfo>().moveVert(temp4_, -99, Color.Lerp(Color.black, dirt, 0.75f));
                     }
+                    //We did good! Let's celebrate with a cube!
+                    if (camp == null)
+                        camp = Instantiate(Resources.Load("camp") as GameObject);
+
+                    //Move hole site into position
+                    var newPointy = (myVerts[0] + myVerts[1] + myVerts[2] + myVerts[3] + myVerts[4] + myVerts[5] + myVerts[6]) / 6;
+                    newPointy = (newPointy + myVerts[6]) / 2;
+                    camp.transform.position = newPointy+ transform.position;
+                    camp.transform.Rotate(new Vector3(0, 150 + (60 * start), 0));
+
+                    var hut = camp.GetComponentInChildren<hut>().gameObject;
+                    var campfire = camp.GetComponentInChildren<campfire>().gameObject;
+
+                    int temp3 = start + 3;
+                    if (temp3 > 5)
+                        temp3 -= 6;
+                    int temp4 = start + 4;
+                    if (temp4 > 5)
+                        temp4 -= 6;
+
+                    newPointy = (myVerts[temp3] + myVerts[temp4]) / 2;
+                    newPointy = (newPointy * 3 + myVerts[6]) / 4;
+                    hut.transform.position = new Vector3(hut.transform.position.x, transform.position.y+ newPointy.y,hut.transform.position.z);
+
+                    campfire.transform.position = transform.position+ myVerts[6];
                 }
+                moveVert(6, -99, dirt);
             }
         }
     }
@@ -801,5 +833,10 @@ public class HexInfo : MonoBehaviour
         /*DestroyImmediate(GetComponent<MeshCollider>());
         MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = mesh;*/
+    }
+
+    void OnDestroy()
+    {
+        Destroy(camp);
     }
 }

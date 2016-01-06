@@ -18,6 +18,7 @@ public class PentInfo : MonoBehaviour
     public float favs=1;
     public float floorLevel;
 
+    public int dirtFailures;
     GameObject flag;
     List<GameObject> itemsToDestroy = new List<GameObject>();
 
@@ -51,6 +52,21 @@ public class PentInfo : MonoBehaviour
             new Vector3(3f + 0.33f* meshScale, floorLevel-1f, 0f),
             new Vector3(2f + 0.2f* meshScale, floorLevel-1f, -4f - 0.4f * meshScale),
             new Vector3(-2 - 0.2f * meshScale, floorLevel-1f, -4f - 0.4f * meshScale),
+        };
+        Vector3[] newPentVerts =
+        {
+            new Vector3(-0.5f, floorLevel, -0.688f),//0
+            new Vector3(-0.809f, floorLevel, 0.263f),//1
+            new Vector3(0, floorLevel,0.851f),//2
+            new Vector3(0.809f, floorLevel,0.263f),//3
+            new Vector3(0.5f, floorLevel, -0.688f),//4
+
+            
+            new Vector3(-0.5f, floorLevel - 1, -0.688f),//0
+            new Vector3(-0.809f, floorLevel - 1, 0.263f),//1
+            new Vector3(0, floorLevel - 1, 0.851f),//2
+            new Vector3(0.809f, floorLevel - 1, 0.263f),//3
+            new Vector3(0.5f, floorLevel - 1, -0.688f)//4
         };
         #endregion
 
@@ -101,7 +117,7 @@ public class PentInfo : MonoBehaviour
 
         MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
 
-        mesh.vertices = pentVerts;
+        mesh.vertices = newPentVerts;
         mesh.triangles = triangles;
 
         //add out UV coordinates to the mesh
@@ -146,7 +162,8 @@ public class PentInfo : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        itemsToDestroy.Remove(col.gameObject);
+        if (col.tag!="Player")
+         itemsToDestroy.Remove(col.gameObject);
     }
 
     [HideInInspector]
@@ -163,7 +180,7 @@ public class PentInfo : MonoBehaviour
         for (int i = 0; i < hexs.Count; i++)
         {
             if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                LargestLowestValue = hexs[i].GetComponent<HexInfo>().avg;
+                LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
         }
         for (int i = 0; i < hexs.Count; i++)
         {
@@ -180,12 +197,15 @@ public class PentInfo : MonoBehaviour
             {
                 hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
             }
-        }
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            hexs[i].GetComponent<HexInfo>().heightColour();
+            //Update collision mesh
+            hexs[i].GetComponent<MeshCollider>().sharedMesh = hexs[i].GetComponent<MeshFilter>().mesh;
+            //hexs[i].GetComponent<MeshCollider>().convex = true;
         }
 
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
+        }
 
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;
@@ -206,10 +226,14 @@ public class PentInfo : MonoBehaviour
                 }
             }
         }
-
+        Debug.Log(highestPoint);
+        Debug.Log(flagPos);
         //Place flag at top point!
+        if (flag!= null)
+            Destroy(flag);
+
         flag = Instantiate(Resources.Load("flagpole")) as GameObject;
-        flag.transform.position = flagPos + new Vector3(0, .75f, 0);
+        flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
     }
 
     public void blendColours()
@@ -272,12 +296,39 @@ public class PentInfo : MonoBehaviour
         string inputText = tweetData.text;
         inputText = inputText.ToLower();
         char[] vowels = { 'a', 'e', 'i', 'o', 'u' };
-        float[] vowelCount = new float[] { 1, 1, 1, 1, 1 };
+        int[] vowelCount = new int[] { 1, 1, 1, 1, 1 };
 
         for (int i = 0; i < inputText.Length; i++)
             for (int v = 0; v < 5; v++)
                 if (inputText[i] == vowels[v])
                     ++vowelCount[v];
+
+        //The max amount a vowel direction should go in is 8*amount;
+        int mostVowels=0;
+        for (int i=0; i < vowelCount.Length;i++)
+            if (vowelCount[i] > mostVowels)
+                mostVowels = vowelCount[i];
+
+        float max = (1.0f / mostVowels);
+        Debug.Log(max);
+        Debug.Log(mostVowels);
+
+        Vector3[] NewPentVerts =
+        {
+            new Vector3((-0.5f-(0.5f*(vowelCount[0]*max)))*meshScale,floorLevel,(-0.688f-(0.688f*(vowelCount[0]*max))) *meshScale),//0
+            new Vector3((-0.809f-(0.809f*(vowelCount[1]*max)))*meshScale,floorLevel,(0.263f+(0.263f*(vowelCount[1]*max)))*meshScale),//1
+            new Vector3(0,floorLevel, (0.851f+(0.851f*(vowelCount[2]*max)))*meshScale),//2
+            new Vector3((0.809f+(0.809f*(vowelCount[3]*max)))*meshScale,floorLevel,(0.263f+(0.263f*(vowelCount[3]*max))) *meshScale),//3
+            new Vector3((0.5f+(0.5f*(vowelCount[4]*max)))*meshScale,floorLevel,(-0.688f-(0.688f*(vowelCount[4]*max))) *meshScale),//4
+
+            
+            new Vector3((-0.5f-(0.5f*(vowelCount[0]*max)))*meshScale,floorLevel-1,(-0.688f-(0.688f*(vowelCount[0]*max))) *meshScale),//0
+            new Vector3((-0.809f -(0.809f*(vowelCount[1]*max)))*meshScale,floorLevel-1,(0.263f+(0.263f*(vowelCount[1]*max)))*meshScale),//1
+            new Vector3(0,floorLevel-1, (0.851f+(0.851f*(vowelCount[2]*max)))*meshScale),//2
+            new Vector3((0.809f+(0.809f*(vowelCount[3]*max)))*meshScale,floorLevel-1,(0.263f+(0.263f*(vowelCount[3]*max))) *meshScale),//3
+            new Vector3((0.5f+(0.5f*(vowelCount[4]*max)))*meshScale,floorLevel-1,(-0.688f-(0.688f*(vowelCount[4]*max))) *meshScale),//4
+            
+        };
 
         Vector3[] tempVerts =
         {
@@ -295,7 +346,7 @@ public class PentInfo : MonoBehaviour
         };
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        mesh.vertices = tempVerts;
+        mesh.vertices = NewPentVerts;
 
         //Is this line actually did something, that'd be fucking marvelous, but noooo
         //gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
@@ -322,7 +373,7 @@ public class PentInfo : MonoBehaviour
         {
             //Make a hex
             GameObject hex = new GameObject("hex " + h + "," + w);
-            hex.tag = "Hex";
+            //hex.hideFlags = HideFlags.HideInHierarchy;
             HexInfo hexinf = hex.AddComponent<HexInfo>();
             hexinf.mat = HexMat;
             hexinf.MeshSetup(hexScale);
@@ -436,6 +487,7 @@ public class PentInfo : MonoBehaviour
         w = 0;
         SpawnHexNEW();
         Destroy(flag);
+        dirtFailures = 0;
     }
 
     public void detectHexEdges()
