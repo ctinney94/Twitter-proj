@@ -195,6 +195,9 @@ public class PentInfo : MonoBehaviour
         {
             for (int j = 0; j < 7; j++)
             {
+                if (hexs[i].GetComponent<HexInfo>().camp != null)
+                    Destroy(hexs[i].GetComponent<HexInfo>().camp);
+
                 hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
             }
             //Update collision mesh
@@ -245,6 +248,11 @@ public class PentInfo : MonoBehaviour
                 hexs[i].GetComponent<HexInfo>().blendCols(j);
             }
         }
+        //For each hex
+        //Get current colour
+
+        //Then for each hex
+        //Lerp colours for corners.
     }
 
     public void dirtPath()

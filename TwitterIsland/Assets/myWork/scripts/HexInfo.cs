@@ -20,7 +20,7 @@ public class HexInfo : MonoBehaviour
     Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
     Color rock = Color.gray;
     public Color dirt = new Color(0.96f, 0.64f, 0.38f);
-    GameObject camp;
+    public GameObject camp;
 
     public GameObject[] pals = { null, null, null, null, null, null };    
     /*
