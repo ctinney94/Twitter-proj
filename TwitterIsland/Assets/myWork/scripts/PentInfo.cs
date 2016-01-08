@@ -170,21 +170,24 @@ public class PentInfo : MonoBehaviour
     public float LargestLowestValue = 0;
     public void heights()
     {
-        detectHexEdges();
-        for (int i = 0; i < hexs.Count; i++)
+        if (hexs[0].GetComponent<HexInfo>().least == 0)
         {
-            hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
-        }
+            detectHexEdges();
+            for (int i = 0; i < hexs.Count; i++)
+            {
+                hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
+            }
 
-        //Find the leaststs
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
-        }
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue,favs);
+            //Find the leaststs
+            for (int i = 0; i < hexs.Count; i++)
+            {
+                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
+                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
+            }
+            for (int i = 0; i < hexs.Count; i++)
+            {
+                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
+            }
         }
     }
 
@@ -214,8 +217,10 @@ public class PentInfo : MonoBehaviour
         Vector3 flagPos = Vector3.zero;
 
         //Find highest point on map
+        Debug.Log("Placing flag - "+LargestLowestValue);
         for (int i = 0; i < hexs.Count; i++)
         {
+            Debug.Log(hexs[i].name + hexs[i].GetComponent<HexInfo>().least);
             if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
             {
                 Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
@@ -229,8 +234,6 @@ public class PentInfo : MonoBehaviour
                 }
             }
         }
-        Debug.Log(highestPoint);
-        Debug.Log(flagPos);
         //Place flag at top point!
         if (flag!= null)
             Destroy(flag);
@@ -243,16 +246,62 @@ public class PentInfo : MonoBehaviour
     {
         for (int i = 0; i < hexs.Count; i++)
         {
-            for (int j = 0; j < 7; j++)
+            for (int j = 0; j < 6; j++)
             {
-                hexs[i].GetComponent<HexInfo>().blendCols(j);
+                //hexs[i].GetComponent<HexInfo>().blendCols(j);
             }
         }
+        
         //For each hex
         //Get current colour
+        List<List<Color>> list = new List<List<Color>>();
+        for (int j = 0; j < hexs.Count; j++)
+        {
+            var listB = new List<Color>();
+            for (int i = 0; i < 6; i++)
+            {
+                var hex = hexs[j].GetComponent<HexInfo>();
 
+                int i1 = i-1;
+                if (i1 == -1)
+                    i1 = 5;
+
+                int i3 = i + 2;
+                if (i3 > 5)
+                    i3 -= 6;
+
+                int i4 = i + 4;
+                if (i4 > 5)
+                    i4 -= 6;
+
+                if (hex.pals[i] != null && hex.pals[i1] != null)
+                {
+                    var borderHex = hex.pals[i].GetComponent<HexInfo>();
+                    var borderHex2 = hex.pals[i1].GetComponent<HexInfo>();
+                    Color[] border2Cols = borderHex2.getColors();
+                    Color[] borderCols = borderHex.getColors();
+
+
+                    var newCol = (borderCols[i4] + border2Cols[i3] + hex.getColors()[i]) / 3;
+                    listB.Add(newCol);
+                }
+                else
+                {
+                    listB.Add(Color.black);
+                }
+            }
+            list.Add(listB);
+        }
         //Then for each hex
         //Lerp colours for corners.
+        for (int j = 0; j < hexs.Count; j++)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                var hex = hexs[j].GetComponent<HexInfo>();
+                hex.moveVert(i, -99, list[j][i]);
+            }
+        }
     }
 
     public void dirtPath()
@@ -318,8 +367,6 @@ public class PentInfo : MonoBehaviour
                 mostVowels = vowelCount[i];
 
         float max = (1.0f / mostVowels);
-        Debug.Log(max);
-        Debug.Log(mostVowels);
 
         Vector3[] NewPentVerts =
         {
@@ -496,6 +543,7 @@ public class PentInfo : MonoBehaviour
         SpawnHexNEW();
         Destroy(flag);
         dirtFailures = 0;
+        LargestLowestValue = 0;
     }
 
     public void detectHexEdges()

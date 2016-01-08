@@ -194,45 +194,56 @@ public class HexInfo : MonoBehaviour
         total = totalHexs;
     }
 
-    public void addHeight(float maxLeast, float heightScale)
+    public void addHeight(float maxLeast, float heightScale, int numOfHexs)
     {
-        //8 hex island
-        //2 beach
-        //2 grass
-        float dist = least / maxLeast;
-        //% of closeness to centre
-        //0 is beach
-        int random = 0;
-        if (Random.value > 0.8f)
-        {
-            random++;
-        }
-        if (dist < 0.25f)
+        if (numOfHexs < 12)
         {
             for (int i = 0; i < 7; i++)
             {
-                moveVert(i, ((least / 5) * heightScale ), sand);
-            }
-        }
-        else if (dist > 0.249f && dist < 0.5f)
-        {
-            for (int i = 0; i < 7; i++)
-            {
-                moveVert(i, ((least / 3) * heightScale )+ random, grass);
+                moveVert(i,numOfPals*0.5f* heightScale, sand);
             }
         }
         else
         {
-            for (int i = 0; i < 7; i++)
+
+            //8 hex island
+            //2 beach
+            //2 grass
+            float dist = least / maxLeast;
+            //% of closeness to centre
+            //0 is beach
+            int random = 0;
+            if (Random.value > 0.8f)
             {
-                //this peaks should rise exptonentially
-                //well not quite exponentially, but it sho
-                //moveVert(i, ((least * least) * .1f) + ((avg - offset - 2) * .3f) + random, rock);
+                random++;
+            }
+            if (dist < 0.25f)
+            {
+                for (int i = 0; i < 7; i++)
+                {
+                    moveVert(i, ((least / 5) * heightScale), sand);
+                }
+            }
+            else if (dist > 0.249f && dist < 0.5f)
+            {
+                for (int i = 0; i < 7; i++)
+                {
+                    moveVert(i, ((least / 3) * heightScale) + random, grass);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 7; i++)
+                {
+                    //this peaks should rise exptonentially
+                    //well not quite exponentially, but it sho
+                    //moveVert(i, ((least * least) * .1f) + ((avg - offset - 2) * .3f) + random, rock);
 
-                float startingPoint = (maxLeast/2);
+                    float startingPoint = (maxLeast / 2);
 
-                float hexsIn = least - startingPoint;
-                moveVert(i, (((least/3)*heightScale) +((hexsIn * 2)*heightScale))+random, rock);
+                    float hexsIn = least - startingPoint;
+                    moveVert(i, (((least / 3) * heightScale) + ((hexsIn * 2) * heightScale)) + random, rock);
+                }
             }
         }
     }
@@ -287,8 +298,8 @@ public class HexInfo : MonoBehaviour
         //Sprinkle some now on top :)
         for (int i = 0; i < 7; i++)
         {
-            if (Vertices[i].y < -0.1f)
-                moveVert(i, -99, wetSand);
+            if (Vertices[i].y < 0.05f)
+                moveVert(i, -99, Color.black);
             if (Vertices[i].y > 6f)
                 moveVert(i, -99, Color.white);
         }
@@ -304,132 +315,36 @@ public class HexInfo : MonoBehaviour
     
     public void blendCols(int vertNum)
     {
-        Color[] myCols = getColors();
-        Vector3[] myVerts = getVerts();
+        int i1 = vertNum - 1;
+        if (i1 == -1)
+            i1 = 5;
 
-        switch (vertNum)
+        int i3 = vertNum + 2;
+        if (i3 > 5)
+            i3 -= 6;
+
+        int i4 = vertNum + 4;
+        if (i4 > 5)
+            i4 -= 6;
+
+        if (pals[vertNum] != null && pals[i1] != null)
         {
-            case 0:
-                #region 0
-                if (pals[5] != null && pals[0]!=null)
-                {
-                    var borderHex = pals[5].GetComponent<HexInfo>();
-                    var borderHex2 = pals[0].GetComponent<HexInfo>();
-                    Color[] border2Cols = borderHex2.getColors();
-                    Color[] borderCols = borderHex.getColors();
-                    Vector3[] borderVerts = borderHex.getVerts();
-                    Vector3[] border2Verts = borderHex2.getVerts();
+            var borderHex = pals[vertNum].GetComponent<HexInfo>();
+            var borderHex2 = pals[i1].GetComponent<HexInfo>();
 
-                    var newCol = (borderCols[2] + border2Cols[4] + myCols[vertNum]) / 3;
 
-                    moveVert(0, myVerts[0].y, newCol);
-                    borderHex.moveVert(2, borderVerts[2].y, newCol);
-                    borderHex2.moveVert(4, border2Verts[4].y, newCol);
-                }
-                break;
-            #endregion
-            case 1:
-                #region 1
-                if (pals[1]!=null && pals[0] != null)
-                {
-                    var borderHex = pals[1].GetComponent<HexInfo>();
-                    var borderHex2 = pals[0].GetComponent<HexInfo>();
-                    Vector3[] borderVerts = borderHex.getVerts();
-                    Vector3[] border2Verts = borderHex2.getVerts();
-                    Color[] borderCols = borderHex.getColors();
-                    Color[] border2Cols = borderHex2.getColors();
-
-                    var newCol = (borderCols[5] + border2Cols[3] + myCols[vertNum]) / 3;
-
-                    moveVert(vertNum, myVerts[vertNum].y, newCol);
-                    borderHex.moveVert(5, borderVerts[5].y, newCol);
-                    borderHex2.moveVert(3, border2Verts[3].y, newCol);
-                }
-                break;
-            #endregion
-            case 2:
-                #region 2
-                if (pals[1] != null && pals[2]!=null)
-                {
-                    var borderHex = pals[1].GetComponent<HexInfo>();
-                    var borderHex2 = pals[2].GetComponent<HexInfo>();
-                    Vector3[] borderVerts = borderHex.getVerts();
-                    Vector3[] border2Verts = borderHex2.getVerts();
-                    Color[] borderCols = borderHex.getColors();
-                    Color[] border2Cols = borderHex2.getColors();
-
-                    var newCol = (borderCols[4] + border2Cols[0] + myCols[vertNum]) / 3;
-
-                    moveVert(vertNum, myVerts[vertNum].y, newCol);
-                    borderHex.moveVert(4, borderVerts[4].y, newCol);
-                    borderHex2.moveVert(0, border2Verts[0].y, newCol);
-                }
-                break;
-            #endregion
-            case 3:
-                #region 3
-                if (pals[2] != null && pals[3] != null)
-                {
-                    var borderHex = pals[2].GetComponent<HexInfo>();
-                    var borderHex2 = pals[3].GetComponent<HexInfo>();
-                    Vector3[] border2Verts = borderHex2.getVerts();
-                    Vector3[] borderVerts = borderHex.getVerts();
-                    Color[] borderCols = borderHex.getColors();
-                    Color[] border2Cols = borderHex2.getColors();
-
-                    var newCol = (borderCols[5] + border2Cols[1] + myCols[vertNum]) / 3;
-
-                    moveVert(vertNum, myVerts[vertNum].y, newCol);
-                    borderHex.moveVert(5, borderVerts[5].y, newCol);
-                    borderHex2.moveVert(1, border2Verts[1].y, newCol);
-                }
-                break;
-            #endregion
-            case 4:
-                #region 4
-                if (pals[3] != null && pals[4] != null)
-                {
-                    var borderHex = pals[3].GetComponent<HexInfo>();
-                    var borderHex2 = pals[4].GetComponent<HexInfo>();
-                    Vector3[] border2Verts = borderHex2.getVerts();
-                    Vector3[] borderVerts = borderHex.getVerts();
-                    Color[] borderCols = borderHex.getColors();
-                    Color[] border2Cols = borderHex2.getColors();
-
-                    var newCol = (borderCols[0] + border2Cols[2] + myCols[vertNum]) / 3;
-
-                    moveVert(vertNum, myVerts[vertNum].y, newCol);
-                    borderHex.moveVert(0, borderVerts[0].y, newCol);
-                    borderHex2.moveVert(2, border2Verts[2].y, newCol);
-                }
-                break;
-            #endregion
-            case 5:
-                #region 5
-                if (pals[5] != null && pals[4]!=null)
-                {
-                    var borderHex = pals[5].GetComponent<HexInfo>();
-                    var borderHex2 = pals[4].GetComponent<HexInfo>();
-                    Vector3[] border2Verts = borderHex2.getVerts();
-                    Vector3[] borderVerts = borderHex.getVerts();
-                    Color[] borderCols = borderHex.getColors();
-                    Color[] border2Cols = borderHex2.getColors();
-
-                    var newCol = (borderCols[3] + border2Cols[1] + myCols[vertNum]) / 3;
-
-                    moveVert(vertNum, myVerts[vertNum].y, newCol);
-                    borderHex.moveVert(3, borderVerts[3].y, newCol);
-                    borderHex2.moveVert(1, border2Verts[1].y, newCol);
-                }
-                break;
-            #endregion
-            case 6:
-                var newColy = (myCols[0] + myCols[1] + myCols[2] + myCols[3] + myCols[4] + myCols[5]) / 6;
-                moveVert(6, myVerts[6].y, Color.Lerp(myCols[6], newColy, 0.5f));
-                break;
+            var newCol = (borderHex.getColors()[i4] + borderHex2.getColors()[i3] + getColors()[vertNum]) / 3;
+            moveVert(vertNum, -99, newCol);
+            borderHex.moveVert(i4, -99, newCol);
+            borderHex2.moveVert(i3, -99, newCol);
         }
+        //Old code for centre vert
+        //var newColy = (myCols[0] + myCols[1] + myCols[2] + myCols[3] + myCols[4] + myCols[5]) / 6;
+
     }
 
+    public float sandDown = -.5f;
+    public float sandDown2 = -.5f;
     public void interlopeCorner(int vertNum)
     {
         Vector3[] myVerts = getVerts();
@@ -454,19 +369,19 @@ public class HexInfo : MonoBehaviour
                 else if (pals[5] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(2, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(2, sandDown, wetSand);
                 }
                 else if (pals[0] != null)
                 {
                     var borderHex = pals[0].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(4, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(4, sandDown, wetSand);
                 }
                 else
                 {
                     //This is a beach border
-                    moveVert(vertNum, -0.5f, wetSand);
+                    moveVert(vertNum, sandDown2, wetSand);
                 }
                 break;
             #endregion
@@ -488,19 +403,19 @@ public class HexInfo : MonoBehaviour
                 else if (pals[1] != null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(5, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(5, sandDown, wetSand);
                 }
                 else if (pals[1] != null)
                 {
                     var borderHex = pals[0].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(3, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(3, sandDown, wetSand);
                 }
                 else
                 {
                     //This is a beach border
-                    moveVert(vertNum, -0.5f, wetSand);
+                    moveVert(vertNum, sandDown2, wetSand);
                 }
                 break;
             #endregion
@@ -523,18 +438,18 @@ public class HexInfo : MonoBehaviour
                 {
                     //This is a beach border
                     var borderHex = pals[1].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(4, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(4, sandDown, wetSand);
                 }
                 else if (pals[2] != null)
                 {
                     //This is a beach border
                     var borderHex = pals[2].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(0, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(0, sandDown, wetSand);
                 }
                 else
-                    moveVert(vertNum, -0.5f, wetSand);
+                    moveVert(vertNum, sandDown2, wetSand);
                 #endregion
                 break;
             case 3:
@@ -555,17 +470,17 @@ public class HexInfo : MonoBehaviour
                 else if (pals[2] != null)
                 {
                     var borderHex = pals[2].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(5, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(5, sandDown, wetSand);
                 }
                 else if (pals[3] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(1, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(1, sandDown, wetSand);
                 }
                 else
-                    moveVert(vertNum, -0.5f, wetSand);
+                    moveVert(vertNum, sandDown2, wetSand);
                 #endregion
                 break;
             case 4:
@@ -585,17 +500,17 @@ public class HexInfo : MonoBehaviour
                 else if (pals[3] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(0, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(0, sandDown, wetSand);
                 }
                 else if (pals[4] != null)
                 {
                     var borderHex = pals[4].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(2, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(2, sandDown, wetSand);
                 }
                 else
-                    moveVert(vertNum, -0.5f, wetSand);
+                    moveVert(vertNum, sandDown2, wetSand);
                 #endregion
                 break;
             case 5:
@@ -616,17 +531,17 @@ public class HexInfo : MonoBehaviour
                 else if (pals[4] != null)
                 {
                     var borderHex = pals[4].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(1, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(1, sandDown, wetSand);
                 }
                 else if (pals[5] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
-                    moveVert(vertNum, -0.25f, wetSand);
-                    borderHex.moveVert(3, -0.25f, wetSand);
+                    moveVert(vertNum, sandDown, wetSand);
+                    borderHex.moveVert(3, sandDown, wetSand);
                 }
                 else
-                    moveVert(vertNum, -0.5f, wetSand);
+                    moveVert(vertNum, sandDown2, wetSand);
                 #endregion
                 break;
             case 6:
