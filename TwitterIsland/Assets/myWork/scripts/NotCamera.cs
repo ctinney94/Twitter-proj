@@ -10,7 +10,7 @@ public class NotCamera : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        var max = target.GetComponent<PentInfo>().mesh.bounds.center;
+        var max = target.GetComponent<MeshFilter>().mesh.bounds.center;
         transform.LookAt(max);
         moveCamera();
 	}

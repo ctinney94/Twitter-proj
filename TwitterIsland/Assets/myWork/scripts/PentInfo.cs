@@ -13,8 +13,8 @@ public class PentInfo : MonoBehaviour
     public GameObject InputBit;
     public Material PentMat, HexMat, wireframeMat;
 
-    public float meshScale = 1, hexScale = 0.25f;
-    [Range(0.1f, 2)]
+    public float meshScale = 1, hexScale = 0.2f;
+    [Range(0.1f, 10)]
     public float favs=1;
     public float floorLevel;
 
@@ -217,10 +217,8 @@ public class PentInfo : MonoBehaviour
         Vector3 flagPos = Vector3.zero;
 
         //Find highest point on map
-        Debug.Log("Placing flag - "+LargestLowestValue);
         for (int i = 0; i < hexs.Count; i++)
         {
-            Debug.Log(hexs[i].name + hexs[i].GetComponent<HexInfo>().least);
             if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
             {
                 Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
@@ -414,6 +412,7 @@ public class PentInfo : MonoBehaviour
         meshCollider.sharedMesh = mesh;
         meshCollider.convex = true;
         meshCollider.isTrigger = true;
+        GetComponent<MeshFilter>().mesh = mesh;
         GameObject.Find("Particle effects").GetComponent<mood>().move(mesh.bounds.center);
     }
     #endregion
