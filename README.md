@@ -1,13 +1,11 @@
 # Twitter Island Project
 
 ##To do list for this project
-- **Write research reoprt draft**
-- Fix culling issue with meshs
-- Set up hexagon to appear in pentagon in organized pattern
-- Fix targetted framework issue
-- Do the same for the references needed for tweetInvi
 
-# Research report deadline 10/12/2015
-## 3 weeks and 3 days.
-## 18 weekdays and 6 weekend days.
+- Sort out emmision scaling for lighting and rain particle systems
+- Create interface for inputting how many favs/RTs a tweet got, instead of the sliders
+- Create seagulls for each hashtag used
+- Add system for saving islands once created
+- Have a think about the larger scale for the program, how will a user navigate all the islands?
+
 
