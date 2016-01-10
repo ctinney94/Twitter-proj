@@ -165,186 +165,7 @@ public class PentInfo : MonoBehaviour
         if (col.tag!="Player")
          itemsToDestroy.Remove(col.gameObject);
     }
-
-    [HideInInspector]
-    public float LargestLowestValue = 0;
-    public void heights()
-    {
-        if (hexs[0].GetComponent<HexInfo>().least == 0)
-        {
-            detectHexEdges();
-            for (int i = 0; i < hexs.Count; i++)
-            {
-                hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
-            }
-
-            //Find the leaststs
-            for (int i = 0; i < hexs.Count; i++)
-            {
-                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
-            }
-            for (int i = 0; i < hexs.Count; i++)
-            {
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
-            }
-        }
-    }
-
-    public void smooth()
-    {
-        //for (int i = 0; i < hexs.Count; i++)
-        for (int i = hexs.Count-1; i > -1; i--)
-        {
-            for (int j = 0; j < 7; j++)
-            {
-                if (hexs[i].GetComponent<HexInfo>().camp != null)
-                    Destroy(hexs[i].GetComponent<HexInfo>().camp);
-
-                hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
-            }
-            //Update collision mesh
-            hexs[i].GetComponent<MeshCollider>().sharedMesh = hexs[i].GetComponent<MeshFilter>().mesh;
-            //hexs[i].GetComponent<MeshCollider>().convex = true;
-        }
-
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
-        }
-
-        float highestPoint = 0;
-        Vector3 flagPos = Vector3.zero;
-
-        //Find highest point on map
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
-            {
-                Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
-                for (int j = 0; j < points.Length; j++)
-                {
-                    if (points[j].y > highestPoint)
-                    {
-                        highestPoint = points[j].y;
-                        flagPos = points[j] + hexs[i].transform.position;
-                    }
-                }
-            }
-        }
-        //Place flag at top point!
-        if (flag!= null)
-            Destroy(flag);
-
-        flag = Instantiate(Resources.Load("flagpole")) as GameObject;
-        flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
-    }
-
-    public void blendColours()
-    {
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            for (int j = 0; j < 6; j++)
-            {
-                //hexs[i].GetComponent<HexInfo>().blendCols(j);
-            }
-        }
-        
-        //For each hex
-        //Get current colour
-        List<List<Color>> list = new List<List<Color>>();
-        for (int j = 0; j < hexs.Count; j++)
-        {
-            var listB = new List<Color>();
-            for (int i = 0; i < 6; i++)
-            {
-                var hex = hexs[j].GetComponent<HexInfo>();
-
-                int i1 = i-1;
-                if (i1 == -1)
-                    i1 = 5;
-
-                int i3 = i + 2;
-                if (i3 > 5)
-                    i3 -= 6;
-
-                int i4 = i + 4;
-                if (i4 > 5)
-                    i4 -= 6;
-
-                if (hex.pals[i] != null && hex.pals[i1] != null)
-                {
-                    var borderHex = hex.pals[i].GetComponent<HexInfo>();
-                    var borderHex2 = hex.pals[i1].GetComponent<HexInfo>();
-                    Color[] border2Cols = borderHex2.getColors();
-                    Color[] borderCols = borderHex.getColors();
-
-
-                    var newCol = (borderCols[i4] + border2Cols[i3] + hex.getColors()[i]) / 3;
-                    listB.Add(newCol);
-                }
-                else
-                {
-                    listB.Add(Color.black);
-                }
-            }
-            list.Add(listB);
-        }
-        //Then for each hex
-        //Lerp colours for corners.
-        for (int j = 0; j < hexs.Count; j++)
-        {
-            for (int i = 0; i < 6; i++)
-            {
-                var hex = hexs[j].GetComponent<HexInfo>();
-                hex.moveVert(i, -99, list[j][i]);
-            }
-        }
-    }
-
-    public void dirtPath()
-    {
-        bool dirtAdded = false;
-
-        while (!dirtAdded)
-        {
-            //pick a random hex which is nest to a border hex (first green hex inward)
-            var random = Random.Range(0, hexs.Count - 1);
-            var randomHex = hexs[random].GetComponent<HexInfo>();
-
-            //Is the random hex one we can use to start a path?
-            if (((randomHex.least / LargestLowestValue) > 0.25f))
-            {
-                if (randomHex.least < ((int)(0.25 * LargestLowestValue)) + 2)
-                {
-                    //We have a hex we can use!
-                    while (!dirtAdded)
-                    {
-                        var startingHex = (int)Random.Range(0, randomHex.pals.Length);
-                        
-                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().least / LargestLowestValue <= 0.25f)
-                        {
-                            int temp2 = startingHex + 4;
-                            if (temp2 > 5)
-                                temp2 -= 6;
-                            int temp3 = startingHex + 3;
-                            if (temp3 > 5)
-                                temp3 -= 6;
-                            int pal = startingHex + 6;
-                                if (pal > 5)
-                                pal -= 6;
-
-                            randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp2, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
-                            randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
-                            randomHex.dirtPath(startingHex, LargestLowestValue, 1);
-                            dirtAdded = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+    
     public void UpdatePentMesh()
     {
         InputField tweetData = InputBit.GetComponent<InputField>();
@@ -417,11 +238,191 @@ public class PentInfo : MonoBehaviour
     }
     #endregion
 
+    #region islandRelated
+
+    [HideInInspector]
+    public float LargestLowestValue = 0;
+    public void CreateIsland()
+    {
+        if (hexs[0].GetComponent<HexInfo>().least == 0)
+        {
+            //Find pals
+            detectHexEdges();
+            for (int i = 0; i < hexs.Count; i++)
+            {
+                //Add weightings to the island based on the number of hexs between itself and the edge of the mesh
+                hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
+            }
+
+            //Find the highest point on the map (the hex with the largest [least] value
+            for (int i = 0; i < hexs.Count; i++)
+            {
+                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
+                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
+            }
+            for (int i = 0; i < hexs.Count; i++)
+            {
+                //Add some height to the hexs
+                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
+            }
+        }
+    
+        //Smooth island out
+        for (int i = hexs.Count - 1; i > -1; i--)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+                if (hexs[i].GetComponent<HexInfo>().camp != null)
+                    Destroy(hexs[i].GetComponent<HexInfo>().camp);
+
+                hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
+            }
+            //Update collision mesh
+            hexs[i].GetComponent<MeshCollider>().sharedMesh = hexs[i].GetComponent<MeshFilter>().mesh;
+        }
+
+        //Colour the hexs based on position
+        for (int i = 0; i < hexs.Count; i++)
+            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
+
+        float highestPoint = 0;
+        Vector3 flagPos = Vector3.zero;
+
+        //Find highest point on map
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
+            {
+                Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
+                for (int j = 0; j < points.Length; j++)
+                {
+                    if (points[j].y > highestPoint)
+                    {
+                        highestPoint = points[j].y;
+                        flagPos = points[j] + hexs[i].transform.position;
+                    }
+                }
+            }
+        }
+
+        //Place flag at top point!
+        if (flag != null)
+            Destroy(flag);
+
+        flag = Instantiate(Resources.Load("flagpole")) as GameObject;
+        flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
+    }
+
+    public void blendColours()
+    {
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                //hexs[i].GetComponent<HexInfo>().blendCols(j);
+            }
+        }
+
+        //For each hex
+        //Get current colour
+        List<List<Color>> list = new List<List<Color>>();
+        for (int j = 0; j < hexs.Count; j++)
+        {
+            var listB = new List<Color>();
+            for (int i = 0; i < 6; i++)
+            {
+                var hex = hexs[j].GetComponent<HexInfo>();
+
+                int i1 = i - 1;
+                if (i1 == -1)
+                    i1 = 5;
+
+                int i3 = i + 2;
+                if (i3 > 5)
+                    i3 -= 6;
+
+                int i4 = i + 4;
+                if (i4 > 5)
+                    i4 -= 6;
+
+                if (hex.pals[i] != null && hex.pals[i1] != null)
+                {
+                    var borderHex = hex.pals[i].GetComponent<HexInfo>();
+                    var borderHex2 = hex.pals[i1].GetComponent<HexInfo>();
+                    Color[] border2Cols = borderHex2.getColors();
+                    Color[] borderCols = borderHex.getColors();
+
+
+                    var newCol = (borderCols[i4] + border2Cols[i3] + hex.getColors()[i]) / 3;
+                    listB.Add(newCol);
+                }
+                else
+                {
+                    listB.Add(Color.black);
+                }
+            }
+            list.Add(listB);
+        }
+        //Then for each hex
+        //Lerp colours for corners.
+        for (int j = 0; j < hexs.Count; j++)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                var hex = hexs[j].GetComponent<HexInfo>();
+                hex.moveVert(i, -99, list[j][i]);
+            }
+        }
+    }
+
+    public void dirtPath()
+    {
+        bool dirtAdded = false;
+
+        while (!dirtAdded)
+        {
+            //pick a random hex which is nest to a border hex (first green hex inward)
+            var random = Random.Range(0, hexs.Count - 1);
+            var randomHex = hexs[random].GetComponent<HexInfo>();
+
+            //Is the random hex one we can use to start a path?
+            if (((randomHex.least / LargestLowestValue) > 0.25f))
+            {
+                if (randomHex.least < ((int)(0.25 * LargestLowestValue)) + 2)
+                {
+                    //We have a hex we can use!
+                    while (!dirtAdded)
+                    {
+                        var startingHex = (int)Random.Range(0, randomHex.pals.Length);
+
+                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().least / LargestLowestValue <= 0.25f)
+                        {
+                            int temp2 = startingHex + 4;
+                            if (temp2 > 5)
+                                temp2 -= 6;
+                            int temp3 = startingHex + 3;
+                            if (temp3 > 5)
+                                temp3 -= 6;
+                            int pal = startingHex + 6;
+                            if (pal > 5)
+                                pal -= 6;
+
+                            randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp2, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                            randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+                            randomHex.dirtPath(startingHex, LargestLowestValue, 1);
+                            dirtAdded = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     void SpawnHexNEW()
     {
         Vector3 max = mesh.bounds.max;
         Vector3 min = mesh.bounds.min;
-        
+
         #region Hex creation
         while (CreateHexs)
         {
@@ -547,6 +548,7 @@ public class PentInfo : MonoBehaviour
 
     public void detectHexEdges()
     {
+        //For each hex, raycast in each direction around them and return the gameobject hit, store as a pal
         for (int i = 0; i < hexs.Count; i++)
         {
             Vector3 hexOrigin = hexs[i].transform.position;
@@ -554,7 +556,7 @@ public class PentInfo : MonoBehaviour
             Vector3 above = hexOrigin + new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
             Vector3 below = hexOrigin - new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
             Vector3 upperLeft = hexOrigin + new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 upperRight = hexOrigin + new Vector3(4.5f* hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
+            Vector3 upperRight = hexOrigin + new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
             Vector3 lowerRight = hexOrigin - new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
             Vector3 lowerLeft = hexOrigin - new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
 
@@ -598,4 +600,5 @@ public class PentInfo : MonoBehaviour
             }
         }
     }
+    #endregion
 }
