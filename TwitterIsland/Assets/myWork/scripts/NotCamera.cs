@@ -11,7 +11,7 @@ public class NotCamera : MonoBehaviour {
 	void Update ()
     {
         var max = target.GetComponent<MeshFilter>().mesh.bounds.center;
-        transform.LookAt(max);
+        transform.LookAt(max+ new Vector3(0,5,0));
         moveCamera();
 	}
 

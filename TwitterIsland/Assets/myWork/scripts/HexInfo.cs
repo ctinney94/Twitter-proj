@@ -23,16 +23,33 @@ public class HexInfo : MonoBehaviour
     public GameObject camp;
 
     public GameObject[] pals = { null, null, null, null, null, null };    
-    /*
-    void OnMouseEnter()
+    
+    void OnMouseDown()
     {
-        GetComponent<Renderer>().material = GameObject.Find("PentTest").GetComponent<PentInfo>().wireframeMat;
+        Color centreColour = getColors()[6];
+
+        if (centreColour == Color.Lerp(Color.black, grass, 0.8f) || centreColour == grass)
+        {
+            GameObject poof = Instantiate(Resources.Load("forestPoof") as GameObject);
+            poof.transform.position = transform.position + getVerts()[6];
+        }
+        else if (centreColour == sand || centreColour == Color.Lerp(Color.white, sand, 0.75f))
+        {
+            GameObject poof = Instantiate(Resources.Load("sandPoof") as GameObject);
+            poof.transform.position = transform.position + getVerts()[6]; ;
+        }
+        else if (centreColour == rock || centreColour == Color.Lerp(Color.black, dirt, 0.5f))
+        {
+            GameObject poof = Instantiate(Resources.Load("rockPoof") as GameObject);
+            poof.transform.position = transform.position + getVerts()[6];
+        }
+        else if (centreColour == Color.white)
+        {
+            GameObject poof = Instantiate(Resources.Load("snowPoof") as GameObject);
+            poof.transform.position = transform.position + getVerts()[6];
+        }
     }
-    void OnMouseExit()
-    {
-        GetComponent<Renderer>().material = GameObject.Find("PentTest").GetComponent<PentInfo>().HexMat;
-    }
-    */
+
     public Vector3[] getVerts()
     {
         return GetComponent<MeshFilter>().mesh.vertices;
@@ -41,7 +58,7 @@ public class HexInfo : MonoBehaviour
     {
         return GetComponent<MeshFilter>().mesh.colors;
     }
-    
+
     public void MeshSetup(float scale)
 	{
         if (name == "hex 0,0")
@@ -298,8 +315,6 @@ public class HexInfo : MonoBehaviour
         //Sprinkle some now on top :)
         for (int i = 0; i < 7; i++)
         {
-            if (Vertices[i].y < 0.05f)
-                moveVert(i, -99, Color.black);
             if (Vertices[i].y > 6f)
                 moveVert(i, -99, Color.white);
         }

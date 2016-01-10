@@ -14,7 +14,7 @@ public class PentInfo : MonoBehaviour
     public Material PentMat, HexMat, wireframeMat;
 
     public float meshScale = 1, hexScale = 0.2f;
-    [Range(0.1f, 10)]
+    [Range(0.1f, 1.5f)]
     public float favs=1;
     public float floorLevel;
 
