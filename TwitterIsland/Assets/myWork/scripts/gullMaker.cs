@@ -2,13 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine.UI;
 
 public class gullMaker : MonoBehaviour {
 
     public int gulls = 0;
     GameObject gull;
     List<string> gullNames = new List<string>();
-   
+    public GameObject islandMenus, gullcam;
+
     // Use this for initialization
     void Start()
     {
@@ -16,7 +18,7 @@ public class gullMaker : MonoBehaviour {
         {
             while (!sr.EndOfStream)
             {
-                gullNames.Add(sr.ReadLine() + " chips");
+                gullNames.Add(sr.ReadLine() + " Chips");
             }
         }
         gull = Resources.Load("gull") as GameObject;
@@ -62,6 +64,8 @@ public class gullMaker : MonoBehaviour {
 
             int theChosenGull = Random.Range(0, gullNames.Count);
 
+            gullyGuy.GetComponent<Animator>().SetFloat("offset", Random.value);
+
             gullyGuy.name = gullNames[theChosenGull];
             gullNames.Remove(gullNames[theChosenGull]);
             gullyGuy.tag = "gull";
@@ -88,5 +92,36 @@ public class gullMaker : MonoBehaviour {
         {
             gulls[i].GetComponent<gull>().radius = 3f+(newRadius*1.5f);
         }
+    }
+
+    public void gullCam()
+    {
+        islandMenus.SetActive(false);
+        gullcam.SetActive(true);
+        GameObject[] gulls = GameObject.FindGameObjectsWithTag("gull");
+
+        //Grab the camera, disable iesland menu canvas, enable a new one
+        Camera.main.GetComponent<NotCamera>().enabled = false;
+        Camera.main.transform.parent = gulls[Random.Range(0, gulls.Length)].transform;
+
+        Camera.main.transform.localPosition = new Vector3(7.2f,11.81f, -21);
+        Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
+
+        /*Text[] texts = islandMenus.GetComponentsInChildren<texts>();
+
+        for (int i=0; i < texts.Length;i++)
+        {
+            if (texts[i].gameObject.name == "gullcam_text")
+                texts[i].text = "Current Gull: "+ Camera.main.transform.parent.name;
+        }*/
+        GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
+    }
+
+    public void exitGullCam()
+    {
+        islandMenus.SetActive(true);
+        gullcam.SetActive(false);
+        Camera.main.transform.parent = null;
+        Camera.main.GetComponent<NotCamera>().enabled = true;
     }
 }

@@ -1,0 +1,210 @@
+fileFormatVersion: 2
+guid: a3728506ab53b584ba53cb975ddfe23d
+timeCreated: 1452637864
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: Armature
+    100002: Bone.004
+    100004: Bone.005
+    100006: Bone.006
+    100008: Bone.007
+    100010: Bone.007_end
+    100012: Bone.008
+    100014: Bone.008_end
+    100016: Bone.010
+    100018: Bone.011
+    100020: Bone.012
+    100022: Bone.013
+    100024: Bone.013_end
+    100026: Bone.014
+    100028: Bone.014_end
+    100030: elblow
+    100032: elblow.001
+    100034: elblow.001_end
+    100036: elblow_end
+    100038: gull
+    100040: //RootNode
+    100042: lower body
+    100044: neck
+    100046: neck_end
+    100048: upper body
+    100050: wingLeft
+    100052: wingRight
+    400000: Armature
+    400002: Bone.004
+    400004: Bone.005
+    400006: Bone.006
+    400008: Bone.007
+    400010: Bone.007_end
+    400012: Bone.008
+    400014: Bone.008_end
+    400016: Bone.010
+    400018: Bone.011
+    400020: Bone.012
+    400022: Bone.013
+    400024: Bone.013_end
+    400026: Bone.014
+    400028: Bone.014_end
+    400030: elblow
+    400032: elblow.001
+    400034: elblow.001_end
+    400036: elblow_end
+    400038: gull
+    400040: //RootNode
+    400042: lower body
+    400044: neck
+    400046: neck_end
+    400048: upper body
+    400050: wingLeft
+    400052: wingRight
+    4300000: gull
+    7400000: Armature|ArmatureAction
+    7400002: Armature|ArmatureAction.001
+    7400004: Armature|flap
+    7400006: Armature|tail_follow
+    9500000: //RootNode
+    13700000: gull
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 0
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Armature|flap
+      takeName: Armature|flap
+      firstFrame: 0
+      lastFrame: 21
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Armature
+        weight: 1
+      - path: Armature/Bone.008
+        weight: 1
+      - path: Armature/Bone.008/Bone.008_end
+        weight: 1
+      - path: Armature/Bone.014
+        weight: 1
+      - path: Armature/Bone.014/Bone.014_end
+        weight: 1
+      - path: Armature/elblow
+        weight: 1
+      - path: Armature/elblow/elblow_end
+        weight: 1
+      - path: Armature/elblow.001
+        weight: 1
+      - path: Armature/elblow.001/elblow.001_end
+        weight: 1
+      - path: Armature/lower body
+        weight: 1
+      - path: Armature/lower body/upper body
+        weight: 1
+      - path: Armature/lower body/upper body/neck
+        weight: 1
+      - path: Armature/lower body/upper body/neck/neck_end
+        weight: 1
+      - path: Armature/lower body/wingLeft
+        weight: 1
+      - path: Armature/lower body/wingLeft/Bone.010
+        weight: 1
+      - path: Armature/lower body/wingLeft/Bone.010/Bone.011
+        weight: 1
+      - path: Armature/lower body/wingLeft/Bone.010/Bone.011/Bone.012
+        weight: 1
+      - path: Armature/lower body/wingLeft/Bone.010/Bone.011/Bone.012/Bone.013
+        weight: 1
+      - path: Armature/lower body/wingLeft/Bone.010/Bone.011/Bone.012/Bone.013/Bone.013_end
+        weight: 1
+      - path: Armature/lower body/wingRight
+        weight: 1
+      - path: Armature/lower body/wingRight/Bone.004
+        weight: 1
+      - path: Armature/lower body/wingRight/Bone.004/Bone.005
+        weight: 1
+      - path: Armature/lower body/wingRight/Bone.004/Bone.005/Bone.006
+        weight: 1
+      - path: Armature/lower body/wingRight/Bone.004/Bone.005/Bone.006/Bone.007
+        weight: 1
+      - path: Armature/lower body/wingRight/Bone.004/Bone.005/Bone.006/Bone.007/Bone.007_end
+        weight: 1
+      - path: gull
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

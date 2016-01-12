@@ -244,6 +244,7 @@ public class PentInfo : MonoBehaviour
     public float LargestLowestValue = 0;
     public void CreateIsland()
     {
+        //updateHexs();
         if (hexs[0].GetComponent<HexInfo>().least == 0)
         {
             //Find pals
