@@ -61,11 +61,9 @@ public class HexInfo : MonoBehaviour
 
     public void MeshSetup(float scale)
 	{
-        if (name == "hex 0,0")
-        {
             #region verts
             float floorLevel = 0f;
-            Vector3[] vertices =
+            Vector3[] initVerts =
             {
             //These are the values required to create a hexagon with a side length of 6
             new Vector3(-3f, floorLevel, -Mathf.Sqrt(36-9)),    //0
@@ -75,10 +73,10 @@ public class HexInfo : MonoBehaviour
             new Vector3(6f, floorLevel, 0),                     //4
             new Vector3(3f, floorLevel, -Mathf.Sqrt(36-9)),      //5
             new Vector3(0,0,0),
-        };
+            };
 
-            for (int i = 0; i < vertices.Length; i++)
-                vertices[i] = Vector3.Scale(vertices[i], new Vector3(scale, 1, scale));
+            for (int i = 0; i < initVerts.Length; i++)
+                initVerts[i] = Vector3.Scale(initVerts[i], new Vector3(scale, 1, scale));
             //Based off this hex here:
             //https://s-media-cache-ak0.pinimg.com/236x/7e/f2/a7/7ef2a733a6fa0fe4ae0d64cfbb1f5b2c.jpg
             #endregion
@@ -115,11 +113,10 @@ public class HexInfo : MonoBehaviour
             #endregion
 
             #region finalize
-
             //create a mesh object to pass our data into
             Mesh mesh = new Mesh();
             //add our vertices to the mesh
-            mesh.vertices = vertices;
+            mesh.vertices = initVerts;
             //add our triangles to the mesh
             mesh.triangles = triangles;
             //add out UV coordinates to the mesh
@@ -145,26 +142,9 @@ public class HexInfo : MonoBehaviour
             meshCol.sharedMesh = mesh;
             //UV TESTING
             //renderer.material.mainTexture = texture;
-            newColours = new Color[vertices.Length];
+            newColours = new Color[initVerts.Length];
             mesh.colors = newColours;
             #endregion
-        }
-        else
-        { 
-            MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-            MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
-
-            Mesh mesh = GameObject.Find("hex 0,0").GetComponent<MeshFilter>().mesh;
-            mesh.RecalculateNormals();
-            meshFilter.mesh = mesh;
-            meshRenderer.material = mat;
-            rig = gameObject.AddComponent<Rigidbody>();
-            rig.isKinematic = true;
-            meshCol.sharedMesh = mesh;
-            newColours = new Color[mesh.vertices.Length];
-            mesh.colors = newColours;
-        }
     }
     
     public int[] dirWeightings = { 0, 0, 0, 0, 0, 0 };
@@ -357,9 +337,7 @@ public class HexInfo : MonoBehaviour
         //var newColy = (myCols[0] + myCols[1] + myCols[2] + myCols[3] + myCols[4] + myCols[5]) / 6;
 
     }
-
-    public float sandDown = -.5f;
-    public float sandDown2 = -.5f;
+    
     public void interlopeCorner(int vertNum)
     {
         Vector3[] myVerts = getVerts();
@@ -384,19 +362,19 @@ public class HexInfo : MonoBehaviour
                 else if (pals[5] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(2, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(2, -0.5f, wetSand);
                 }
                 else if (pals[0] != null)
                 {
                     var borderHex = pals[0].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(4, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(4, -0.5f, wetSand);
                 }
                 else
                 {
                     //This is a beach border
-                    moveVert(vertNum, sandDown2, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
                 }
                 break;
             #endregion
@@ -418,19 +396,19 @@ public class HexInfo : MonoBehaviour
                 else if (pals[1] != null)
                 {
                     var borderHex = pals[1].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(5, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(5, -0.5f, wetSand);
                 }
                 else if (pals[1] != null)
                 {
                     var borderHex = pals[0].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(3, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(3, -0.5f, wetSand);
                 }
                 else
                 {
                     //This is a beach border
-                    moveVert(vertNum, sandDown2, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
                 }
                 break;
             #endregion
@@ -453,18 +431,18 @@ public class HexInfo : MonoBehaviour
                 {
                     //This is a beach border
                     var borderHex = pals[1].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(4, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(4, -0.5f, wetSand);
                 }
                 else if (pals[2] != null)
                 {
                     //This is a beach border
                     var borderHex = pals[2].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(0, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(0, -0.5f, wetSand);
                 }
                 else
-                    moveVert(vertNum, sandDown2, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
                 #endregion
                 break;
             case 3:
@@ -485,17 +463,17 @@ public class HexInfo : MonoBehaviour
                 else if (pals[2] != null)
                 {
                     var borderHex = pals[2].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(5, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(5, -0.5f, wetSand);
                 }
                 else if (pals[3] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(1, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(1, -0.5f, wetSand);
                 }
                 else
-                    moveVert(vertNum, sandDown2, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
                 #endregion
                 break;
             case 4:
@@ -515,17 +493,17 @@ public class HexInfo : MonoBehaviour
                 else if (pals[3] != null)
                 {
                     var borderHex = pals[3].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(0, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(0, -0.5f, wetSand);
                 }
                 else if (pals[4] != null)
                 {
                     var borderHex = pals[4].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(2, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(2, -0.5f, wetSand);
                 }
                 else
-                    moveVert(vertNum, sandDown2, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
                 #endregion
                 break;
             case 5:
@@ -546,17 +524,17 @@ public class HexInfo : MonoBehaviour
                 else if (pals[4] != null)
                 {
                     var borderHex = pals[4].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(1, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(1, -0.5f, wetSand);
                 }
                 else if (pals[5] != null)
                 {
                     var borderHex = pals[5].GetComponent<HexInfo>();
-                    moveVert(vertNum, sandDown, wetSand);
-                    borderHex.moveVert(3, sandDown, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
+                    borderHex.moveVert(3, -0.5f, wetSand);
                 }
                 else
-                    moveVert(vertNum, sandDown2, wetSand);
+                    moveVert(vertNum, -0.5f, wetSand);
                 #endregion
                 break;
             case 6:

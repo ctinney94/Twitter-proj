@@ -6,8 +6,8 @@ public class mood : MonoBehaviour {
     [Range(-1,1)]public float moodness = 0;
 
     [Range(0,0.85f)]public float blackness=0;
-    public GameObject cloudObject, rainObject, lightningObject, worldLightObject, fireworksOjbect; 
-    ParticleSystem rain, lightning, cloud, fireworks;
+    public GameObject cloudObject, rainObject, lightningObject, worldLightObject, fireworksOjbect, rainbowObject; 
+    ParticleSystem rain, lightning, cloud, fireworks, rainbow;
     Light lighty;
 
     public float floater;
@@ -18,7 +18,7 @@ public class mood : MonoBehaviour {
         lightning = lightningObject.GetComponent<ParticleSystem>();
         lighty = worldLightObject.GetComponent<Light>();
         fireworks = fireworksOjbect.GetComponent<ParticleSystem>();
-
+        rainbow = rainbowObject.GetComponent<ParticleSystem>();
     }
 	
 	// Update is called once per frame
@@ -31,12 +31,20 @@ public class mood : MonoBehaviour {
         {
             GameObject flag = GameObject.Find("flagpole(Clone)");
             if (flag != null)
+            {
                 fireworks.transform.position = flag.transform.position;
+                rainbow.transform.position = flag.transform.position + new Vector3(-7.5f,-2.5f,0);
+            }
 
             if (moodness > 0.8f)
                 fireworks.enableEmission = true;
             else
                 fireworks.enableEmission = false;
+
+            if (moodness > 0.4f)
+                rainbow.enableEmission = true;
+            else
+                rainbow.enableEmission = true;
 
             cloud.emissionRate = 0;
         }

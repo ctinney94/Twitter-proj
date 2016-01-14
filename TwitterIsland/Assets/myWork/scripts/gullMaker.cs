@@ -105,7 +105,7 @@ public class gullMaker : MonoBehaviour {
         GameObject[] gulls = GameObject.FindGameObjectsWithTag("gull");
 
         //Grab the camera, disable iesland menu canvas, enable a new one
-        Camera.main.GetComponent<NotCamera>().enabled = false;
+        Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
         Camera.main.transform.parent = gulls[Random.Range(0, gulls.Length)].transform;
 
         Camera.main.transform.localPosition = new Vector3(7.2f,11.81f, -21);
@@ -119,6 +119,6 @@ public class gullMaker : MonoBehaviour {
         islandMenus.SetActive(true);
         gullcam.SetActive(false);
         Camera.main.transform.parent = null;
-        Camera.main.GetComponent<NotCamera>().enabled = true;
+        Camera.main.GetComponent<cameraOrbitControls>().enabled = true;
     }
 }

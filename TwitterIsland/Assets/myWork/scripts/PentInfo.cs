@@ -13,7 +13,7 @@ public class PentInfo : MonoBehaviour
     public GameObject InputBit;
     public Material PentMat, HexMat, wireframeMat;
 
-    public float meshScale = 1, hexScale = 0.2f;
+    public float meshScale = .1f, hexScale = 0.2f;
     [Range(0.1f, 1.5f)]
     public float favs=1;
     public float floorLevel;
@@ -36,37 +36,21 @@ public class PentInfo : MonoBehaviour
     void MeshSetup()
     {
         #region verts
-
-        float floorLevel = 1;
+        
         Vector3[] pentVerts =
         {
-
-            new Vector3(-3.0f - 0.33f* meshScale, floorLevel, 0.0f),
-            new Vector3(0f, floorLevel, 2f + 0.2f * meshScale),
-            new Vector3(3f + 0.33f * meshScale, floorLevel, 0f),
-            new Vector3(2f + 0.2f * meshScale, floorLevel, -4f - 0.4f * meshScale),
-            new Vector3(-2 - 0.2f * meshScale, floorLevel, -4f - 0.4f*  meshScale),
-
-            new Vector3(-3.0f - 0.33f * meshScale, floorLevel-1f, 0.0f),
-            new Vector3(0f, floorLevel-1f, 2f + 0.2f * meshScale),
-            new Vector3(3f + 0.33f* meshScale, floorLevel-1f, 0f),
-            new Vector3(2f + 0.2f* meshScale, floorLevel-1f, -4f - 0.4f * meshScale),
-            new Vector3(-2 - 0.2f * meshScale, floorLevel-1f, -4f - 0.4f * meshScale),
-        };
-        Vector3[] newPentVerts =
-        {
-            new Vector3(-0.5f, floorLevel, -0.688f),//0
-            new Vector3(-0.809f, floorLevel, 0.263f),//1
-            new Vector3(0, floorLevel,0.851f),//2
-            new Vector3(0.809f, floorLevel,0.263f),//3
-            new Vector3(0.5f, floorLevel, -0.688f),//4
+            new Vector3((-0.5f-0.5f)*meshScale,floorLevel,(-0.688f-0.688f) *meshScale),//0
+            new Vector3((-0.809f-0.809f)*meshScale,floorLevel,(0.263f+0.263f)*meshScale),//1
+            new Vector3(0,floorLevel, (0.851f+0.851f)*meshScale),//2
+            new Vector3((0.809f+0.809f)*meshScale,floorLevel,(0.263f+0.263f) *meshScale),//3
+            new Vector3((0.5f+0.5f)*meshScale,floorLevel,(-0.688f-0.688f) *meshScale),//4
 
             
-            new Vector3(-0.5f, floorLevel - 1, -0.688f),//0
-            new Vector3(-0.809f, floorLevel - 1, 0.263f),//1
-            new Vector3(0, floorLevel - 1, 0.851f),//2
-            new Vector3(0.809f, floorLevel - 1, 0.263f),//3
-            new Vector3(0.5f, floorLevel - 1, -0.688f)//4
+            new Vector3((-0.5f-0.5f)*meshScale,floorLevel-1,(-0.688f-0.688f) *meshScale),//0
+            new Vector3((-0.809f -0.809f)*meshScale,floorLevel-1,(0.263f+0.263f)*meshScale),//1
+            new Vector3(0,floorLevel-1, (0.851f+(0.851f))*meshScale),//2
+            new Vector3((0.809f+0.809f)*meshScale,floorLevel-1,(0.263f+0.263f) *meshScale),//3
+            new Vector3((0.5f+0.5f)*meshScale,floorLevel-1,(-0.688f-0.688f) *meshScale),//4
         };
         #endregion
 
@@ -117,7 +101,7 @@ public class PentInfo : MonoBehaviour
 
         MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
 
-        mesh.vertices = newPentVerts;
+        mesh.vertices = pentVerts;
         mesh.triangles = triangles;
 
         //add out UV coordinates to the mesh
@@ -155,9 +139,9 @@ public class PentInfo : MonoBehaviour
         meshScale = newScale;
     }
 
-    public void setHexScale(float newScale)
+    public void setFavs(float newFavs)
     {
-        hexScale = newScale;
+        favs = newFavs;
     }
 
     void OnTriggerEnter(Collider col)
@@ -201,25 +185,7 @@ public class PentInfo : MonoBehaviour
             new Vector3(0,floorLevel-1, (0.851f+(0.851f*(vowelCount[2]*max)))*meshScale),//2
             new Vector3((0.809f+(0.809f*(vowelCount[3]*max)))*meshScale,floorLevel-1,(0.263f+(0.263f*(vowelCount[3]*max))) *meshScale),//3
             new Vector3((0.5f+(0.5f*(vowelCount[4]*max)))*meshScale,floorLevel-1,(-0.688f-(0.688f*(vowelCount[4]*max))) *meshScale),//4
-            
         };
-
-        Vector3[] tempVerts =
-        {
-            new Vector3(-3.0f - 0.33f*vowelCount[0] * meshScale, floorLevel, 0.0f),
-            new Vector3(0f, floorLevel, 2f + 0.2f*vowelCount[1] * meshScale),
-            new Vector3(3f + 0.33f*vowelCount[2] * meshScale, floorLevel, 0f),
-            new Vector3(2f + 0.2f*vowelCount[3] * meshScale, floorLevel, -4f - 0.4f*vowelCount[3] * meshScale),
-            new Vector3(-2 - 0.2f*vowelCount[4] * meshScale, floorLevel, -4f - 0.4f*vowelCount[4]*  meshScale),
-
-            new Vector3(-3.0f - 0.33f*vowelCount[0] * meshScale, floorLevel-1f, 0.0f),
-            new Vector3(0f, floorLevel-1f, 2f + 0.2f*vowelCount[1] * meshScale),
-            new Vector3(3f + 0.33f*vowelCount[2] * meshScale, floorLevel-1f, 0f),
-            new Vector3(2f + 0.2f*vowelCount[3] * meshScale, floorLevel-1f, -4f - 0.4f*vowelCount[3] * meshScale),
-            new Vector3(-2 - 0.2f*vowelCount[4] * meshScale, floorLevel-1f, -4f - 0.4f*vowelCount[4] * meshScale),
-        };
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
         mesh.vertices = NewPentVerts;
 
         //Is this line actually did something, that'd be fucking marvelous, but noooo
@@ -239,6 +205,137 @@ public class PentInfo : MonoBehaviour
     #endregion
 
     #region islandRelated
+
+    public void updateHexs()
+    {
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            Destroy(hexs[i].gameObject);
+        }
+        hexs.Clear();
+        CreateHexs = true;
+        h = 0;
+        w = 0;
+
+        UpdatePentMesh();
+        Destroy(flag);
+        dirtFailures = 0;
+        LargestLowestValue = 0;
+        SpawnHexNEW();
+    }
+
+    void SpawnHexNEW()
+    {
+        Vector3 max = GetComponent<MeshCollider>().bounds.max;
+        Vector3 min = GetComponent<MeshCollider>().bounds.min;
+
+        #region Hex creation
+        while (CreateHexs)
+        {
+            //Make a hex
+            GameObject hex = new GameObject("hex " + h + "," + w);
+            //hex.hideFlags = HideFlags.HideInHierarchy;
+            HexInfo hexinf = hex.AddComponent<HexInfo>();
+            hexinf.mat = HexMat;
+            hexinf.MeshSetup(hexScale);
+            hexinf.transform.position = min;
+
+            #region Move Hex into position
+            //Move along by 1 hex
+            float x = w * 1.5f * (hexScale * 6);
+            float y;
+            if (w % 2 != 0)//If w is odd
+            {
+                //move up by 1 hex
+                y = h * 2 * (hexScale * Mathf.Sqrt(36 - 9));
+            }
+            else
+            {
+                //Move p by a hex and a half
+                y = (h * 2 * (hexScale * Mathf.Sqrt(36 - 9))) + (hexScale * Mathf.Sqrt(36 - 9));
+            }
+
+            hex.transform.Translate(x, .5f, y);
+            #endregion
+
+            //If we've reached the edge of the pentagon bounding box
+            if (hex.transform.position.x > max.x + 2 * (hexScale * Mathf.Sqrt(36 - 9)))
+            {
+                //Start a new line
+                h++;
+                w = 0;
+                Destroy(hex);
+            }
+            else
+            {
+                w++;
+                hexs.Add(hex);
+                itemsToDestroy.Add(hex);
+            }
+
+            if (hex.transform.position.z > max.z + 2 * (hexScale * Mathf.Sqrt(36 - 9)))
+            {
+                CreateHexs = false;
+                hexs.Remove(hex);
+                Destroy(hex);
+            }
+
+            if (hexs.Count > 4500)
+                CreateHexs = false;
+        }
+        #endregion
+
+        Invoke("hexRemoval", 0.1f);
+    }
+
+    void hexRemoval()
+    {
+        for (int j = 0; j < itemsToDestroy.Count; j++)
+        {
+            hexs.Remove(itemsToDestroy[j]);
+            Destroy(itemsToDestroy[j]);
+        }
+        itemsToDestroy.Clear();
+        Invoke("CreateIsland", 0.1f);
+
+        #region combine mesh
+
+        //Delete rigidbody
+        /*for (int i = 0; i < hexs.Count; i++)
+        {
+            if (hexs[i] != null)
+                Destroy(hexs[i].GetComponent<HexInfo>().rig);
+        }
+
+        CombineInstance[] combine = new CombineInstance[hexs.Count];
+
+        for (int i = 0; i < hexs.Count; i++)
+        {
+
+            if (hexs[i] != null)
+            {
+                combine[i].mesh = hexs[i].GetComponent<MeshFilter>().sharedMesh;
+                combine[i].transform = hexs[i].GetComponent<MeshFilter>().transform.localToWorldMatrix;
+            }
+        }
+        if (hexs.Count > 1)
+        {
+            hexs[0].GetComponent<MeshFilter>().mesh = new Mesh();
+            hexs[0].GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+            hexs[0].transform.position = Vector3.zero;
+            for (int i = 1; i < hexs.Count; i++)
+            {
+                Destroy(hexs[i]);
+            }
+
+
+            DestroyImmediate(hexs[0].GetComponent<MeshCollider>());
+            MeshCollider meshCollider = hexs[0].AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = hexs[0].GetComponent<MeshFilter>().mesh;
+        }*/
+        #endregion
+
+    }
 
     [HideInInspector]
     public float LargestLowestValue = 0;
@@ -312,6 +409,61 @@ public class PentInfo : MonoBehaviour
 
         flag = Instantiate(Resources.Load("flagpole")) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
+    }
+    
+    public void detectHexEdges()
+    {
+        //For each hex, raycast in each direction around them and return the gameobject hit, store as a pal
+        for (int i = 0; i < hexs.Count; i++)
+        {
+            Vector3 hexOrigin = hexs[i].transform.position;
+
+            Vector3 above = hexOrigin + new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
+            Vector3 below = hexOrigin - new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
+            Vector3 upperLeft = hexOrigin + new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
+            Vector3 upperRight = hexOrigin + new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
+            Vector3 lowerRight = hexOrigin - new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
+            Vector3 lowerLeft = hexOrigin - new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
+
+            RaycastHit hit;
+            Ray ray;
+            hexOrigin += new Vector3(0, 1, 0);
+            ray = new Ray(hexOrigin, lowerLeft - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[0] = hit.transform.gameObject;
+            }
+
+            ray = new Ray(hexOrigin, upperLeft - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[1] = hit.transform.gameObject;
+            }
+
+            ray = new Ray(hexOrigin, above - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[2] = hit.transform.gameObject;
+            }
+
+            ray = new Ray(hexOrigin, upperRight - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[3] = hit.transform.gameObject;
+            }
+
+            ray = new Ray(hexOrigin, lowerRight - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[4] = hit.transform.gameObject;
+            }
+
+            ray = new Ray(hexOrigin, below - hexOrigin);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                hexs[i].GetComponent<HexInfo>().pals[5] = hit.transform.gameObject;
+            }
+        }
     }
 
     public void blendColours()
@@ -418,188 +570,6 @@ public class PentInfo : MonoBehaviour
             }
         }
     }
-
-    void SpawnHexNEW()
-    {
-        Vector3 max = mesh.bounds.max;
-        Vector3 min = mesh.bounds.min;
-
-        #region Hex creation
-        while (CreateHexs)
-        {
-            //Make a hex
-            GameObject hex = new GameObject("hex " + h + "," + w);
-            //hex.hideFlags = HideFlags.HideInHierarchy;
-            HexInfo hexinf = hex.AddComponent<HexInfo>();
-            hexinf.mat = HexMat;
-            hexinf.MeshSetup(hexScale);
-            hexinf.transform.position = min;
-
-            #region Move Hex into position
-            //Move along by 1 hex
-            float x = w * 1.5f * (hexScale * 6);
-            float y;
-            if (w % 2 != 0)//If w is odd
-            {
-                //move up by 1 hex
-                y = h * 2 * (hexScale * Mathf.Sqrt(36 - 9));
-            }
-            else
-            {
-                //Move p by a hex and a half
-                y = (h * 2 * (hexScale * Mathf.Sqrt(36 - 9))) + (hexScale * Mathf.Sqrt(36 - 9));
-            }
-
-            hex.transform.Translate(x, .5f, y);
-            #endregion
-
-            //If we've reached the edge of the pentagon bounding box
-            if (hex.transform.position.x > max.x + 2 * (hexScale * Mathf.Sqrt(36 - 9)))
-            {
-                //Start a new line
-                h++;
-                w = 0;
-                Destroy(hex);
-            }
-            else
-            {
-                w++;
-                hexs.Add(hex);
-                itemsToDestroy.Add(hex);
-            }
-
-            if (hex.transform.position.z > max.z + 2 * (hexScale * Mathf.Sqrt(36 - 9)))
-            {
-                CreateHexs = false;
-                hexs.Remove(hex);
-                Destroy(hex);
-            }
-
-            if (hexs.Count > 4500)
-                CreateHexs = false;
-        }
-        #endregion
-
-        Invoke("hexRemoval", 0.1f);
-    }
-
-    void hexRemoval()
-    {
-        for (int j = 0; j < itemsToDestroy.Count; j++)
-        {
-            hexs.Remove(itemsToDestroy[j]);
-            Destroy(itemsToDestroy[j]);
-        }
-        itemsToDestroy.Clear();
-
-        //Delete rigidbody
-        /*for (int i = 0; i < hexs.Count; i++)
-        {
-            if (hexs[i] !=null)
-            Destroy(hexs[i].GetComponent<HexInfo>().rig);
-        }*/
-
-        /*
-        #region combine mesh
-        CombineInstance[] combine = new CombineInstance[hexs.Count];
-
-        for (int i = 0; i < hexs.Count; i++)
-        {
-
-            if (hexs[i] != null)
-            {
-                combine[i].mesh = hexs[i].GetComponent<MeshFilter>().sharedMesh;
-                combine[i].transform = hexs[i].GetComponent<MeshFilter>().transform.localToWorldMatrix;
-            }
-        }
-        if (hexs.Count > 1)
-        {
-            hexs[0].GetComponent<MeshFilter>().mesh = new Mesh();
-            hexs[0].GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-            hexs[0].transform.position = Vector3.zero;
-            for (int i = 1; i < hexs.Count; i++)
-            {
-                Destroy(hexs[i]);
-            }
-
-
-            DestroyImmediate(hexs[0].GetComponent<MeshCollider>());
-            MeshCollider meshCollider = hexs[0].AddComponent<MeshCollider>();
-            meshCollider.sharedMesh = hexs[0].GetComponent<MeshFilter>().mesh;
-        }
-        #endregion
-        */
-    }
-
-    public void updateHexs()
-    {
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            Destroy(hexs[i].gameObject);
-        }
-        hexs.Clear();
-        CreateHexs = true;
-        h = 0;
-        w = 0;
-        SpawnHexNEW();
-        Destroy(flag);
-        dirtFailures = 0;
-        LargestLowestValue = 0;
-    }
-
-    public void detectHexEdges()
-    {
-        //For each hex, raycast in each direction around them and return the gameobject hit, store as a pal
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            Vector3 hexOrigin = hexs[i].transform.position;
-
-            Vector3 above = hexOrigin + new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
-            Vector3 below = hexOrigin - new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
-            Vector3 upperLeft = hexOrigin + new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 upperRight = hexOrigin + new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 lowerRight = hexOrigin - new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 lowerLeft = hexOrigin - new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-
-            RaycastHit hit;
-            Ray ray;
-            hexOrigin += new Vector3(0, 1, 0);
-            ray = new Ray(hexOrigin, lowerLeft - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[0] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, upperLeft - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[1] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, above - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[2] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, upperRight - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[3] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, lowerRight - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[4] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, below - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[5] = hit.transform.gameObject;
-            }
-        }
-    }
+    
     #endregion
 }
