@@ -11,6 +11,8 @@ public class gullMaker : MonoBehaviour {
     List<string> gullNames = new List<string>();
     public GameObject islandMenus, gullcam;
 
+    public AudioClip[] gullNoises;
+
     // Use this for initialization
     void Start()
     {
@@ -65,7 +67,7 @@ public class gullMaker : MonoBehaviour {
             int theChosenGull = Random.Range(0, gullNames.Count);
 
             gullyGuy.GetComponent<Animator>().SetFloat("offset", Random.value);
-
+            gullyGuy.GetComponent<Animator>().SetFloat("speed", Random.Range(0.75f, 1.4f));
             gullyGuy.name = gullNames[theChosenGull];
             gullNames.Remove(gullNames[theChosenGull]);
             gullyGuy.tag = "gull";
@@ -96,6 +98,8 @@ public class gullMaker : MonoBehaviour {
 
     public void gullCam()
     {
+        var audio = gullcam.GetComponent<AudioSource>();
+        audio.PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
         islandMenus.SetActive(false);
         gullcam.SetActive(true);
         GameObject[] gulls = GameObject.FindGameObjectsWithTag("gull");
@@ -106,14 +110,7 @@ public class gullMaker : MonoBehaviour {
 
         Camera.main.transform.localPosition = new Vector3(7.2f,11.81f, -21);
         Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
-
-        /*Text[] texts = islandMenus.GetComponentsInChildren<texts>();
-
-        for (int i=0; i < texts.Length;i++)
-        {
-            if (texts[i].gameObject.name == "gullcam_text")
-                texts[i].text = "Current Gull: "+ Camera.main.transform.parent.name;
-        }*/
+        
         GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
     }
 
