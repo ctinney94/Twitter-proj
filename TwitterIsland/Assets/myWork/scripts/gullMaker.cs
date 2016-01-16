@@ -106,7 +106,14 @@ public class gullMaker : MonoBehaviour {
 
         //Grab the camera, disable iesland menu canvas, enable a new one
         Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
-        Camera.main.transform.parent = gulls[Random.Range(0, gulls.Length)].transform;
+
+        int randomGull = Random.Range(0, gulls.Length);
+        if (gulls.Length > 1)
+        {
+            while (Camera.main.transform.parent == gulls[randomGull].transform)
+                randomGull = Random.Range(0, gulls.Length);
+        }
+        Camera.main.transform.parent = gulls[randomGull].transform;
 
         Camera.main.transform.localPosition = new Vector3(7.2f,11.81f, -21);
         Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));

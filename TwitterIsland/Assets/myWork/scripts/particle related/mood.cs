@@ -44,12 +44,17 @@ public class mood : MonoBehaviour {
             if (moodness > 0.4f)
                 rainbow.enableEmission = true;
             else
-                rainbow.enableEmission = true;
+                rainbow.enableEmission = false;
 
             cloud.emissionRate = 0;
+            lightning.emissionRate = 0;
+            lighty.shadowStrength = 0;
+            rain.emissionRate = 0;
         }
         else
         {
+            fireworks.enableEmission = false;
+            rainbow.enableEmission = false;
             var temp = -1 * moodness;//turn this back into a positive so maths can happen.
 
             Color cloudClour = Color.Lerp(Color.white, Color.black, temp * 0.85f);

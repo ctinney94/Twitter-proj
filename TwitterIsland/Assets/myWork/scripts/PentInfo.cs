@@ -14,7 +14,6 @@ public class PentInfo : MonoBehaviour
     public Material PentMat, HexMat, wireframeMat;
 
     public float meshScale = .1f, hexScale = 0.2f;
-    [Range(0.1f, 1.5f)]
     public float favs=1;
     public float floorLevel;
 
@@ -128,10 +127,10 @@ public class PentInfo : MonoBehaviour
 
     #region HuD and interactivity functions
 
-    public void togglePentVisibility()
+    public void setPentVisibility(bool hi)
     {
-        GetComponent<MeshRenderer>().enabled = !GetComponent<MeshRenderer>().enabled;
-        GetComponent<MeshCollider>().enabled = GetComponent<MeshRenderer>().enabled;
+        GetComponent<MeshRenderer>().enabled = hi;
+        GetComponent<MeshCollider>().enabled = hi;
     }
 
     public void setPentScale(float newScale)
@@ -141,7 +140,7 @@ public class PentInfo : MonoBehaviour
 
     public void setFavs(float newFavs)
     {
-        favs = newFavs;
+            favs = newFavs;
     }
 
     void OnTriggerEnter(Collider col)
@@ -279,9 +278,6 @@ public class PentInfo : MonoBehaviour
                 hexs.Remove(hex);
                 Destroy(hex);
             }
-
-            if (hexs.Count > 4500)
-                CreateHexs = false;
         }
         #endregion
 
@@ -296,6 +292,7 @@ public class PentInfo : MonoBehaviour
             Destroy(itemsToDestroy[j]);
         }
         itemsToDestroy.Clear();
+        setPentVisibility(false);
         Invoke("CreateIsland", 0.1f);
 
         #region combine mesh

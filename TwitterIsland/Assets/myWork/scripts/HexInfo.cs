@@ -295,7 +295,7 @@ public class HexInfo : MonoBehaviour
         //Sprinkle some now on top :)
         for (int i = 0; i < 7; i++)
         {
-            if (Vertices[i].y > 6f)
+            if (Vertices[i].y > 10f)
                 moveVert(i, -99, Color.white);
         }
     }
