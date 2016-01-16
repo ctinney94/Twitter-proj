@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -22,9 +21,11 @@ public class HexInfo : MonoBehaviour
     public Color dirt = new Color(0.96f, 0.64f, 0.38f);
     public GameObject camp;
 
-    public GameObject[] pals = { null, null, null, null, null, null };    
-    
-    void OnMouseDown()
+    public GameObject[] pals = { null, null, null, null, null, null };
+
+
+    //Commenting out for mobile verison
+    /*void OnMouseDown()
     {
         Color centreColour = getColors()[6];
 
@@ -48,7 +49,7 @@ public class HexInfo : MonoBehaviour
             GameObject poof = Instantiate(Resources.Load("snowPoof") as GameObject);
             poof.transform.position = transform.position + getVerts()[6];
         }
-    }
+    }*/
 
     public Vector3[] getVerts()
     {

@@ -106,6 +106,7 @@ public class gullMaker : MonoBehaviour {
 
         //Grab the camera, disable iesland menu canvas, enable a new one
         Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
+        //Camera.main.GetComponent<mobileControls>().enabled = false;
 
         int randomGull = Random.Range(0, gulls.Length);
         if (gulls.Length > 1)
