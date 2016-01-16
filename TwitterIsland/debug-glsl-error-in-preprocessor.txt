@@ -1,0 +1,34 @@
+#line 223 ""
+#ifdef DUMMY_PREPROCESSOR_TO_WORK_AROUND_HLSL_COMPILER_LINE_HANDLING
+#endif
+
+#include "HLSLSupport.cginc"
+#include "UnityShaderVariables.cginc"
+#line 46
+
+		#define UNITY_SETUP_BRDF_INPUT MetallicSetup
+	#line 223 ""
+#ifdef DUMMY_PREPROCESSOR_TO_WORK_AROUND_HLSL_COMPILER_LINE_HANDLING
+#endif
+
+			// #pragma target 2.0
+			
+			// #pragma shader_feature _NORMALMAP
+			// #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+			// #pragma shader_feature _EMISSION 
+			// #pragma shader_feature _METALLICGLOSSMAP 
+			// #pragma shader_feature ___ _DETAIL_MULX2
+			// SM2.0: NOT SUPPORTED shader_feature _PARALLAXMAP
+
+			// #pragma skip_variants SHADOWS_SOFT DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
+
+			// #pragma multi_compile_fwdbase
+			// #pragma multi_compile_fog
+	
+			// #pragma vertex vertForwardBase_VC
+			// #pragma fragment fragForwardBase_VC
+
+			#include "UnityStandardCore.cginc"
+            #include "UnityVC.cginc"
+
+			
