@@ -13,18 +13,21 @@ public class PentInfo : MonoBehaviour
     public GameObject InputBit;
     public Material PentMat, HexMat, wireframeMat;
 
-    public float meshScale = .1f, hexScale = 0.2f;
-    public float favs=1;
-    public float floorLevel;
+    public float meshScale = .1f,
+        hexScale = 0.2f,
+    favs = 1,
+   floorLevel;
 
     public int dirtFailures;
     GameObject flag;
-    List<GameObject> itemsToDestroy = new List<GameObject>();
 
     bool CreateHexs = true;
     List<GameObject> hexs = new List<GameObject>();
+    List<GameObject> itemsToDestroy = new List<GameObject>();
 
     float h = 0, w = 0;
+    int finishedIslands=0;
+
     #region Initialization
     void Start()
 	{
@@ -233,7 +236,6 @@ public class PentInfo : MonoBehaviour
         {
             //Make a hex
             GameObject hex = new GameObject("hex " + h + "," + w);
-            //hex.hideFlags = HideFlags.HideInHierarchy;
             HexInfo hexinf = hex.AddComponent<HexInfo>();
             hexinf.mat = HexMat;
             hexinf.MeshSetup(hexScale);
@@ -294,44 +296,6 @@ public class PentInfo : MonoBehaviour
         itemsToDestroy.Clear();
         setPentVisibility(false);
         Invoke("CreateIsland", 0.1f);
-
-        #region combine mesh
-
-        //Delete rigidbody
-        /*for (int i = 0; i < hexs.Count; i++)
-        {
-            if (hexs[i] != null)
-                Destroy(hexs[i].GetComponent<HexInfo>().rig);
-        }
-
-        CombineInstance[] combine = new CombineInstance[hexs.Count];
-
-        for (int i = 0; i < hexs.Count; i++)
-        {
-
-            if (hexs[i] != null)
-            {
-                combine[i].mesh = hexs[i].GetComponent<MeshFilter>().sharedMesh;
-                combine[i].transform = hexs[i].GetComponent<MeshFilter>().transform.localToWorldMatrix;
-            }
-        }
-        if (hexs.Count > 1)
-        {
-            hexs[0].GetComponent<MeshFilter>().mesh = new Mesh();
-            hexs[0].GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-            hexs[0].transform.position = Vector3.zero;
-            for (int i = 1; i < hexs.Count; i++)
-            {
-                Destroy(hexs[i]);
-            }
-
-
-            DestroyImmediate(hexs[0].GetComponent<MeshCollider>());
-            MeshCollider meshCollider = hexs[0].AddComponent<MeshCollider>();
-            meshCollider.sharedMesh = hexs[0].GetComponent<MeshFilter>().mesh;
-        }*/
-        #endregion
-
     }
 
     [HideInInspector]
@@ -567,6 +531,65 @@ public class PentInfo : MonoBehaviour
             }
         }
     }
-    
+
+    Vector3 lastIsland=Vector3.zero;
+
+    public void mergeIsland()
+    {
+        
+        #region combine mesh
+
+        //Delete rigidbody
+        /*for (int i = 0; i < hexs.Count; i++)
+        {
+            if (hexs[i] != null)
+                Destroy(hexs[i].GetComponent<HexInfo>().rig);
+        }*/
+
+        CombineInstance[] combine = new CombineInstance[hexs.Count];
+
+        for (int i = 0; i < hexs.Count; i++)
+        {
+
+            if (hexs[i] != null)
+            {
+                combine[i].mesh = hexs[i].GetComponent<MeshFilter>().sharedMesh;
+                combine[i].transform = hexs[i].GetComponent<MeshFilter>().transform.localToWorldMatrix;
+            }
+        }
+        if (hexs.Count > 1)
+        {
+            hexs[0].GetComponent<MeshFilter>().mesh = new Mesh();
+            hexs[0].GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+            hexs[0].transform.position = Vector3.zero;
+            for (int i = 1; i < hexs.Count; i++)
+            {
+                Destroy(hexs[i]);
+            }
+
+            DestroyImmediate(hexs[0].GetComponent<MeshCollider>());
+            MeshCollider meshCollider = hexs[0].AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = hexs[0].GetComponent<MeshFilter>().mesh;
+            finishedIslands++;
+            hexs[0].name = "Finished Island " + finishedIslands;
+
+            if (flag != null)
+                flag.transform.parent = hexs[0].transform;
+
+            flag = null;
+            hexs[0].GetComponent<MeshCollider>().sharedMesh.RecalculateBounds();
+            var x = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds.size.x;
+            var z = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds.size.z;
+            hexs[0].transform.position = new Vector3(x*1.5f + lastIsland.x, 0, Random.Range(-z, z));
+            
+            //store position of last island so we can make the new one correctly
+            lastIsland = hexs[0].transform.position;
+            Camera.main.GetComponent<cameraOrbitControls>().islands.Add(hexs[0]);
+            hexs.Clear();
+        }
+        #endregion
+        //Move island by ~300 x for z
+    }
+
     #endregion
 }

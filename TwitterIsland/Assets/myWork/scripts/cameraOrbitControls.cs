@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 //SOURCE:
 //http://wiki.unity3d.com/index.php?title=MouseOrbitZoom
@@ -8,6 +9,9 @@ using System.Collections;
 [AddComponentMenu("Camera-Control/3dsMax Camera Style")]
 public class cameraOrbitControls : MonoBehaviour
 {
+    public List<GameObject> islands = new List<GameObject>();
+    int current=0;
+
     public Transform target;
     public Vector3 targetOffset;
     public float distance = 5.0f;
@@ -32,6 +36,42 @@ public class cameraOrbitControls : MonoBehaviour
 
     void Start() { Init(); }
     void OnEnable() { Init(); }
+
+    public void changeTarget(int direction)
+    {
+        if (target == null)//0
+        {
+            if (direction > 0 && islands[0] != null)
+            {
+                target = islands[0].transform;
+                current = 1;
+            }
+        }
+        else if (islands.Count > 1)
+        {
+            if (current != islands.Count && direction > 0)//If we're not at island limit and want to go right
+            {
+                target = islands[current].transform;
+                current += direction;
+            }
+            else if (direction < 0)
+            {
+                if (current == 1)
+                {
+                    current = 0;
+                    GameObject go = new GameObject("Cam Target");
+                    go.transform.position = Vector3.zero;
+                    target = go.transform;
+                }
+                else
+                {
+                    current += direction;
+                    target = islands[current-1].transform;
+                }
+            }
+        }
+        Debug.Log(current);
+    }
 
     public void Init()
     {
