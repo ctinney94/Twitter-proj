@@ -9,7 +9,7 @@ public class FPSmovement : MonoBehaviour {
 
     public float mouseSensitivity = 4;
     public float moveSpeed = 0.1f;
-    public GameObject cameraObject, mainCam;
+    public GameObject cameraObject, mainCam, IslslandHuD;
     public bool allowJetpack;
 
     // Use this for initialization
@@ -19,7 +19,16 @@ public class FPSmovement : MonoBehaviour {
     }
     public void enter()
     {
-        transform.position = GameObject.Find("flagpole(Clone)").transform.position + new Vector3(0,1,0);
+        int currentFlag = mainCam.GetComponent<cameraOrbitControls>().currentIsland;
+        IslslandHuD.SetActive(false);
+        mainCam.SetActive(false);
+        cameraObject.SetActive(true);
+        if (currentFlag != 0)
+            transform.position = GameObject.Find("flagpole " + currentFlag).transform.position + new Vector3(0, 1, 0);
+        else
+            transform.position = GameObject.Find("flagpole(Clone)").transform.position + new Vector3(0, 1, 0);
+
+
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
     }
@@ -28,11 +37,11 @@ public class FPSmovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update()
-    { 
+    {
         float rotX = CrossPlatformInputManager.GetAxis("Mouse X") * mouseSensitivity;
         float rotY = CrossPlatformInputManager.GetAxis("Mouse Y") * mouseSensitivity;
 
-        float posX=0, posZ=0;
+        float posX = 0, posZ = 0;
 
         #region movement
 
@@ -57,9 +66,9 @@ public class FPSmovement : MonoBehaviour {
         // gameObject.transform.Translate(posX*moveSpeed, 0, posZ*moveSpeed);
         gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
         cameraObject.transform.rotation *= Quaternion.Euler(-rotY, 0f, 0f);
-            #endregion
+        #endregion
 
-            #region jetpack
+        #region jetpack
         if (Input.GetKey(KeyCode.Space))
         {
             //if (gameObject.GetComponent<Rigidbody>().velocity.y < 0.01)            
@@ -75,19 +84,17 @@ public class FPSmovement : MonoBehaviour {
             gameObject.GetComponent<Rigidbody>().useGravity = true;
         #endregion
         
-        #region mouse things
         if (Input.GetKey(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            IslslandHuD.SetActive(true);
             mainCam.SetActive(true);
             gameObject.SetActive(false);
         }
 
         if (Cursor.lockState == CursorLockMode.Locked)
             Cursor.visible = false;
-        
-        #endregion
     }
 
     void FixedUpdate()

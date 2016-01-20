@@ -79,7 +79,7 @@ struct v2f {
 		float3 viewDir : TEXCOORD2;
 	#endif
 	
-	UNITY_FOG_COORDS(4)
+//	UNITY_FOG_COORDS(4)
 };
 
 v2f vert(appdata v)
@@ -106,7 +106,7 @@ v2f vert(appdata v)
 	o.ref = ComputeScreenPos(o.pos);
 	#endif
 
-	UNITY_TRANSFER_FOG(o,o.pos);
+//	UNITY_TRANSFER_FOG(o,o.pos);
 	return o;
 }
 
@@ -183,7 +183,7 @@ half4 frag( v2f i ) : SV_Target
 	color.rgb += foamGradient * intensityFactor * foamColor;
 	#endif
 	
-	UNITY_APPLY_FOG(i.fogCoord, color);
+//	UNITY_APPLY_FOG(i.fogCoord, color);
 	return color;
 }
 ENDCG

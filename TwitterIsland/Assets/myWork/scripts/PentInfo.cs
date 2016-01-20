@@ -532,7 +532,7 @@ public class PentInfo : MonoBehaviour
         }
     }
 
-    Vector3 lastIsland=Vector3.zero;
+    GameObject lastIsland;
 
     public void mergeIsland()
     {
@@ -578,17 +578,25 @@ public class PentInfo : MonoBehaviour
 
             flag = null;
             hexs[0].GetComponent<MeshCollider>().sharedMesh.RecalculateBounds();
-            var x = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds.size.x;
-            var z = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds.size.z;
-            hexs[0].transform.position = new Vector3(x*1.5f + lastIsland.x, 0, Random.Range(-z, z));
-            
+            var newBounds = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds;
+
+            //lastPos.x + Oldbounds/2 + newbounds/2
+            if (lastIsland != null)
+            {
+                var oldBounds = lastIsland.GetComponent<MeshCollider>().sharedMesh.bounds;
+                hexs[0].transform.position = new Vector3(lastIsland.transform.position.x + oldBounds.size.x + newBounds.size.x, 0, Random.Range(-newBounds.size.z, newBounds.size.z));
+            }
+            else
+                hexs[0].transform.position = new Vector3(150 + (newBounds.size.x / 2), 0, Random.Range(-newBounds.size.z, newBounds.size.z));
             //store position of last island so we can make the new one correctly
-            lastIsland = hexs[0].transform.position;
+            lastIsland = hexs[0];
             Camera.main.GetComponent<cameraOrbitControls>().islands.Add(hexs[0]);
             hexs.Clear();
         }
         #endregion
-        //Move island by ~300 x for z
+
+        GameObject.Find("flagpole(Clone)").name = "flagpole " + finishedIslands;
+
     }
 
     #endregion

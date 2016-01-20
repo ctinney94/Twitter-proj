@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class cameraOrbitControls : MonoBehaviour
 {
     public List<GameObject> islands = new List<GameObject>();
-    int current=0;
+    public int currentIsland=0;
 
     public Transform target;
     public Vector3 targetOffset;
@@ -36,41 +36,33 @@ public class cameraOrbitControls : MonoBehaviour
 
     void Start() { Init(); }
     void OnEnable() { Init(); }
+    
+    Vector3 newTarget;
 
     public void changeTarget(int direction)
     {
-        if (target == null)//0
+        if (direction > 0)
         {
-            if (direction > 0 && islands[0] != null)
+            if (currentIsland != islands.Count)
             {
-                target = islands[0].transform;
-                current = 1;
+                newTarget = islands[currentIsland].transform.position;
+                currentIsland += direction;
             }
         }
-        else if (islands.Count > 1)
+        else
         {
-            if (current != islands.Count && direction > 0)//If we're not at island limit and want to go right
+            if (currentIsland >1)
             {
-                target = islands[current].transform;
-                current += direction;
+                currentIsland += direction;
+                newTarget = islands[currentIsland-1].transform.position;
             }
-            else if (direction < 0)
+            else
             {
-                if (current == 1)
-                {
-                    current = 0;
-                    GameObject go = new GameObject("Cam Target");
-                    go.transform.position = Vector3.zero;
-                    target = go.transform;
-                }
-                else
-                {
-                    current += direction;
-                    target = islands[current-1].transform;
-                }
+                currentIsland = 0;
+                newTarget = Vector3.zero;
             }
         }
-        Debug.Log(current);
+        Debug.Log(currentIsland);
     }
 
     public void Init()
@@ -102,6 +94,11 @@ public class cameraOrbitControls : MonoBehaviour
      */
     void LateUpdate()
     {
+        //Lerp target
+        target.position = Vector3.Slerp(target.position, newTarget, Time.deltaTime*5);
+        if (target.position == newTarget)
+            target.position = newTarget;
+
         // If Control and Alt and Middle button? ZOOM!
         if (Input.GetMouseButton(1)&&Input.GetKey(KeyCode.LeftControl))
         {
