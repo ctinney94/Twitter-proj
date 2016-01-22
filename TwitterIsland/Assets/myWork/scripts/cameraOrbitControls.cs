@@ -37,7 +37,7 @@ public class cameraOrbitControls : MonoBehaviour
     void Start() { Init(); }
     void OnEnable() { Init(); }
     
-    Vector3 newTarget;
+    public Vector3 newTarget;
 
     public void changeTarget(int direction)
     {
@@ -62,7 +62,6 @@ public class cameraOrbitControls : MonoBehaviour
                 newTarget = Vector3.zero;
             }
         }
-        Debug.Log(currentIsland);
     }
 
     public void Init()

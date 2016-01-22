@@ -18,17 +18,14 @@ public class HexInfo : MonoBehaviour
     Color sand = Color.Lerp(Color.yellow, Color.white,0.2f);
     Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
     Color rock = Color.gray;
-    public Color dirt = new Color(0.96f, 0.64f, 0.38f);
+    Color dirt = new Color(0.96f, 0.64f, 0.38f);
     public GameObject camp;
 
     public GameObject[] pals = { null, null, null, null, null, null };
 
-
-    //Commenting out for mobile verison
-    /*void OnMouseDown()
+    void OnMouseDown()
     {
         Color centreColour = getColors()[6];
-
         if (centreColour == Color.Lerp(Color.black, grass, 0.8f) || centreColour == grass)
         {
             GameObject poof = Instantiate(Resources.Load("forestPoof") as GameObject);
@@ -49,7 +46,7 @@ public class HexInfo : MonoBehaviour
             GameObject poof = Instantiate(Resources.Load("snowPoof") as GameObject);
             poof.transform.position = transform.position + getVerts()[6];
         }
-    }*/
+    }
 
     public Vector3[] getVerts()
     {
@@ -150,7 +147,6 @@ public class HexInfo : MonoBehaviour
     
     public int[] dirWeightings = { 0, 0, 0, 0, 0, 0 };
     public float avg, most, least;
-    int total;
     public void hexWeighter(int totalHexs)
     {
         for (int i = 0; i < pals.Length; i++)
@@ -189,7 +185,6 @@ public class HexInfo : MonoBehaviour
             if (dirWeightings[i] < least)
                 least = dirWeightings[i];
         }
-        total = totalHexs;
     }
 
     public void addHeight(float maxLeast, float heightScale, int numOfHexs)

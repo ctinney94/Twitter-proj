@@ -15,9 +15,7 @@ public class gull : MonoBehaviour {
 	void Update () {
         float x = 0;
         float y = 0;
-
-        Vector2 direction = Vector2.zero;
-
+        
         x = radius * Mathf.Cos(angle+(Mathf.Deg2Rad*offset));
         y = radius * Mathf.Sin(angle+ (Mathf.Deg2Rad * offset));
         

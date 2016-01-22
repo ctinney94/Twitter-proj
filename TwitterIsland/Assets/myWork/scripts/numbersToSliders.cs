@@ -43,15 +43,6 @@ public class numbersToSliders : MonoBehaviour
             if (num >= rankings[i])
                 rank++;
         }
-
-        var rem = num % 1;
-
-
-        //num - raknings[rank-1]  = leftover amount
-
-        //this is the amount to the next level
-        //(1 / above ) * leftover amount
-
         return rank +((num - rankings[rank - 1]) / (rankings[rank] - rankings[rank - 1]));
     }
 

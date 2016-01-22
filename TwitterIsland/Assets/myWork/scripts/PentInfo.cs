@@ -536,16 +536,8 @@ public class PentInfo : MonoBehaviour
 
     public void mergeIsland()
     {
-        
         #region combine mesh
-
-        //Delete rigidbody
-        /*for (int i = 0; i < hexs.Count; i++)
-        {
-            if (hexs[i] != null)
-                Destroy(hexs[i].GetComponent<HexInfo>().rig);
-        }*/
-
+        
         CombineInstance[] combine = new CombineInstance[hexs.Count];
 
         for (int i = 0; i < hexs.Count; i++)
@@ -572,7 +564,8 @@ public class PentInfo : MonoBehaviour
             meshCollider.sharedMesh = hexs[0].GetComponent<MeshFilter>().mesh;
             finishedIslands++;
             hexs[0].name = "Finished Island " + finishedIslands;
-
+            
+        #endregion
             if (flag != null)
                 flag.transform.parent = hexs[0].transform;
 
@@ -593,10 +586,11 @@ public class PentInfo : MonoBehaviour
             Camera.main.GetComponent<cameraOrbitControls>().islands.Add(hexs[0]);
             hexs.Clear();
         }
-        #endregion
 
         GameObject.Find("flagpole(Clone)").name = "flagpole " + finishedIslands;
-
+        Destroy(lastIsland.GetComponent<HexInfo>());
+        var ilnd = lastIsland.AddComponent<finishedIsland>();
+        ilnd.islandIndex = finishedIslands;
     }
 
     #endregion
