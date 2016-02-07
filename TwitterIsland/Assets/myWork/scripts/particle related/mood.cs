@@ -25,7 +25,7 @@ public class mood : MonoBehaviour {
 	void Update () {
 
         //Also scale
-        var scale = GameObject.Find("PentTest").GetComponent<PentInfo>().meshScale;
+        var scale = GameObject.Find("IslandMaker").GetComponent<IslandMaker>().meshScale;
         transform.localScale = new Vector3(scale / 7, scale / 7, scale / 7);
         if (moodness > 0)
         {

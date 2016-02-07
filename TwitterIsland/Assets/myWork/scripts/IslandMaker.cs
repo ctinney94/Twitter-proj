@@ -3,28 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-//I can't be fucked to fix you right now.
-
-public class PentInfo : MonoBehaviour
+public class IslandMaker : MonoBehaviour
 {
     //basic pentgon mesh making
 	public Vector3[] pentVerts;
 	public Vector2[] uv;
 	public int[] Triangles;
     public Mesh mesh;
-    public GameObject InputBit;
     public Material PentMat, HexMat, wireframeMat;
+    public static Texture2D avatar;
 
-    public float meshScale = .1f,
-        hexScale = 0.2f,
-    favs = 1,
-   floorLevel;
+    public float meshScale = .1f, 
+        hexScale = 0.2f, 
+        favs = 1, 
+        floorLevel;
 
-    public int dirtFailures;
     GameObject flag;
 
     bool CreateHexs = true;
-    List<GameObject> hexs = new List<GameObject>();
+    public List<GameObject> hexs = new List<GameObject>();
     List<GameObject> itemsToDestroy = new List<GameObject>();
 
     float h = 0, w = 0;
@@ -62,6 +59,9 @@ public class PentInfo : MonoBehaviour
 
         int[] triangles =
        {
+            /*1,4,0,
+            1,3,4,
+            1,2,3*/
 
             9,5,4,
             4,5,0,
@@ -134,27 +134,21 @@ public class PentInfo : MonoBehaviour
         GetComponent<MeshRenderer>().enabled = hi;
         GetComponent<MeshCollider>().enabled = hi;
     }
-
-    public void setPentScale(float newScale)
-    {
-        meshScale = newScale;
-    }
-
-    public void setFavs(float newFavs)
-    {
-            favs = newFavs;
-    }
+    
 
     void OnTriggerEnter(Collider col)
     {
         if (col.tag!="Player")
          itemsToDestroy.Remove(col.gameObject);
     }
-    
-    public void UpdatePentMesh()
+
+    string oldText = "test";
+    public void UpdatePentMesh(string inputText)
     {
-        InputField tweetData = InputBit.GetComponent<InputField>();
-        string inputText = tweetData.text;
+        if (inputText == null)
+            inputText = oldText;
+
+        oldText = inputText;
         inputText = inputText.ToLower();
         char[] vowels = { 'a', 'e', 'i', 'o', 'u' };
         int[] vowelCount = new int[] { 1, 1, 1, 1, 1 };
@@ -207,7 +201,7 @@ public class PentInfo : MonoBehaviour
 
     #region islandRelated
 
-    public void updateHexs()
+    public void updateHexs(string text)
     {
         for (int i = 0; i < hexs.Count; i++)
         {
@@ -218,9 +212,8 @@ public class PentInfo : MonoBehaviour
         h = 0;
         w = 0;
 
-        UpdatePentMesh();
+        UpdatePentMesh(text);
         Destroy(flag);
-        dirtFailures = 0;
         LargestLowestValue = 0;
         SpawnHexNEW();
     }
@@ -374,6 +367,8 @@ public class PentInfo : MonoBehaviour
 
         flag = Instantiate(Resources.Load("flagpole")) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
+        //flag.GetComponent<Renderer>().material.mainTexture = avatar;
+        flag.GetComponent<MeshRenderer>().material.SetTexture("_Main", avatar);
     }
 
     public void CreateIsland()
@@ -445,6 +440,7 @@ public class PentInfo : MonoBehaviour
 
         flag = Instantiate(Resources.Load("flagpole")) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
+        flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
     }
     
     public void detectHexEdges()
@@ -598,7 +594,7 @@ public class PentInfo : MonoBehaviour
 
                             randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp2, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
                             randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
-                            //randomHex.dirtPath(startingHex, LargestLowestValue, 1,this);
+                            randomHex.dirtPath(startingHex, LargestLowestValue, 1,this);
                             dirtAdded = true;
                         }
                     }
@@ -609,7 +605,9 @@ public class PentInfo : MonoBehaviour
 
     GameObject lastIsland;
 
-    public void mergeIsland()
+    public List<GameObject> camps = new List<GameObject>();
+    
+    public void mergeIsland(GameObject gulls)
     {
         #region combine mesh
         
@@ -647,7 +645,12 @@ public class PentInfo : MonoBehaviour
             flag = null;
             hexs[0].GetComponent<MeshCollider>().sharedMesh.RecalculateBounds();
             var newBounds = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds;
+            
+            for (int i = 0; i < camps.Count; i++)
+                camps[i].transform.parent = hexs[0].transform;
 
+            gulls.transform.parent = hexs[0].transform;
+            gulls.GetComponent<gullMaker>().UpdateRadius(meshScale);
             //lastPos.x + Oldbounds/2 + newbounds/2
             if (lastIsland != null)
             {
@@ -661,11 +664,16 @@ public class PentInfo : MonoBehaviour
             Camera.main.GetComponent<cameraOrbitControls>().islands.Add(hexs[0]);
             hexs.Clear();
         }
-
+        
+        for (int i = 0; i < camps.Count; i++)
+            camps[i].transform.parent = lastIsland.transform;
+        gulls.transform.parent = lastIsland.transform;
         GameObject.Find("flagpole(Clone)").name = "flagpole " + finishedIslands;
         Destroy(lastIsland.GetComponent<HexInfo>());
         var ilnd = lastIsland.AddComponent<finishedIsland>();
         ilnd.islandIndex = finishedIslands;
+
+        camps.Clear();
     }
 
     #endregion

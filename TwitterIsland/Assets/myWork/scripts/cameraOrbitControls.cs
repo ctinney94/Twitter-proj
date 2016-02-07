@@ -10,20 +10,20 @@ using System.Collections.Generic;
 public class cameraOrbitControls : MonoBehaviour
 {
     public List<GameObject> islands = new List<GameObject>();
-    public int currentIsland=0;
+    public int currentIsland = 0;
 
     public Transform target;
     public Vector3 targetOffset;
-    public float distance = 5.0f;
-    public float maxDistance = 20;
-    public float minDistance = .6f;
-    public float xSpeed = 200.0f;
-    public float ySpeed = 200.0f;
-    public int yMinLimit = -80;
-    public int yMaxLimit = 80;
-    public int zoomRate = 40;
-    public float panSpeed = 0.3f;
-    public float zoomDampening = 5.0f;
+    public float distance = 0;
+    float maxDistance = 150;
+    float minDistance = 0.6f;
+    float xSpeed = 120f;
+    float ySpeed = 120;
+    int yMinLimit = 5;
+    int yMaxLimit = 80;
+    int zoomRate = 100;
+    float panSpeed = 0.5f;
+    float zoomDampening = 5.0f;
 
     private float xDeg = 0.0f;
     private float yDeg = 0.0f;
@@ -94,12 +94,12 @@ public class cameraOrbitControls : MonoBehaviour
     void LateUpdate()
     {
         //Lerp target
-        target.position = Vector3.Slerp(target.position, newTarget, Time.deltaTime*5);
+        target.position = Vector3.Lerp(target.position, newTarget, Time.deltaTime*5);
         if (target.position == newTarget)
             target.position = newTarget;
 
         // If Control and Alt and Middle button? ZOOM!
-        if (Input.GetMouseButton(1)&&Input.GetKey(KeyCode.LeftControl))
+        if (Input.GetMouseButton(1))
         {
             desiredDistance -= Input.GetAxis("Mouse Y") * Time.deltaTime * zoomRate * 0.25f * Mathf.Abs(desiredDistance);
         }
@@ -145,6 +145,23 @@ public class cameraOrbitControls : MonoBehaviour
         // calculate position based on the new currentDistance 
         position = target.position - (rotation * Vector3.forward * currentDistance + targetOffset);
         transform.position = position;
+
+        /*if (Input.GetKey(KeyCode.W))
+        {
+            target.Translate(Vector3.up * Time.deltaTime);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            target.Translate(Vector3.left * Time.deltaTime);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            target.Translate(Vector3.down * Time.deltaTime);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            target.Translate(Vector3.right * Time.deltaTime);
+        }*/
     }
 
     private static float ClampAngle(float angle, float min, float max)

@@ -15,7 +15,7 @@ public class FPSmovement : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        Cursor.visible = false;
+        //Cursor.visible = false;
     }
     public void enter()
     {
@@ -34,12 +34,26 @@ public class FPSmovement : MonoBehaviour {
     }
 
     Vector3 velocity;
-
+    bool mouse=true;
     // Update is called once per frame
     void Update()
     {
-        float rotX = CrossPlatformInputManager.GetAxis("Mouse X") * mouseSensitivity;
-        float rotY = CrossPlatformInputManager.GetAxis("Mouse Y") * mouseSensitivity;
+        if (mouse)
+        {
+            float rotX = CrossPlatformInputManager.GetAxis("Mouse X") * mouseSensitivity;
+            float rotY = CrossPlatformInputManager.GetAxis("Mouse Y") * mouseSensitivity;
+            gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
+            cameraObject.transform.rotation *= Quaternion.Euler(-rotY, 0f, 0f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+            mouse = !mouse;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            moveSpeed *= 3;
+
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+            moveSpeed /= 3;
 
         float posX = 0, posZ = 0;
 
@@ -63,9 +77,6 @@ public class FPSmovement : MonoBehaviour {
         }
 
         velocity = new Vector3(posX * moveSpeed, 0, posZ * moveSpeed);
-        // gameObject.transform.Translate(posX*moveSpeed, 0, posZ*moveSpeed);
-        gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
-        cameraObject.transform.rotation *= Quaternion.Euler(-rotY, 0f, 0f);
         #endregion
 
         #region jetpack

@@ -1,8 +1,5 @@
-
+using UnityEngine;
 using System;
-using System.IO;
-using System.Net;
-using System.Xml;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
@@ -11,10 +8,9 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 
-using UnityEngine;
-
 namespace Twitter
 {
+
     public class RequestTokenResponse
     {
         public string Token { get; set; }
@@ -32,10 +28,10 @@ namespace Twitter
     public delegate void RequestTokenCallback(bool success, RequestTokenResponse response);
     public delegate void AccessTokenCallback(bool success, AccessTokenResponse response);
     public delegate void PostTweetCallback(bool success);
+    public delegate void GetAvatarCallback(bool success);
 
     public class API
     {
-
         #region OAuth Token Methods
         // 1. Get Request-Token From Twitter
         // 2. Get PIN from User
@@ -50,6 +46,7 @@ namespace Twitter
 
         public static IEnumerator GetRequestToken(string consumerKey, string consumerSecret, RequestTokenCallback callback)
         {
+            
             WWW web = WWWRequestToken(consumerKey, consumerSecret);
 
             yield return web;
@@ -134,7 +131,8 @@ namespace Twitter
             AddDefaultOAuthParams(parameters, consumerKey, consumerSecret);
             parameters.Add("oauth_callback", "oob");
 
-			var headers = new Dictionary<string, string>();
+            //var headers = new Hashtable();
+            var headers = new Dictionary<string, string>();
             headers["Authorization"] = GetFinalOAuthHeader("POST", RequestTokenURL, parameters);
 
             return new WWW(RequestTokenURL, form.data, headers);
@@ -146,15 +144,15 @@ namespace Twitter
             byte[] dummmy = new byte[1];
             dummmy[0] = 0;
 
-			// HTTP header
-			var headers = new Dictionary<string, string>();
+            // HTTP header
+            var headers = new Dictionary<string,string>();
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             AddDefaultOAuthParams(parameters, consumerKey, consumerSecret);
             parameters.Add("oauth_token", requestToken);
             parameters.Add("oauth_verifier", pin);
 
             headers["Authorization"] = GetFinalOAuthHeader("POST", AccessTokenURL, parameters);
-
+            
             return new WWW(AccessTokenURL, dummmy, headers);
         }
 
@@ -167,23 +165,27 @@ namespace Twitter
 
             return GetFinalOAuthHeader(httpRequestType, apiURL, parameters);
         }
-
         #endregion
 
         #region Twitter API Methods
 
         private const string PostTweetURL = "https://api.twitter.com/1.1/statuses/update.json";
 
+        //GET statuses/user_timeline
+        private const string GetTweetsURL = "https://api.twitter.com/1.1/statuses/user_timeline.json";
+
+        //GET users/show
+        public const string GetAccountURL = "https://api.twitter.com/1.1/users/show.json";
+
+
         public static IEnumerator PostTweet(string text, string consumerKey, string consumerSecret, AccessTokenResponse response, PostTweetCallback callback)
         {
-            //Is tweet within allowed bounds?
             if (string.IsNullOrEmpty(text) || text.Length > 140)
             {
                 Debug.Log(string.Format("PostTweet - text[{0}] is empty or too long.", text));
 
                 callback(false);
             }
-            //Time to post a tweet
             else
             {
                 Dictionary<string, string> parameters = new Dictionary<string, string>();
@@ -192,19 +194,18 @@ namespace Twitter
                 // Add data to the form to post.
                 WWWForm form = new WWWForm();
                 form.AddField("status", text);
-
                 // HTTP header
-                var headers = new Dictionary<string, string>();
+                var headers = new Dictionary<string,string>();
                 headers["Authorization"] = GetHeaderWithAccessToken("POST", PostTweetURL, consumerKey, consumerSecret, response, parameters);
 
-                //Time to do an internet!
                 WWW web = new WWW(PostTweetURL, form.data, headers);
-                yield return web;//Wait until the line above has gone through
+               
+                yield return web;
 
                 if (!string.IsNullOrEmpty(web.error))
                 {
-                    Debug.Log(string.Format("PostTweet - failed. {0}\n{1}", web.error, web.text));
-                    callback(false);
+					Debug.Log(string.Format("PostTweet - failed. {0}\n{1}", web.error, web.text));
+					callback(false);
                 }
                 else
                 {
@@ -222,67 +223,150 @@ namespace Twitter
                 }
             }
         }
-            /*public static IEnumerator GetTimeline(string text, string consumerKey, string consumerSecret, AccessTokenResponse response, PostTweetCallback callback)
+        
+        public static string GetTwitterAccessToken(string consumerKey, string consumerSecret)
         {
-            #region stupid shit
-            var oAuthConsumerKey = "superSecretKey";
-            var oAuthConsumerSecret = "superSecretSecret";
-            var oAuthUrl = "https://api.twitter.com/oauth2/token";
-            var screenname = "aScreenName";
+            string URL_ENCODED_KEY_AND_SECRET = Convert.ToBase64String(Encoding.UTF8.GetBytes(consumerKey + ":"+consumerSecret));
 
-            // Do the Authenticate
-            var authHeaderFormat = "Basic {0}";
+            byte[] body;
+            body = Encoding.UTF8.GetBytes("grant_type=client_credentials");
+            
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["Authorization"] = "Basic " + URL_ENCODED_KEY_AND_SECRET;
 
-            var authHeader = string.Format(authHeaderFormat,
-                Convert.ToBase64String(Encoding.UTF8.GetBytes(Uri.EscapeDataString(oAuthConsumerKey) + ":" +
-                Uri.EscapeDataString((oAuthConsumerSecret)))
-            ));
+            WWW web = new WWW("https://api.twitter.com/oauth2/token", body, headers);
 
-            var postBody = "grant_type=client_credentials";
-
-            HttpWebRequest authRequest = (HttpWebRequest)WebRequest.Create(oAuthUrl);
-            authRequest.Headers.Add("Authorization", authHeader);
-            authRequest.Method = "POST";
-            authRequest.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-            authRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
-            using (Stream stream = authRequest.GetRequestStream())
+            while(!web.isDone)
             {
-                byte[] content = ASCIIEncoding.ASCII.GetBytes(postBody);
-                stream.Write(content, 0, content.Length);
+                Debug.Log("Retrieving acess token...");
             }
+            string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
+            output = output.Replace("\"}", "");
 
-            authRequest.Headers.Add("Accept-Encoding", "gzip");
-
-            WebResponse authResponse = authRequest.GetResponse();
-            #endregion 
-
-            // Do the timeline
-            var timelineFormat = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name={0}&include_rts=1&exclude_replies=1&count=50";
-            var timelineUrl = string.Format(timelineFormat, screenname);
-            HttpWebRequest timeLineRequest = (HttpWebRequest)WebRequest.Create(timelineUrl);
-            var timelineHeaderFormat = "{0} {1}";
-            timeLineRequest.Headers.Add("Authorization", string.Format(timelineHeaderFormat, twitAuthResponse.token_type, twitAuthResponse.access_token));
-            timeLineRequest.Method = "Get";
-            WebResponse timeLineResponse = timeLineRequest.GetResponse();
-            var timeLineJson = string.Empty;
-            using (timeLineResponse)
-            {
-                using (var reader = new StreamReader(timeLineResponse.GetResponseStream()))
-                {
-                    timeLineJson = reader.ReadToEnd();
-                }
-            }
-
-
-public class TwitAuthenticateResponse
-        {
-            public string token_type { get; set; }
-            public string access_token { get; set; }
+            return output;
         }
-    }*/
 
+        [System.Serializable]
+        public class Tweet
+        {
+            public string Text;
+            public string ID;
+            public string UserID;
+            public int RTs;
+            public int Favs;
+        }
+
+        public static void GetUserTimeline(string name, string AccessToken, int count, twitterButton caller)
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["Authorization"] = "Bearer " + AccessToken;
+
+            WWW web = new WWW("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=" + name + "&count=" + count + "&trim_user=1" + "&include_rts=0&exclude_replies=true&contributor_details=false", null, headers);
+
+            while (!web.isDone)
+            {
+                Debug.Log("Processing request...");
+            }
+
+            //find user mentions
+            List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
+            //remove if true
+            string extractMe;
+            if (ammendOutputText == null)
+                extractMe = web.text;
+            else
+                extractMe = ammendOutputText;
+
+            List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"source\":");
+            List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
+            List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
+            List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
+            List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
+
+            List<Tweet> tweets = new List<Tweet>();
+
+            for (int i = 0; i < text.Count; i++)
+            {
+                Tweet thisTweet = new Tweet();
+                thisTweet.Text = text[i];
+                thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
+                thisTweet.RTs = int.Parse(RTs[i]);
+                thisTweet.Favs = int.Parse(favs[i]);
+                thisTweet.ID = tweetID[i].Substring(0,tweetID[i].IndexOf(",\"id_str"));
+
+                tweets.Add(thisTweet);
+            }
+            caller.tweets = tweets;
+            ammendOutputText = null;
+        }
+
+        public static void GetProfile(string name, string AccessToken, twitterButton caller)
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["Authorization"] = "Bearer " + AccessToken;
+
+            WWW web = new WWW("https://api.twitter.com/1.1/users/show.json?screen_name=" + name, null, headers);
+
+            while (!web.isDone)
+            {
+                Debug.Log("Processing request...");
+            }
+            
+            List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
+            URL[0]=URL[0].Remove(URL[0].IndexOf("_normal"), 7);
+            caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
+        }
         #endregion
+
+        public static List<string> extractData(string outputText, string start, string end)
+        {
+            List<int> startPos = new List<int>();
+            List<int> stopPos = new List<int>();
+            int i = 0;
+            //Find all the position of all mentions of "text":
+            while ((i=outputText.IndexOf(start,i))!=-1)
+            {
+                startPos.Add(i);
+                i++;
+            }
+
+            i = 0;
+            //Do the same for "source":
+            while ((i = outputText.IndexOf(end, i)) != -1)
+            {
+                stopPos.Add(i);
+                i++;
+            }
+
+            List<string> returnMe = new List<string>();
+
+            //for (int j = 0; j < startPos.Count; j++)
+            for (int j = startPos.Count-1; j>-1;j--)
+            {
+                string output = "";
+                for (int c = startPos[j]; c < stopPos[j]; c++)
+                {
+                    output += outputText[c];
+                }
+                output = output.Replace(start, "");
+                output = output.Replace("\\n", " ");
+                output = output.Replace("\\", "");
+
+                if (output != "[]" && start == ",\"user_mentions\":")
+                {
+                    //Then remove text from original input.
+                    //Remove each section of the string STARTING AT THE END AND WORKING BACK
+                    outputText = outputText.Remove(startPos[j]+1+start.Length, output.Length-1);
+                    output = null;
+                    ammendOutputText = outputText;
+                }
+
+                returnMe.Add(output);
+            }
+            return returnMe;
+        }
+
+        public static string ammendOutputText=null;
 
         #region OAuth Help Methods
         // The below help methods are modified from "WebRequestBuilder.cs" in Twitterizer(http://www.twitterizer.net/).
