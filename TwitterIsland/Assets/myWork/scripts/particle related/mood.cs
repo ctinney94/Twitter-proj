@@ -6,26 +6,25 @@ public class mood : MonoBehaviour {
     [Range(-1,1)]public float moodness = 0;
 
     [Range(0,0.85f)]public float blackness=0;
-    public GameObject cloudObject, rainObject, lightningObject, worldLightObject, fireworksOjbect, rainbowObject; 
+    public GameObject cloudObject, rainObject, lightningObject, fireworksOjbect, rainbowObject; 
     ParticleSystem rain, lightning, cloud, fireworks, rainbow;
     Light lighty;
 
     public float floater;
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         cloud = cloudObject.GetComponent<ParticleSystem>();
         rain = rainObject.GetComponent<ParticleSystem>();
         lightning = lightningObject.GetComponent<ParticleSystem>();
-        lighty = worldLightObject.GetComponent<Light>();
+        lighty = GameObject.Find("WorldLight").GetComponent<Light>();
         fireworks = fireworksOjbect.GetComponent<ParticleSystem>();
         rainbow = rainbowObject.GetComponent<ParticleSystem>();
     }
 	
-	// Update is called once per frame
-	void Update () {
-
+	public void UpdateParticles(float scale)
+    {
         //Also scale
-        var scale = GameObject.Find("IslandMaker").GetComponent<IslandMaker>().meshScale;
+        //var scale = GameObject.Find("IslandMaker").GetComponent<IslandMaker>().meshScale;
         transform.localScale = new Vector3(scale / 7, scale / 7, scale / 7);
         if (moodness > 0)
         {
@@ -59,7 +58,12 @@ public class mood : MonoBehaviour {
 
             Color cloudClour = Color.Lerp(Color.white, Color.black, temp * 0.85f);
             cloud.GetComponent<Renderer>().material.SetColor("_TintColor", cloudClour);
-            lighty.shadowStrength = temp;
+
+            blackness = temp;
+            //Need to think of a new of doing shadows for islands.
+            //Changing the global lighting is a bit silly
+            //Maybe do it for each island?
+            //lighty.shadowStrength = temp;
 
             rain.emissionRate = (10 * (temp - 0.5f)) + (scale * scale * 2 * (temp - 0.5f));
             lightning.emissionRate = scale * (temp - 0.6f);

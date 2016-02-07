@@ -9,6 +9,7 @@ public class gullMaker : MonoBehaviour {
     public int gulls = 0;
     GameObject gull;
     GameObject islandMenus, gullcam;
+    List<GameObject> myGulls = new List<GameObject>();
 
     public AudioClip[] gullNoises;
 
@@ -17,6 +18,7 @@ public class gullMaker : MonoBehaviour {
     {
         islandMenus = GameObject.Find("Island menus");
         gullcam = GameObject.Find("Gullcam");
+        GameObject.Find("Gull cam!").GetComponent<gullCam>().gullCollections.Add(this);
     }
 
     public void reloadGulls(string text)
@@ -75,6 +77,7 @@ public class gullMaker : MonoBehaviour {
             gullNames.Remove(gullNames[theChosenGull]);
             gullyGuy.tag = "gull";
             gullyGuy.transform.parent = gameObject.transform;
+            myGulls.Add(gullyGuy);
         }
     }
 
@@ -100,34 +103,41 @@ public class gullMaker : MonoBehaviour {
 
     public void gullCam()
     {
-        var audio = gullcam.GetComponent<AudioSource>();
-        audio.PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
-        islandMenus.SetActive(false);
-        gullcam.SetActive(true);
-        GameObject[] gulls = GameObject.FindGameObjectsWithTag("gull");
-
-        //Grab the camera, disable iesland menu canvas, enable a new one
-        Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
-        //Camera.main.GetComponent<mobileControls>().enabled = false;
-
-        int randomGull = Random.Range(0, gulls.Length);
-        if (gulls.Length > 1)
+        if (myGulls.Count != 0)
         {
-            while (Camera.main.transform.parent == gulls[randomGull].transform)
-                randomGull = Random.Range(0, gulls.Length);
+
+            var audio = gullcam.GetComponent<AudioSource>();
+            audio.PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
+            islandMenus.SetActive(false);
+            gullcam.SetActive(true);
+
+            //Grab the camera, disable island menu canvas, enable a new one
+            Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
+            //Camera.main.GetComponent<mobileControls>().enabled = false;
+
+            int randomGull = Random.Range(0, myGulls.Count);
+            if (myGulls.Count > 2)
+            {
+                while (Camera.main.transform.parent == myGulls[randomGull].transform)
+                {
+                    randomGull = Random.Range(0, myGulls.Count);
+                }                
+            }
+            Camera.main.transform.parent = myGulls[randomGull].transform;
+
+            Camera.main.transform.localPosition = new Vector3(7.2f, 11.81f, -21);
+            Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
+
+            GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
         }
-        Camera.main.transform.parent = gulls[randomGull].transform;
-
-        Camera.main.transform.localPosition = new Vector3(7.2f, 11.81f, -21);
-        Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
-
-        GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
+        else
+            exitGullCam();
     }
 
     public void exitGullCam()
     {
         islandMenus.SetActive(true);
-        gullcam.SetActive(false);
+        gullcam.GetComponent<Canvas>().enabled=false;
         Camera.main.transform.parent = null;
         Camera.main.GetComponent<cameraOrbitControls>().enabled = true;
     }

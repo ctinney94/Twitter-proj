@@ -8,8 +8,16 @@ public class finishedIsland : MonoBehaviour
     Color sand = Color.Lerp(Color.yellow, Color.white, 0.2f);
     Color rock = Color.gray;
     Color dirt = new Color(0.96f, 0.64f, 0.38f);
+    [Range(0, 0.85f)]
+    public float blackness = 0;
+    Light worldLight;
 
     public int islandIndex;
+
+    void Awake()
+    {
+        worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
+    }
 
     void OnMouseDown()
     {
@@ -17,6 +25,7 @@ public class finishedIsland : MonoBehaviour
         {
             Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
+            worldLight.GetComponent<lighting>().newShadowStrength = blackness;
         }
         //I tried adding the poofs back in as a thing.
         //Turns out looking through every single vertex of a big island is kinda time consuming, and slows the program right down.

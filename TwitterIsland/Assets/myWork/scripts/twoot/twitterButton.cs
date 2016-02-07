@@ -67,7 +67,7 @@ public class twitterButton : MonoBehaviour {
             GameObject gulls = Instantiate(Resources.Load("Gulley!")) as GameObject;
             gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].Text);
 
-            yield return new WaitForSeconds(2.5f);
+            yield return new WaitForSeconds(0.5f);
             IslandMaker.mergeIsland(gulls);
         }
     }

@@ -62,6 +62,7 @@ public class cameraOrbitControls : MonoBehaviour
                 newTarget = Vector3.zero;
             }
         }
+        GameObject.Find("WorldLight").GetComponent<lighting>().newShadowStrength = islands[currentIsland-1].GetComponent<finishedIsland>().blackness;
     }
 
     public void Init()

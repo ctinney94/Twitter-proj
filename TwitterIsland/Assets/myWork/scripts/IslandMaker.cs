@@ -12,6 +12,7 @@ public class IslandMaker : MonoBehaviour
     public Mesh mesh;
     public Material PentMat, HexMat, wireframeMat;
     public static Texture2D avatar;
+    GameObject particles;
 
     public float meshScale = .1f, 
         hexScale = 0.2f, 
@@ -195,7 +196,7 @@ public class IslandMaker : MonoBehaviour
         meshCollider.convex = true;
         meshCollider.isTrigger = true;
         GetComponent<MeshFilter>().mesh = mesh;
-        GameObject.Find("Particle effects").GetComponent<mood>().move(mesh.bounds.center);
+        //GameObject.Find("Particle effects").GetComponent<mood>().move(mesh.bounds.center);
     }
     #endregion
 
@@ -373,6 +374,7 @@ public class IslandMaker : MonoBehaviour
 
     public void CreateIsland()
     {
+        #region all that islands creating shit
         if (hexs[0].GetComponent<HexInfo>().least == 0)
         {
             //Find pals
@@ -414,6 +416,7 @@ public class IslandMaker : MonoBehaviour
         for (int i = 0; i < hexs.Count; i++)
             hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
 
+        #endregion
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;
 
@@ -433,7 +436,6 @@ public class IslandMaker : MonoBehaviour
                 }
             }
         }
-
         //Place flag at top point!
         if (flag != null)
             Destroy(flag);
@@ -441,8 +443,13 @@ public class IslandMaker : MonoBehaviour
         flag = Instantiate(Resources.Load("flagpole")) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
+
+        //now do particle related things
+        particles = Instantiate(Resources.Load("Particle Effects")) as GameObject;
+        particles.GetComponent<mood>().moodness = Random.Range(-1f, 1f);
+        particles.GetComponent<mood>().UpdateParticles(meshScale);
     }
-    
+
     public void detectHexEdges()
     {
         //For each hex, raycast in each direction around them and return the gameobject hit, store as a pal
@@ -649,6 +656,7 @@ public class IslandMaker : MonoBehaviour
             for (int i = 0; i < camps.Count; i++)
                 camps[i].transform.parent = hexs[0].transform;
 
+            particles.transform.parent = hexs[0].transform;
             gulls.transform.parent = hexs[0].transform;
             gulls.GetComponent<gullMaker>().UpdateRadius(meshScale);
             //lastPos.x + Oldbounds/2 + newbounds/2
@@ -668,10 +676,13 @@ public class IslandMaker : MonoBehaviour
         for (int i = 0; i < camps.Count; i++)
             camps[i].transform.parent = lastIsland.transform;
         gulls.transform.parent = lastIsland.transform;
+        particles.transform.parent = lastIsland.transform;
+
         GameObject.Find("flagpole(Clone)").name = "flagpole " + finishedIslands;
         Destroy(lastIsland.GetComponent<HexInfo>());
-        var ilnd = lastIsland.AddComponent<finishedIsland>();
-        ilnd.islandIndex = finishedIslands;
+        var island = lastIsland.AddComponent<finishedIsland>();
+        island.islandIndex = finishedIslands;
+        island.blackness = particles.GetComponent<mood>().blackness;
 
         camps.Clear();
     }
