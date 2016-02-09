@@ -57,9 +57,11 @@ public class twitterButton : MonoBehaviour {
     {
         for (int i = 0; i < tweets.Count; i++)
         {
-            numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
-            nums.RTs(tweets[i].RTs);
-            nums.favs(tweets[i].Favs);
+            numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();         
+            IslandMaker.favs = nums.favs(tweets[i].Favs);
+            IslandMaker.meshScale = nums.RTs(tweets[i].RTs);
+            IslandMaker.UpdatePentMesh(null);
+
             IslandMaker.avatar = avatarImage;
             IslandMaker.updateHexs(tweets[i].Text);
             yield return new WaitForSeconds(.75f);
@@ -68,7 +70,7 @@ public class twitterButton : MonoBehaviour {
             gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].Text);
 
             yield return new WaitForSeconds(0.5f);
-            IslandMaker.mergeIsland(gulls);
+            IslandMaker.mergeIsland(gulls,tweets[i]);
         }
     }
     static Texture2D avatarImage;

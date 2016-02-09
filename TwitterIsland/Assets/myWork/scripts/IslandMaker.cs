@@ -614,7 +614,7 @@ public class IslandMaker : MonoBehaviour
 
     public List<GameObject> camps = new List<GameObject>();
     
-    public void mergeIsland(GameObject gulls)
+    public void mergeIsland(GameObject gulls, Twitter.API.Tweet THETWEET)
     {
         #region combine mesh
         
@@ -681,7 +681,9 @@ public class IslandMaker : MonoBehaviour
         GameObject.Find("flagpole(Clone)").name = "flagpole " + finishedIslands;
         Destroy(lastIsland.GetComponent<HexInfo>());
         var island = lastIsland.AddComponent<finishedIsland>();
+        island.thisTweet = THETWEET;
         island.islandIndex = finishedIslands;
+        island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
 
         camps.Clear();

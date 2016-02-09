@@ -35,7 +35,7 @@ public class numbersToSliders : MonoBehaviour
             4188620,
         };
 
-    float findRank(float num)
+    public float findRank(float num)
     {
         int rank = 0;
         for (int i = 0; i < rankings.Length; i++)
@@ -58,14 +58,12 @@ public class numbersToSliders : MonoBehaviour
         }
     }
 
-    public void RTs(int RTs)
+    public float RTs(int RTs)
     {
         float j = findRank((float)(RTs));
         j /= 25;
         j *= 50;
-        IslandMaker IM = GameObject.Find("IslandMaker").GetComponent<IslandMaker>();
-        IM.meshScale = j;
-        IM.UpdatePentMesh(null);
+        return j;
     }
 
     public void favs(string favs)
@@ -79,14 +77,12 @@ public class numbersToSliders : MonoBehaviour
         }
     }
 
-    public void favs(int favs)
+    public float favs(int favs)
     {
         float j = findRank((float)favs);
         j /= 25;
         j *= 1;
-        IslandMaker IM = GameObject.Find("IslandMaker").GetComponent<IslandMaker>();
-        IM.favs = j;
-
+        return j;
     }
 
     public void scaleToRTs(float scale)

@@ -11,15 +11,88 @@ public class finishedIsland : MonoBehaviour
     [Range(0, 0.85f)]
     public float blackness = 0;
     Light worldLight;
-
+    public Twitter.API.Tweet thisTweet;
     public int islandIndex;
+    GameObject tweetText;
 
-    void Awake()
+    public void WakeUp()
     {
         worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
+        tweetText = new GameObject();
+        tweetText.transform.parent = transform;
+        var meshy = tweetText.AddComponent<TextMesh>();
+        meshy.anchor = TextAnchor.LowerCenter;
+        meshy.alignment = TextAlignment.Center;
+        meshy.transform.position = GameObject.Find("flagpole " + islandIndex).transform.position + new Vector3(0,1,0);
+        meshy.fontSize = 50;
+
+
+        numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
+
+        meshy.characterSize = nums.findRank(thisTweet.RTs) / 20;
+        FormatString(thisTweet.Text, meshy);
     }
 
-    void OnMouseDown()
+    void Update()
+    {
+        if (tweetText != null)
+        {
+            if (Camera.main != null)
+            {
+                tweetText.transform.LookAt(2*tweetText.transform.position - Camera.main.transform.position);
+                var d = tweetText.transform.localRotation.eulerAngles;
+                d.y += 180;
+                //tweetText.transform.localRotation = Quaternion.Euler(d);
+            }
+            else
+            {
+                tweetText.transform.LookAt(2 * tweetText.transform.position - GameObject.Find("Camera").transform.position);
+            }
+        }
+    }
+    
+
+    void FormatString(string text,TextMesh textObject)
+    {
+        int maxLineChars = 35; //maximum number of characters per line...experiment with different values to make it work
+
+        string[] words;
+        var result = "";
+        int charCount = 0;
+        words = text.Split(" "[0]); //Split the string into seperate words
+        result = "";
+
+        for (var index = 0; index < words.Length; index++)
+        {
+
+            var word = words[index].Trim();
+
+            if (index == 0)
+            {
+                result = words[0];
+                textObject.text = result;
+            }
+
+            if (index > 0)
+            {
+                charCount += word.Length + 1; //+1, because we assume, that there will be a space after every word
+                if (charCount <= maxLineChars)
+                {
+                    result += " " + word;
+                }
+                else
+                {
+                    charCount = 0;
+                    result += "\n " + word;
+                }
+
+
+                textObject.text = result;
+            }
+        }
+    }
+
+        void OnMouseDown()
     {
         if (Camera.main != null)
         {
