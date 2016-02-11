@@ -65,7 +65,7 @@ public class twitterButton : MonoBehaviour {
             IslandMaker.avatar = avatarImage;
             IslandMaker.updateHexs(tweets[i].Text);
             yield return new WaitForSeconds(.75f);
-
+            
             GameObject gulls = Instantiate(Resources.Load("Gulley!")) as GameObject;
             gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].Text);
 
@@ -76,6 +76,7 @@ public class twitterButton : MonoBehaviour {
     static Texture2D avatarImage;
     public static IEnumerator setAvatar(string url)
     {
+        url = url.Replace("\\", "");
         WWW web = new WWW(url);
         yield return web;
         avatarImage = web.texture;

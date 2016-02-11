@@ -18,7 +18,7 @@ public class finishedIsland : MonoBehaviour
     public void WakeUp()
     {
         worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
-        tweetText = new GameObject();
+        tweetText = new GameObject("Tweet text");
         tweetText.transform.parent = transform;
         var meshy = tweetText.AddComponent<TextMesh>();
         meshy.anchor = TextAnchor.LowerCenter;
@@ -52,7 +52,7 @@ public class finishedIsland : MonoBehaviour
     }
     
 
-    void FormatString(string text,TextMesh textObject)
+    void FormatString(string text, TextMesh textObject)
     {
         int maxLineChars = 35; //maximum number of characters per line...experiment with different values to make it work
 
@@ -85,11 +85,11 @@ public class finishedIsland : MonoBehaviour
                     charCount = 0;
                     result += "\n " + word;
                 }
-
-
                 textObject.text = result;
             }
         }
+        result = result.Replace("\\n", "\n ");
+        textObject.text = result;
     }
 
         void OnMouseDown()
@@ -99,6 +99,9 @@ public class finishedIsland : MonoBehaviour
             Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
+            Debug.Log((float)thisTweet.dateTime.Hour/24);
+            Debug.Log(thisTweet.dateTime.Hour);
+            worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }
         //I tried adding the poofs back in as a thing.
         //Turns out looking through every single vertex of a big island is kinda time consuming, and slows the program right down.

@@ -247,8 +247,22 @@ namespace Twitter
         }
 
         [System.Serializable]
+        public class tw_DateTime
+        {
+            public string Weekday;
+            public string Month;
+            public int Day;
+            public int Hour;
+            public int Minute;
+            public int Second;
+            public string Offset;
+            public int Year;
+        }
+
+        [System.Serializable]
         public class Tweet
         {
+            public tw_DateTime dateTime;
             public string Text;
             public string ID;
             public string UserID;
@@ -277,6 +291,7 @@ namespace Twitter
             else
                 extractMe = ammendOutputText;
 
+            List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
             List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"source\":");
             List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
             List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
@@ -288,6 +303,51 @@ namespace Twitter
             for (int i = 0; i < text.Count; i++)
             {
                 Tweet thisTweet = new Tweet();
+                #region dateTime formating
+                string temp = "";
+                List<string> boop = new List<string>();
+                Debug.Log(dateTime[i]);
+                for (int k = 0; k < dateTime[i].Length; k++)
+                {
+                    if (dateTime[i][k] != ' ')
+                        temp += dateTime[i][k];
+                    else
+                    {
+                        boop.Add(temp);
+                        temp = "";
+                    }
+
+                    if (k == dateTime[i].Length - 1)
+                        boop.Add(temp);
+                }
+                temp = "";
+                List<string> doop = new List<string>();
+                for (int k = 0; k < boop[3].Length; k++)
+                {
+                    if (boop[3][k] != ':')
+                        temp += boop[3][k];
+                    else
+                    {
+                        doop.Add(temp);
+                        temp = "";
+                    }
+
+                    if (k == boop[3].Length - 1)
+                        doop.Add(temp);
+                }
+
+                tw_DateTime time = new tw_DateTime();
+                time.Weekday = boop[0];
+                time.Month = boop[1];
+                time.Day = int.Parse(boop[2]);
+                time.Hour = int.Parse(doop[0]);
+                time.Minute = int.Parse(doop[1]);
+                time.Second = int.Parse(doop[2]);
+                time.Year = int.Parse(boop[5]);
+                time.Offset = boop[4];
+                #endregion
+
+                thisTweet.dateTime = time;
                 thisTweet.Text = text[i];
                 thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
                 thisTweet.RTs = int.Parse(RTs[i]);
@@ -318,6 +378,31 @@ namespace Twitter
         }
         #endregion
 
+        public static List<string> extractData(string outputText, string start)
+        {
+            List<int> startPos = new List<int>();
+            int i = 0;
+            while ((i = outputText.IndexOf(start, i)) != -1)
+            {
+                startPos.Add(i);
+                i++;
+            }
+            List<string> returnMe = new List<string>();
+            for (int j = startPos.Count - 2; j > -1; j--)
+            {
+                string output = "";
+                for (int c = startPos[j]; c < startPos[j + 1]; c++)
+                {
+                    output += outputText[c];
+                }
+                output = output.Replace(start, "");
+                output = output.Replace("\\n", " ");
+                output = output.Replace("\\", "");
+
+                returnMe.Add(output);
+            }
+            return returnMe;
+        }
         public static List<string> extractData(string outputText, string start, string end)
         {
             List<int> startPos = new List<int>();
@@ -348,15 +433,29 @@ namespace Twitter
                 {
                     output += outputText[c];
                 }
+
                 output = output.Replace(start, "");
-                output = output.Replace("\\n", " ");
-                output = output.Replace("\\", "");
+                output = output.Replace("\ud83c[\udf00-\udfff]", " ! ");
+                output = output.Replace("\\\"", "\"");
+                output = output.Replace("\\/", "/");
+                output = output.Replace("&amp;", "&");
+
+                List<int> fuckyou = new List<int>();
+                i = 0;
+                while ((i = output.IndexOf("\\u", i)) != -1)
+                {
+                    fuckyou.Add(i);
+                    i++;
+                }
+
+                for (int u= fuckyou.Count-1; u >-1 ; u--)
+                    output = output.Remove(fuckyou[u], 6);
 
                 if (output != "[]" && start == ",\"user_mentions\":")
                 {
                     //Then remove text from original input.
                     //Remove each section of the string STARTING AT THE END AND WORKING BACK
-                    outputText = outputText.Remove(startPos[j]+1+start.Length, output.Length-1);
+                    outputText = outputText.Remove(startPos[j] + 1 + start.Length, output.Length - 1);
                     output = null;
                     ammendOutputText = outputText;
                 }
