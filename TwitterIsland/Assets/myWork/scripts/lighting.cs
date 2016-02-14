@@ -17,6 +17,7 @@ public class lighting : MonoBehaviour {
             worldLight.shadowStrength = Mathf.Lerp(worldLight.shadowStrength, newShadowStrength, Time.deltaTime*10);
 
         if (newTimeOfDay != dayNight.currentTimeOfDay)
-            dayNight.currentTimeOfDay = Mathf.Lerp(dayNight.currentTimeOfDay,newTimeOfDay, Time.deltaTime * 2);      
+            dayNight.currentTimeOfDay = Mathf.Lerp(dayNight.currentTimeOfDay,newTimeOfDay, Time.deltaTime * 2);
+        
     }
 }

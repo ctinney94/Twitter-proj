@@ -92,20 +92,20 @@ public class finishedIsland : MonoBehaviour
         textObject.text = result;
     }
 
-        void OnMouseDown()
+    void OnMouseDown()
     {
         if (Camera.main != null)
         {
             Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
-            Debug.Log((float)thisTweet.dateTime.Hour/24);
+            Debug.Log((float)thisTweet.dateTime.Hour / 24);
             Debug.Log(thisTweet.dateTime.Hour);
             worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }
         //I tried adding the poofs back in as a thing.
         //Turns out looking through every single vertex of a big island is kinda time consuming, and slows the program right down.
-        
+
         /*Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Debug.DrawRay(ray.origin, ray.direction, Color.green);
 

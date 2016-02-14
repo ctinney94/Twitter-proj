@@ -59,7 +59,7 @@ public class mood : MonoBehaviour {
             Color cloudClour = Color.Lerp(Color.white, Color.black, temp * 0.85f);
             cloud.GetComponent<Renderer>().material.SetColor("_TintColor", cloudClour);
 
-            blackness = temp;
+            blackness = Mathf.Clamp(temp, 0, .7f);
             //Need to think of a new of doing shadows for islands.
             //Changing the global lighting is a bit silly
             //Maybe do it for each island?
