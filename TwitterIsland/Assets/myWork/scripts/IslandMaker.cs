@@ -444,6 +444,8 @@ public class IslandMaker : MonoBehaviour
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
 
+        dirtPath();
+
         //now do particle related things
         particles = Instantiate(Resources.Load("Particle Effects")) as GameObject;
         particles.GetComponent<mood>().moodness = Random.Range(-1f, 1f);
@@ -659,20 +661,12 @@ public class IslandMaker : MonoBehaviour
             particles.transform.parent = hexs[0].transform;
             gulls.transform.parent = hexs[0].transform;
             gulls.GetComponent<gullMaker>().UpdateRadius(meshScale);
-            //lastPos.x + Oldbounds/2 + newbounds/2
-            if (lastIsland != null)
-            {
-                var oldBounds = lastIsland.GetComponent<MeshCollider>().sharedMesh.bounds;
-                hexs[0].transform.position = new Vector3(lastIsland.transform.position.x + oldBounds.size.x + newBounds.size.x, 0, Random.Range(-newBounds.size.z, newBounds.size.z));
-            }
-            else
-                hexs[0].transform.position = new Vector3(150 + (newBounds.size.x / 2), 0, Random.Range(-newBounds.size.z, newBounds.size.z));
+
             //store position of last island so we can make the new one correctly
             lastIsland = hexs[0];
-            Camera.main.GetComponent<cameraOrbitControls>().islands.Add(hexs[0]);
+            Camera.main.GetComponent<cameraOrbitControls>().islands.Add(lastIsland);
             hexs.Clear();
         }
-        
         for (int i = 0; i < camps.Count; i++)
             camps[i].transform.parent = lastIsland.transform;
         gulls.transform.parent = lastIsland.transform;
@@ -685,7 +679,22 @@ public class IslandMaker : MonoBehaviour
         island.islandIndex = finishedIslands;
         island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
-
+        SphereCollider sc = lastIsland.AddComponent<SphereCollider>();
+        sc.isTrigger = true;
+        sc.center = Vector3.zero;
+        sc.radius = meshScale * 2;
+        lastIsland.tag = "Island";
+        var val = 250;
+        while (lastIsland.transform.position.x < 50 && lastIsland.transform.position.x > -50)
+        {
+            while (lastIsland.transform.position.z < 50 && lastIsland.transform.position.z > -50)
+            {
+                Debug.Log("rolling... " + finishedIslands);
+                lastIsland.transform.position = new Vector3(Random.Range(-val, val), 0, Random.Range(-val, val));
+                Debug.Log("x: " + lastIsland.transform.position.x + " z: " + lastIsland.transform.position.z);
+            }
+        }
+        //check we're not in (50,0,50) and (-50,0,-50)
         camps.Clear();
     }
 

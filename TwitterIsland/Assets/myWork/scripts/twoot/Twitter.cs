@@ -306,7 +306,6 @@ namespace Twitter
                 #region dateTime formating
                 string temp = "";
                 List<string> boop = new List<string>();
-                Debug.Log(dateTime[i]);
                 for (int k = 0; k < dateTime[i].Length; k++)
                 {
                     if (dateTime[i][k] != ' ')

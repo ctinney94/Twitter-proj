@@ -65,6 +65,7 @@ public class cameraOrbitControls : MonoBehaviour
         if (islands.Count > 0 && currentIsland > 0)
         {
             GameObject.Find("WorldLight").GetComponent<lighting>().newShadowStrength = islands[currentIsland - 1].GetComponent<finishedIsland>().blackness;
+            GameObject.Find("WorldLight").GetComponent<lighting>().newTimeOfDay = (float)islands[currentIsland - 1].GetComponent<finishedIsland>().thisTweet.dateTime.Hour / 24; 
         }
     }
 

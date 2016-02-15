@@ -92,6 +92,16 @@ public class finishedIsland : MonoBehaviour
         textObject.text = result;
     }
 
+    void OnTriggerEnter(Collider col)
+    {
+        int val = 250;
+        if (col.tag == "Island")
+        {
+        Debug.Log("TRIGGERED " + col.name + " at " + gameObject.name);
+            transform.position = new Vector3(Random.Range(-val, val), 0, Random.Range(-val,val));
+        }
+    }
+
     void OnMouseDown()
     {
         if (Camera.main != null)
@@ -99,8 +109,6 @@ public class finishedIsland : MonoBehaviour
             Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
-            Debug.Log((float)thisTweet.dateTime.Hour / 24);
-            Debug.Log(thisTweet.dateTime.Hour);
             worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }
         //I tried adding the poofs back in as a thing.
