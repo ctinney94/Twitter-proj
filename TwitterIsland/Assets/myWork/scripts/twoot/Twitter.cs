@@ -292,7 +292,7 @@ namespace Twitter
                 extractMe = ammendOutputText;
 
             List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
-            List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"source\":");
+            List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
             List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
             List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
             List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
@@ -370,8 +370,11 @@ namespace Twitter
             {
                 Debug.Log("Processing request...");
             }
-            
+            Debug.Log(web.text);
             List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
+            List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
+            caller.verified = Convert.ToBoolean(verified[0]);
+            Debug.Log(caller.verified);
             URL[0]=URL[0].Remove(URL[0].IndexOf("_normal"), 7);
             caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
         }

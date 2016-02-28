@@ -21,6 +21,7 @@ public class IslandMaker : MonoBehaviour
 
     GameObject flag;
 
+    public GameObject flagPrefab,particlePrefab;
     bool CreateHexs = true;
     public List<GameObject> hexs = new List<GameObject>();
     List<GameObject> itemsToDestroy = new List<GameObject>();
@@ -214,7 +215,6 @@ public class IslandMaker : MonoBehaviour
         w = 0;
 
         UpdatePentMesh(text);
-        Destroy(flag);
         LargestLowestValue = 0;
         SpawnHexNEW();
     }
@@ -276,7 +276,7 @@ public class IslandMaker : MonoBehaviour
         }
         #endregion
 
-        Invoke("hexRemoval",.1f);
+        Invoke("hexRemoval",.5f);
     }
 
     void hexRemoval()
@@ -366,11 +366,13 @@ public class IslandMaker : MonoBehaviour
         if (flag != null)
             Destroy(flag);
 
-        flag = Instantiate(Resources.Load("flagpole")) as GameObject;
+        flag = Instantiate(flagPrefab) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         //flag.GetComponent<Renderer>().material.mainTexture = avatar;
         flag.GetComponent<MeshRenderer>().material.SetTexture("_Main", avatar);
     }
+
+    public bool verified;
 
     public void CreateIsland()
     {
@@ -440,14 +442,17 @@ public class IslandMaker : MonoBehaviour
         if (flag != null)
             Destroy(flag);
 
-        flag = Instantiate(Resources.Load("flagpole")) as GameObject;
+        flag = Instantiate(flagPrefab) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
 
+        //IF WE'RE VERIFIED
+        if (verified)
         dirtPath();
 
         //now do particle related things
-        particles = Instantiate(Resources.Load("Particle Effects")) as GameObject;
+        particles = Instantiate(particlePrefab) as GameObject;
+        particles.GetComponent<mood>().flag = flag;
         particles.GetComponent<mood>().moodness = Random.Range(-1f, 1f);
         particles.GetComponent<mood>().UpdateParticles(meshScale);
     }
@@ -618,6 +623,8 @@ public class IslandMaker : MonoBehaviour
     
     public void mergeIsland(GameObject gulls, Twitter.API.Tweet THETWEET)
     {
+        Debug.Log("COMBINE MESH");
+
         #region combine mesh
         
         CombineInstance[] combine = new CombineInstance[hexs.Count];
@@ -647,11 +654,9 @@ public class IslandMaker : MonoBehaviour
             finishedIslands++;
             hexs[0].name = "Finished Island " + finishedIslands;
             
-        #endregion
             if (flag != null)
                 flag.transform.parent = hexs[0].transform;
 
-            flag = null;
             hexs[0].GetComponent<MeshCollider>().sharedMesh.RecalculateBounds();
             var newBounds = hexs[0].GetComponent<MeshCollider>().sharedMesh.bounds;
             
@@ -661,42 +666,60 @@ public class IslandMaker : MonoBehaviour
             particles.transform.parent = hexs[0].transform;
             gulls.transform.parent = hexs[0].transform;
             gulls.GetComponent<gullMaker>().UpdateRadius(meshScale);
+            
+            if (lastIsland != null)
+            {
+                var oldBounds = lastIsland.GetComponent<MeshCollider>().sharedMesh.bounds;
+                hexs[0].transform.position = new Vector3(lastIsland.transform.position.x + oldBounds.size.x + newBounds.size.x, 0, Random.Range(-newBounds.size.z, newBounds.size.z));
+            }
+            else
+                hexs[0].transform.position = new Vector3(150 + (newBounds.size.x / 2), 0, Random.Range(-newBounds.size.z, newBounds.size.z));
 
             //store position of last island so we can make the new one correctly
             lastIsland = hexs[0];
             Camera.main.GetComponent<cameraOrbitControls>().islands.Add(lastIsland);
             hexs.Clear();
         }
+        #endregion
         for (int i = 0; i < camps.Count; i++)
             camps[i].transform.parent = lastIsland.transform;
         gulls.transform.parent = lastIsland.transform;
         particles.transform.parent = lastIsland.transform;
-
-        GameObject.Find("flagpole(Clone)").name = "flagpole " + finishedIslands;
+        
+        flag.name = "flagpole " + finishedIslands;
+        flag = null;
         Destroy(lastIsland.GetComponent<HexInfo>());
+
         var island = lastIsland.AddComponent<finishedIsland>();
         island.thisTweet = THETWEET;
         island.islandIndex = finishedIslands;
         island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
-        SphereCollider sc = lastIsland.AddComponent<SphereCollider>();
+
+        //Set up a sphere collider we can use to reposition islands if other islands enter the sphere.
+        /*SphereCollider sc = lastIsland.AddComponent<SphereCollider>();
         sc.isTrigger = true;
         sc.center = Vector3.zero;
-        sc.radius = meshScale * 2;
+        sc.radius = meshScale * 2;*/
+
+        //Tag as Island
         lastIsland.tag = "Island";
-        var val = 250;
-        while (lastIsland.transform.position.x < 50 && lastIsland.transform.position.x > -50)
+
+        #endregion
+        //This (sometyimes) crashes everything when included
+
+        /*var val = 250;
+        Debug.Log("oh shit here we go");
+        lastIsland.transform.position = Vector3.zero;
+        while (lastIsland.transform.position.x < 75 && lastIsland.transform.position.x > -75)
         {
-            while (lastIsland.transform.position.z < 50 && lastIsland.transform.position.z > -50)
+            while (lastIsland.transform.position.z < 75 && lastIsland.transform.position.z > -75)
             {
-                Debug.Log("rolling... " + finishedIslands);
+                Debug.Log("Positioning... " + finishedIslands);
                 lastIsland.transform.position = new Vector3(Random.Range(-val, val), 0, Random.Range(-val, val));
-                Debug.Log("x: " + lastIsland.transform.position.x + " z: " + lastIsland.transform.position.z);
             }
-        }
-        //check we're not in (50,0,50) and (-50,0,-50)
+        }*/
         camps.Clear();
     }
-
-    #endregion
+    
 }

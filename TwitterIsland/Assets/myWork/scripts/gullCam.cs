@@ -13,6 +13,6 @@ public class gullCam : MonoBehaviour {
 
     public void exitGullCam()
     {
-        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland].exitGullCam();
+        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].exitGullCam();
     }
 }

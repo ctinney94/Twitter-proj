@@ -92,13 +92,21 @@ public class finishedIsland : MonoBehaviour
         textObject.text = result;
     }
 
-    void OnTriggerEnter(Collider col)
+    void OnTriggerStay(Collider col)
     {
         int val = 250;
         if (col.tag == "Island")
         {
         Debug.Log("TRIGGERED " + col.name + " at " + gameObject.name);
-            transform.position = new Vector3(Random.Range(-val, val), 0, Random.Range(-val,val));
+            Vector3 newPos = Vector3.zero;
+            while (newPos.x < 75 && newPos.x > -75)
+            {
+                while (newPos.z < 75 && newPos.z > -75)
+                {
+                    newPos = new Vector3(Random.Range(-val, val), 25, Random.Range(-val, val));
+                }
+            }
+            transform.position = newPos;
         }
     }
 

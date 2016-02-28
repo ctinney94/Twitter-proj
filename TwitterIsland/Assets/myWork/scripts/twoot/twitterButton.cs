@@ -15,6 +15,8 @@ public class twitterButton : MonoBehaviour {
     public List<Twitter.API.Tweet> tweets;
     public InputField usernameInput;
     public IslandMaker IslandMaker;
+    public GameObject gulley;
+    public bool verified;
 
     // Use this for initialization
     void Start()
@@ -60,17 +62,25 @@ public class twitterButton : MonoBehaviour {
             numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();         
             IslandMaker.favs = nums.favs(tweets[i].Favs);
             IslandMaker.meshScale = nums.RTs(tweets[i].RTs);
+            IslandMaker.verified = verified;
             IslandMaker.UpdatePentMesh(null);
-
+            
             IslandMaker.avatar = avatarImage;
             IslandMaker.updateHexs(tweets[i].Text);
-            yield return new WaitForSeconds(.75f);
+
             
-            GameObject gulls = Instantiate(Resources.Load("Gulley!")) as GameObject;
+            yield return new WaitForSeconds(1f);
+            
+            GameObject gulls = Instantiate(gulley) as GameObject;
             gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].Text);
 
-            yield return new WaitForSeconds(0.5f);
+            Debug.Log("2) waiting");
+            yield return new WaitForSeconds(.75f);
+            Debug.Log("2) finished");
+
+            Debug.Log("Merge...");
             IslandMaker.mergeIsland(gulls,tweets[i]);
+            yield return new WaitForSeconds(.25f);
         }
     }
     static Texture2D avatarImage;
