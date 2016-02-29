@@ -58,6 +58,7 @@ public class twitterButton : MonoBehaviour {
 
     IEnumerator makeIsland()
     {
+        Debug.Log(tweets.Count + " tweets retrieved successfully!");
         for (int i = 0; i < tweets.Count; i++)
         {
             numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();         

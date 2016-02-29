@@ -132,8 +132,9 @@ public class finishedIsland : MonoBehaviour
     {
         if (Camera.main != null)
         {
-            Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform;
+            Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
+            Camera.main.GetComponent<cameraOrbitControls>().newTargetOffset = Vector3.zero;
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
             worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }

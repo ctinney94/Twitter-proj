@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -282,81 +283,87 @@ namespace Twitter
                 Debug.Log("Processing request...");
             }
 
-            //find user mentions
-            List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
-            //remove if true
-            string extractMe;
-            if (ammendOutputText == null)
-                extractMe = web.text;
+            GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
+            if (web.error != null)
+                Debug.Log(web.error);
             else
-                extractMe = ammendOutputText;
-
-            List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
-            List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
-            List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
-            List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
-            List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
-            List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
-
-            List<Tweet> tweets = new List<Tweet>();
-
-            for (int i = 0; i < text.Count; i++)
             {
-                Tweet thisTweet = new Tweet();
-                #region dateTime formating
-                string temp = "";
-                List<string> boop = new List<string>();
-                for (int k = 0; k < dateTime[i].Length; k++)
+                //find user mentions
+                List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
+                //remove if true
+                string extractMe;
+                if (ammendOutputText == null)
+                    extractMe = web.text;
+                else
+                    extractMe = ammendOutputText;
+
+                List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
+                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
+                List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
+                List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
+                List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
+                List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
+
+                List<Tweet> tweets = new List<Tweet>();
+
+                for (int i = 0; i < text.Count; i++)
                 {
-                    if (dateTime[i][k] != ' ')
-                        temp += dateTime[i][k];
-                    else
+                    Tweet thisTweet = new Tweet();
+                    #region dateTime formating
+                    string temp = "";
+                    List<string> boop = new List<string>();
+                    for (int k = 0; k < dateTime[i].Length; k++)
                     {
-                        boop.Add(temp);
-                        temp = "";
+                        if (dateTime[i][k] != ' ')
+                            temp += dateTime[i][k];
+                        else
+                        {
+                            boop.Add(temp);
+                            temp = "";
+                        }
+
+                        if (k == dateTime[i].Length - 1)
+                            boop.Add(temp);
+                    }
+                    temp = "";
+                    List<string> doop = new List<string>();
+                    for (int k = 0; k < boop[3].Length; k++)
+                    {
+                        if (boop[3][k] != ':')
+                            temp += boop[3][k];
+                        else
+                        {
+                            doop.Add(temp);
+                            temp = "";
+                        }
+
+                        if (k == boop[3].Length - 1)
+                            doop.Add(temp);
                     }
 
-                    if (k == dateTime[i].Length - 1)
-                        boop.Add(temp);
+                    tw_DateTime time = new tw_DateTime();
+                    time.Weekday = boop[0];
+                    time.Month = boop[1];
+                    time.Day = int.Parse(boop[2]);
+                    time.Hour = int.Parse(doop[0]);
+                    time.Minute = int.Parse(doop[1]);
+                    time.Second = int.Parse(doop[2]);
+                    time.Year = int.Parse(boop[5]);
+                    time.Offset = boop[4];
+                    #endregion
+
+                    thisTweet.dateTime = time;
+                    thisTweet.Text = text[i];
+                    thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
+                    thisTweet.RTs = int.Parse(RTs[i]);
+                    thisTweet.Favs = int.Parse(favs[i]);
+                    thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
+
+                    tweets.Add(thisTweet);
                 }
-                temp = "";
-                List<string> doop = new List<string>();
-                for (int k = 0; k < boop[3].Length; k++)
-                {
-                    if (boop[3][k] != ':')
-                        temp += boop[3][k];
-                    else
-                    {
-                        doop.Add(temp);
-                        temp = "";
-                    }
-
-                    if (k == boop[3].Length - 1)
-                        doop.Add(temp);
-                }
-
-                tw_DateTime time = new tw_DateTime();
-                time.Weekday = boop[0];
-                time.Month = boop[1];
-                time.Day = int.Parse(boop[2]);
-                time.Hour = int.Parse(doop[0]);
-                time.Minute = int.Parse(doop[1]);
-                time.Second = int.Parse(doop[2]);
-                time.Year = int.Parse(boop[5]);
-                time.Offset = boop[4];
-                #endregion
-
-                thisTweet.dateTime = time;
-                thisTweet.Text = text[i];
-                thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
-                thisTweet.RTs = int.Parse(RTs[i]);
-                thisTweet.Favs = int.Parse(favs[i]);
-                thisTweet.ID = tweetID[i].Substring(0,tweetID[i].IndexOf(",\"id_str"));
-
-                tweets.Add(thisTweet);
+                caller.tweets = tweets;
+                ammendOutputText = null;
             }
-            caller.tweets = tweets;
-            ammendOutputText = null;
         }
 
         public static void GetProfile(string name, string AccessToken, twitterButton caller)
@@ -370,12 +377,18 @@ namespace Twitter
             {
                 Debug.Log("Processing request...");
             }
-            Debug.Log(web.text);
-            List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
-            List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
-            caller.verified = Convert.ToBoolean(verified[0]);
-            URL[0]=URL[0].Remove(URL[0].IndexOf("_normal"), 7);
-            caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
+            GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
+            if (web.error != null)
+                Debug.Log(web.error);
+            else
+            {
+                Debug.Log(web.text);
+                List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
+                List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
+                caller.verified = Convert.ToBoolean(verified[0]);
+                URL[0] = URL[0].Remove(URL[0].IndexOf("_normal"), 7);
+                caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
+            }
         }
         #endregion
 
