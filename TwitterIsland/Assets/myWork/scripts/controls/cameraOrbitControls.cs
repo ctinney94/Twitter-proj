@@ -1,5 +1,5 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -34,10 +34,16 @@ public class cameraOrbitControls : MonoBehaviour
     private Quaternion rotation;
     private Vector3 position;
 
+    Transform dummyTarget;
+    public Vector3 newTargetOffset;
+
+    //UI tings
+    public GameObject gullCamButton,walkAroundButton,LeftArrow,RightArrow;
+
     void Start() { Init(); }
     void OnEnable() { Init(); }
     
-    public Vector3 newTarget;
+    public Transform newTarget;
 
     public void changeTarget(int direction)
     {
@@ -45,7 +51,8 @@ public class cameraOrbitControls : MonoBehaviour
         {
             if (currentIsland != islands.Count)
             {
-                newTarget = islands[currentIsland].transform.position;
+                newTarget = islands[currentIsland].transform;
+                Debug.Log(islands[currentIsland].name);
                 currentIsland += direction;
             }
         }
@@ -54,18 +61,58 @@ public class cameraOrbitControls : MonoBehaviour
             if (currentIsland >1)
             {
                 currentIsland += direction;
-                newTarget = islands[currentIsland-1].transform.position;
+                newTarget = islands[currentIsland - 1].transform;
             }
             else
             {
                 currentIsland = 0;
-                newTarget = Vector3.zero;
+                newTarget.position = Vector3.zero;
             }
         }
         if (islands.Count > 0 && currentIsland > 0)
         {
             GameObject.Find("WorldLight").GetComponent<lighting>().newShadowStrength = islands[currentIsland - 1].GetComponent<finishedIsland>().blackness;
-            GameObject.Find("WorldLight").GetComponent<lighting>().newTimeOfDay = (float)islands[currentIsland - 1].GetComponent<finishedIsland>().thisTweet.dateTime.Hour / 24; 
+            GameObject.Find("WorldLight").GetComponent<lighting>().newTimeOfDay = (float)islands[currentIsland - 1].GetComponent<finishedIsland>().thisTweet.dateTime.Hour / 24;
+        }
+    }
+
+    public void Update()
+    {
+        //Update UI
+        if (currentIsland > 0)
+        {
+            //Enable gull button
+            if (islands[currentIsland - 1].GetComponentInChildren<gullMaker>().gulls > 0)
+            {
+                gullCamButton.GetComponent<Image>().enabled = true;
+                gullCamButton.GetComponent<Button>().enabled = true;
+                gullCamButton.GetComponentInChildren<Text>().enabled = true;
+            }
+            else
+            {
+                gullCamButton.GetComponent<Image>().enabled = false;
+                gullCamButton.GetComponent<Button>().enabled = false;
+                gullCamButton.GetComponentInChildren<Text>().enabled = false;
+            }
+
+            //Walk around button
+            walkAroundButton.SetActive(true);
+
+            //Arrows
+            LeftArrow.SetActive(true);
+            if (currentIsland == islands.Count)
+                RightArrow.SetActive(false);
+            else
+                RightArrow.SetActive(true);
+        }
+        else
+        {
+            gullCamButton.GetComponent<Image>().enabled = false;
+            gullCamButton.GetComponent<Button>().enabled = false;
+            gullCamButton.GetComponentInChildren<Text>().enabled = false;
+            LeftArrow.SetActive(false);
+            walkAroundButton.SetActive(false);
+            RightArrow.SetActive(true);
         }
     }
 
@@ -77,6 +124,8 @@ public class cameraOrbitControls : MonoBehaviour
             GameObject go = new GameObject("Cam Target");
             go.transform.position = transform.position;
             target = go.transform;
+            dummyTarget = go.transform;
+            newTarget = go.transform;
         }
 
         distance = Vector3.Distance(transform.position, target.position);
@@ -99,14 +148,21 @@ public class cameraOrbitControls : MonoBehaviour
     void LateUpdate()
     {
         //Lerp target
-        target.position = Vector3.Lerp(target.position, newTarget, Time.deltaTime*5);
-        if (target.position == newTarget)
-            target.position = newTarget;
+        target.position = Vector3.Lerp(target.position, newTarget.position + newTargetOffset, Time.deltaTime * 5);
+        if (target.position == newTarget.position + newTargetOffset)
+            target.position = newTarget.position + newTargetOffset;
 
         // If Control and Alt and Middle button? ZOOM!
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(2))
         {
-            desiredDistance -= Input.GetAxis("Mouse Y") * Time.deltaTime * zoomRate * 0.25f * Mathf.Abs(desiredDistance);
+            dummyTarget.rotation = transform.rotation;
+            dummyTarget.position = newTarget.position + newTargetOffset;
+            //grab the rotation of the camera so we can move in a psuedo local XY space
+            dummyTarget.rotation = transform.rotation;
+            dummyTarget.Translate(Vector3.right * -Input.GetAxis("Mouse X") * panSpeed);
+            dummyTarget.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
+
+            newTargetOffset = dummyTarget.position - newTarget.position;
         }
         // If middle mouse and left alt are selected? ORBIT
         else if (Input.GetMouseButton(0))
@@ -131,7 +187,10 @@ public class cameraOrbitControls : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.F))
-            target.transform.position = Vector3.zero;
+        {
+            //target.transform.position = Vector3.zero;
+            newTargetOffset = Vector3.zero;
+        }
 
         ////////Orbit Position
 
@@ -150,23 +209,6 @@ public class cameraOrbitControls : MonoBehaviour
         // calculate position based on the new currentDistance 
         position = target.position - (rotation * Vector3.forward * currentDistance + targetOffset);
         transform.position = position;
-
-        /*if (Input.GetKey(KeyCode.W))
-        {
-            target.Translate(Vector3.up * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            target.Translate(Vector3.left * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            target.Translate(Vector3.down * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            target.Translate(Vector3.right * Time.deltaTime);
-        }*/
     }
 
     private static float ClampAngle(float angle, float min, float max)

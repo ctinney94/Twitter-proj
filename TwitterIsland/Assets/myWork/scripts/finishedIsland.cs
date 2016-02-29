@@ -26,7 +26,6 @@ public class finishedIsland : MonoBehaviour
         meshy.transform.position = GameObject.Find("flagpole " + islandIndex).transform.position + new Vector3(0,1,0);
         meshy.fontSize = 50;
 
-
         numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
 
         meshy.characterSize = nums.findRank(thisTweet.RTs) / 20;
@@ -35,6 +34,24 @@ public class finishedIsland : MonoBehaviour
 
     void Update()
     {
+        //Distance from Camera
+        float distance;
+        if (Camera.main!=null)
+            distance= Vector3.Distance(tweetText.transform.position, Camera.main.transform.position);
+        else
+            distance = Vector3.Distance(tweetText.transform.position, GameObject.Find("Camera").transform.position);
+
+
+        if (distance < 250)
+        {
+            tweetText.SetActive(true);
+            float val = Mathf.Clamp(1 / distance * 15, 0, .5f);
+            tweetText.transform.localScale = new Vector3(val, val, val);
+
+        }
+        else
+            tweetText.SetActive(false);
+
         if (tweetText != null)
         {
             if (Camera.main != null)
@@ -92,6 +109,7 @@ public class finishedIsland : MonoBehaviour
         textObject.text = result;
     }
 
+    //not currently used
     void OnTriggerStay(Collider col)
     {
         int val = 250;
@@ -114,7 +132,7 @@ public class finishedIsland : MonoBehaviour
     {
         if (Camera.main != null)
         {
-            Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
+            Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform;
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
             worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;

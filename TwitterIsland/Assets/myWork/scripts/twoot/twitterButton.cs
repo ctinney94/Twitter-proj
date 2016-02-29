@@ -11,11 +11,12 @@ using System.Security.Cryptography;
 public class twitterButton : MonoBehaviour {
 
     loginButton details;
-    public int count;
+    public int tweetsToGrab;
     public List<Twitter.API.Tweet> tweets;
     public InputField usernameInput;
     public IslandMaker IslandMaker;
     public GameObject gulley;
+    public GameObject tweetCountText;
     public bool verified;
 
     // Use this for initialization
@@ -41,12 +42,12 @@ public class twitterButton : MonoBehaviour {
     {
         if (usernameInput.text != null)
         {
-            Twitter.API.GetUserTimeline(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), count, this);
+            Twitter.API.GetUserTimeline(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
             Twitter.API.GetProfile(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
         }
         else
         {
-            Twitter.API.GetUserTimeline(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), count, this);
+            Twitter.API.GetUserTimeline(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
             Twitter.API.GetProfile(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
         }
 
@@ -92,6 +93,13 @@ public class twitterButton : MonoBehaviour {
         avatarImage = web.texture;
         IslandMaker.avatar = web.texture;
         //GameObject.Find("Avatar").GetComponent<Image>().sprite = Sprite.Create(web.texture,new Rect(0,0,web.texture.width,web.texture.height), new Vector2(.5f,.5f));
+    }
+
+    public void changeTweetCount(float newCount)
+    {
+        tweetsToGrab = (int)newCount;
+        string temp = "Tweets to retrieve: " + tweetsToGrab;
+        tweetCountText.GetComponent<Text>().text = temp;
     }
 
     public class TwitAuthenticateResponse

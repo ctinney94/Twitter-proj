@@ -67,10 +67,10 @@ public class mood : MonoBehaviour
             {
                 fireworks.transform.position = flag.transform.position;
 
-                rainbowA.transform.position = flag.transform.position + new Vector3(-3.75f, -0, -0);
-                rainbowB.transform.position = flag.transform.position + new Vector3(-7.5f, -0, -0);
-                rainbowC.transform.position = flag.transform.position + new Vector3(-15f, -.5f, -0);
-                rainbowD.transform.position = flag.transform.position + new Vector3(-22.5f, -1, -0);
+                rainbowA.transform.position = flag.transform.position + new Vector3(-3.75f, -.25f, -0);
+                rainbowB.transform.position = flag.transform.position + new Vector3(-7.5f, -1.5f, -0);
+                rainbowC.transform.position = flag.transform.position + new Vector3(-15f, -2.75f, -0);
+                rainbowD.transform.position = flag.transform.position + new Vector3(-22.5f, -4, -0);
             }
 
             if (moodness > 0.8f)
@@ -80,14 +80,16 @@ public class mood : MonoBehaviour
 
             if (moodness > 0.4f)
             {
-                if (scale < 4)
+                if (scale < 5)
                     rainbowA.enableEmission = true;
-                else if (scale < 8)
+                else if (scale < 10)
                     rainbowB.enableEmission = true;
-                else if (scale < 12)
+                else if (scale < 15)
                     rainbowC.enableEmission = true;
-                else if (scale < 16)
+                else if (scale > 15)
                     rainbowD.enableEmission = true;
+                else
+                    Debug.Log(scale);
             }
             else
             {

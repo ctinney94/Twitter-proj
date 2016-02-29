@@ -374,7 +374,6 @@ namespace Twitter
             List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
             List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
             caller.verified = Convert.ToBoolean(verified[0]);
-            Debug.Log(caller.verified);
             URL[0]=URL[0].Remove(URL[0].IndexOf("_normal"), 7);
             caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
         }
