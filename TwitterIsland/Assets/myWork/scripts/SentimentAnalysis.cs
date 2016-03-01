@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 public class SentimentAnalysis : MonoBehaviour {
 
@@ -10,6 +11,7 @@ public class SentimentAnalysis : MonoBehaviour {
     List<string> niceWords = new List<string>();
     List<string> notSoNiceWords = new List<string>();
     public int nice=0, nasty=0;
+    public mood moodThing;
     // Use this for initialization
     void Start()
     {
@@ -17,7 +19,7 @@ public class SentimentAnalysis : MonoBehaviour {
         {
             while (!sr.EndOfStream)
             {
-                        notSoNiceWords.Add(sr.ReadLine());
+                notSoNiceWords.Add(sr.ReadLine());
             }
         }
 
@@ -42,7 +44,9 @@ public class SentimentAnalysis : MonoBehaviour {
         nice = 0;
         for (int i = 0; i < notSoNiceWords.Count; i++)
         {
-            if (input.ToLower().Contains(notSoNiceWords[i]))
+            if (input.ToLower().Contains(" " + notSoNiceWords[i] + " ")
+                || input.ToLower().Contains("." + notSoNiceWords[i] + " ")
+                || input.ToLower().Contains(" " + notSoNiceWords[i] + "."))
             {
                 nasty++;
                 Debug.Log("Negative word detected - " + notSoNiceWords[i]);
@@ -50,11 +54,27 @@ public class SentimentAnalysis : MonoBehaviour {
         }
         for (int i = 0; i < niceWords.Count; i++)
         {
-            if (input.ToLower().Contains(niceWords[i]))
+            if (input.ToLower().Contains(" " + niceWords[i] + " ")
+                || input.ToLower().Contains("." + niceWords[i] + " ")
+                || input.ToLower().Contains(" " + niceWords[i] + "."))
             {
                 nice++;
                 Debug.Log("Posative word detected - " + niceWords[i]);
             }
         }
+        float t = nice + nasty;
+        float result, a = 0, b = 0;
+        if (t != 0)
+            t = 1 / t;
+        if (nice != 0)
+            a = t * nice;
+        if (nasty != 0)
+            b = t * nasty;
+        result = a - b;
+        moodThing.moodness = result;
+        Debug.Log("t: " + t);
+        Debug.Log("a: " + a);
+        Debug.Log("b: " + b);
+        Debug.Log("result: " + result);
     }
 }

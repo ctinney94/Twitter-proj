@@ -107,12 +107,15 @@ public class cameraOrbitControls : MonoBehaviour
         }
         else
         {
-            gullCamButton.GetComponent<Image>().enabled = false;
-            gullCamButton.GetComponent<Button>().enabled = false;
-            gullCamButton.GetComponentInChildren<Text>().enabled = false;
-            LeftArrow.SetActive(false);
-            walkAroundButton.SetActive(false);
-            RightArrow.SetActive(true);
+            if (gullCamButton != null)
+            {
+                gullCamButton.GetComponent<Image>().enabled = false;
+                gullCamButton.GetComponent<Button>().enabled = false;
+                gullCamButton.GetComponentInChildren<Text>().enabled = false;
+                LeftArrow.SetActive(false);
+                walkAroundButton.SetActive(false);
+                RightArrow.SetActive(true);
+            }
         }
     }
 
