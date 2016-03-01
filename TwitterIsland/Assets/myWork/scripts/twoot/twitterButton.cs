@@ -38,22 +38,29 @@ public class twitterButton : MonoBehaviour {
         print("OnPostTweet - " + (success ? "succedded." : "failed."));
     }
 
+    bool running;
+
     public void GetTweets()
     {
-        if (usernameInput.text != null)
+        if (!running)
         {
-            Twitter.API.GetUserTimeline(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
-            Twitter.API.GetProfile(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
+            running = true;
+            if (usernameInput.text != null)
+            {
+                Twitter.API.GetUserTimeline(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
+                Twitter.API.GetProfile(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
+            }
+            else
+            {
+                Twitter.API.GetUserTimeline(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
+                Twitter.API.GetProfile(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
+            }
+            //Once we have the tweets, do islands!
+            //for each tweet
+            StartCoroutine(makeIsland());
         }
         else
-        {
-            Twitter.API.GetUserTimeline(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
-            Twitter.API.GetProfile(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
-        }
-
-        //Once we have the tweets, do islands!
-        //for each tweet
-        StartCoroutine(makeIsland());
+            Debug.Log("Island creartion process already running - please wait"); //Chill fam, fuck.
     }
 
     IEnumerator makeIsland()
@@ -84,6 +91,7 @@ public class twitterButton : MonoBehaviour {
             IslandMaker.mergeIsland(gulls,tweets[i]);
             yield return new WaitForSeconds(.25f);
         }
+        running = false;
     }
     static Texture2D avatarImage;
     public static IEnumerator setAvatar(string url)
