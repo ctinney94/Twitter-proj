@@ -13,6 +13,7 @@ public class IslandMaker : MonoBehaviour
     public Material PentMat, HexMat, wireframeMat;
     public static Texture2D avatar;
     GameObject particles;
+    public SentimentAnalysis SA;
 
     public float meshScale = .1f, 
         hexScale = 0.2f, 
@@ -188,7 +189,6 @@ public class IslandMaker : MonoBehaviour
         //Is this line actually did something, that'd be fucking marvelous, but noooo
         //gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
 
-
         //I am destorying and remaking the collider all the time
         //If anyone find this I want them to know I'm not proud of what I've done here
         DestroyImmediate(GetComponent<MeshCollider>());
@@ -197,7 +197,6 @@ public class IslandMaker : MonoBehaviour
         meshCollider.convex = true;
         meshCollider.isTrigger = true;
         GetComponent<MeshFilter>().mesh = mesh;
-        //GameObject.Find("Particle effects").GetComponent<mood>().move(mesh.bounds.center);
     }
     #endregion
 
@@ -449,12 +448,6 @@ public class IslandMaker : MonoBehaviour
         //IF WE'RE VERIFIED
         if (verified)
         dirtPath();
-
-        //now do particle related things
-        particles = Instantiate(particlePrefab) as GameObject;
-        particles.GetComponent<mood>().flag = flag;
-        particles.GetComponent<mood>().moodness = Random.Range(-1f, 1f);
-        particles.GetComponent<mood>().UpdateParticles(meshScale);
     }
 
     public void detectHexEdges()
@@ -623,7 +616,11 @@ public class IslandMaker : MonoBehaviour
     
     public void mergeIsland(GameObject gulls, Twitter.API.Tweet THETWEET)
     {
-        Debug.Log("COMBINE MESH");
+        //now do particle related things
+        particles = Instantiate(particlePrefab) as GameObject;
+        particles.GetComponent<mood>().flag = flag;
+        particles.GetComponent<mood>().moodness = SA.getSAValue(THETWEET.Text);
+        particles.GetComponent<mood>().UpdateParticles(meshScale);
 
         #region combine mesh
         
@@ -693,6 +690,7 @@ public class IslandMaker : MonoBehaviour
         var island = lastIsland.AddComponent<finishedIsland>();
         island.thisTweet = THETWEET;
         island.islandIndex = finishedIslands;
+        island.SA = SA;
         island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
 

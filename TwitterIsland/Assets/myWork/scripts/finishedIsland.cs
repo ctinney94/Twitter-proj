@@ -14,6 +14,7 @@ public class finishedIsland : MonoBehaviour
     public Twitter.API.Tweet thisTweet;
     public int islandIndex;
     GameObject tweetText;
+    public SentimentAnalysis SA;
 
     public void WakeUp()
     {
@@ -106,7 +107,7 @@ public class finishedIsland : MonoBehaviour
             }
         }
         result = result.Replace("\\n", "\n ");
-        textObject.text = result;
+        textObject.text = SA.getFormattedText(result);
     }
 
     //not currently used

@@ -283,9 +283,12 @@ namespace Twitter
                 Debug.Log("Processing request...");
             }
 
-            GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
             if (web.error != null)
+            {
+                GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
                 Debug.Log(web.error);
+                Debug.Log(GameObject.Find("Error Text").GetComponent<Text>().text);
+            }
             else
             {
                 //find user mentions
@@ -302,7 +305,11 @@ namespace Twitter
                 List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
                 List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
                 List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
-                List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
+                Debug.Log(extractMe);
+                
+                //I don't actually have a reason why I need this tweet ID
+                //Would it be that awful if I didn't include it?
+                //List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
 
                 List<Tweet> tweets = new List<Tweet>();
 
@@ -312,8 +319,10 @@ namespace Twitter
                     #region dateTime formating
                     string temp = "";
                     List<string> boop = new List<string>();
+                    Debug.Log(dateTime[i]);
                     for (int k = 0; k < dateTime[i].Length; k++)
                     {
+                        Debug.Log("hurtrrr");
                         if (dateTime[i][k] != ' ')
                             temp += dateTime[i][k];
                         else
@@ -327,6 +336,10 @@ namespace Twitter
                     }
                     temp = "";
                     List<string> doop = new List<string>();
+                    Debug.Log(boop[0]);
+                    Debug.Log(boop[1]);
+                    Debug.Log(boop[2]);
+                    Debug.Log(boop[3]);
                     for (int k = 0; k < boop[3].Length; k++)
                     {
                         if (boop[3][k] != ':')
@@ -357,7 +370,7 @@ namespace Twitter
                     thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
                     thisTweet.RTs = int.Parse(RTs[i]);
                     thisTweet.Favs = int.Parse(favs[i]);
-                    thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
+                    thisTweet.ID = "99";//tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
 
                     tweets.Add(thisTweet);
                 }
@@ -377,9 +390,11 @@ namespace Twitter
             {
                 Debug.Log("Processing request...");
             }
-            GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
             if (web.error != null)
+            {
+                GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
                 Debug.Log(web.error);
+            }
             else
             {
                 Debug.Log(web.text);
@@ -448,28 +463,30 @@ namespace Twitter
                     output += outputText[c];
                 }
 
-                output = output.Replace(start, "");
+				if (start != ",\"user_mentions\":")
+				{               
+					output = output.Replace(start, "");
                 output = output.Replace("\ud83c[\udf00-\udfff]", " ! ");
                 output = output.Replace("\\\"", "\"");
                 output = output.Replace("\\/", "/");
                 output = output.Replace("&amp;", "&");
+				}
 
-                List<int> fuckyou = new List<int>();
+                List<int> EmojisOrSimilar = new List<int>();
                 i = 0;
                 while ((i = output.IndexOf("\\u", i)) != -1)
                 {
-                    fuckyou.Add(i);
+                    EmojisOrSimilar.Add(i);
                     i++;
                 }
 
-                for (int u= fuckyou.Count-1; u >-1 ; u--)
-                    output = output.Remove(fuckyou[u], 6);
-
+                for (int u= EmojisOrSimilar.Count-1; u >-1 ; u--)
+                    output = output.Remove(EmojisOrSimilar[u], 6);
                 if (output != "[]" && start == ",\"user_mentions\":")
                 {
                     //Then remove text from original input.
                     //Remove each section of the string STARTING AT THE END AND WORKING BACK
-                    outputText = outputText.Remove(startPos[j] + 1 + start.Length, output.Length - 1);
+                    outputText = outputText.Remove(startPos[j] + 1 + start.Length, output.Length + start.Length - 1);
                     output = null;
                     ammendOutputText = outputText;
                 }
