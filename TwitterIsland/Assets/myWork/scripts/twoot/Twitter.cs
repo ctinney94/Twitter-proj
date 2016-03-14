@@ -284,13 +284,11 @@ namespace Twitter
             }
 
             if (web.error != null)
-            {
                 GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
-                Debug.Log(web.error);
-                Debug.Log(GameObject.Find("Error Text").GetComponent<Text>().text);
-            }
             else
             {
+                GameObject.Find("Error Text").GetComponent<Text>().text = "";
+                
                 //find user mentions
                 List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
                 //remove if true
@@ -309,7 +307,7 @@ namespace Twitter
                 
                 //I don't actually have a reason why I need this tweet ID
                 //Would it be that awful if I didn't include it?
-                //List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
+                List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
 
                 List<Tweet> tweets = new List<Tweet>();
 
@@ -370,7 +368,7 @@ namespace Twitter
                     thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
                     thisTweet.RTs = int.Parse(RTs[i]);
                     thisTweet.Favs = int.Parse(favs[i]);
-                    thisTweet.ID = "99";//tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
+                    thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
 
                     tweets.Add(thisTweet);
                 }
@@ -397,6 +395,8 @@ namespace Twitter
             }
             else
             {
+                GameObject.Find("Error Text").GetComponent<Text>().text = "";
+
                 Debug.Log(web.text);
                 List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
                 List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
@@ -463,30 +463,33 @@ namespace Twitter
                     output += outputText[c];
                 }
 
-				if (start != ",\"user_mentions\":")
-				{               
-					output = output.Replace(start, "");
-                output = output.Replace("\ud83c[\udf00-\udfff]", " ! ");
-                output = output.Replace("\\\"", "\"");
-                output = output.Replace("\\/", "/");
-                output = output.Replace("&amp;", "&");
-				}
-
-                List<int> EmojisOrSimilar = new List<int>();
-                i = 0;
-                while ((i = output.IndexOf("\\u", i)) != -1)
+                if (start != ",\"user_mentions\":")
                 {
-                    EmojisOrSimilar.Add(i);
-                    i++;
-                }
+                    output = output.Replace(start, "");
+                    output = output.Replace("\ud83c[\udf00-\udfff]", " ! ");
+                    output = output.Replace("\\\"", "\"");
+                    output = output.Replace("\\/", "/");
+                    output = output.Replace("&amp;", "&");
 
-                for (int u= EmojisOrSimilar.Count-1; u >-1 ; u--)
-                    output = output.Remove(EmojisOrSimilar[u], 6);
+                    List<int> EmojisOrSimilar = new List<int>();
+                    i = 0;
+                    while ((i = output.IndexOf("\\u", i)) != -1)
+                    {
+                        EmojisOrSimilar.Add(i);
+                        i++;
+                    }
+
+                    for (int u = EmojisOrSimilar.Count - 1; u > -1; u--)
+                    {
+                        output = output.Remove(EmojisOrSimilar[u], 6);
+                        output.Insert(EmojisOrSimilar[u], "*!*");
+                    }
+                }
                 if (output != "[]" && start == ",\"user_mentions\":")
                 {
                     //Then remove text from original input.
                     //Remove each section of the string STARTING AT THE END AND WORKING BACK
-                    outputText = outputText.Remove(startPos[j] + 1 + start.Length, output.Length + start.Length - 1);
+                    outputText = outputText.Remove(startPos[j] + 1, output.Length + start.Length - 1);
                     output = null;
                     ammendOutputText = outputText;
                 }

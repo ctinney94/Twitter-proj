@@ -16,7 +16,7 @@ public class twitterButton : MonoBehaviour {
     public InputField usernameInput;
     public IslandMaker IslandMaker;
     public GameObject gulley;
-    public GameObject tweetCountText;
+    public GameObject tweetCountText,islandBuildingText;
     public bool verified;
 
     // Use this for initialization
@@ -65,10 +65,12 @@ public class twitterButton : MonoBehaviour {
 
     IEnumerator makeIsland()
     {
+        islandBuildingText.SetActive(true);
         GameObject.Find("retirval stats").GetComponent<Text>().text = (tweets.Count + " tweets retrieved successfully");
         for (int i = 0; i < tweets.Count; i++)
         {
-            numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();         
+            islandBuildingText.GetComponent<Text>().text = "Building Islands..." + "\n" + i + "/" + tweets.Count;
+               numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();         
             IslandMaker.favs = nums.favs(tweets[i].Favs);
             IslandMaker.meshScale = nums.RTs(tweets[i].RTs);
             IslandMaker.verified = verified;
@@ -91,6 +93,7 @@ public class twitterButton : MonoBehaviour {
             IslandMaker.mergeIsland(gulls,tweets[i]);
             yield return new WaitForSeconds(.25f);
         }
+        islandBuildingText.SetActive(false);
         running = false;
     }
     static Texture2D avatarImage;
