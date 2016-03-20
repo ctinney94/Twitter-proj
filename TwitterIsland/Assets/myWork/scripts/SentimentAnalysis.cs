@@ -49,6 +49,8 @@ public class SentimentAnalysis : MonoBehaviour {
             if (input.ToLower().Contains(" " + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains("." + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains(" " + notSoNiceWords[i] + ".")
+                || input.ToLower().Contains(" " + notSoNiceWords[i] + "\n")
+                || input.ToLower().Contains("." + notSoNiceWords[i] + "\n")
                 || input.ToLower().StartsWith(notSoNiceWords[i] + " ")
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" "+notSoNiceWords[i]))
@@ -56,16 +58,18 @@ public class SentimentAnalysis : MonoBehaviour {
                 newText = newText.ToLower().Replace(notSoNiceWords[i], "<color=red>" + notSoNiceWords[i] + "</color>");
             }
         }
+        
         for (int i = 0; i < niceWords.Count; i++)
         {
             if (input.ToLower().Contains(" " + niceWords[i] + " ")
                 || input.ToLower().Contains("." + niceWords[i] + " ")
                 || input.ToLower().Contains(" " + niceWords[i] + ".")
+                || input.ToLower().Contains(" " + niceWords[i] + "\n")
+                || input.ToLower().Contains("." + niceWords[i] + "\n")
                 || input.ToLower().StartsWith(niceWords[i] + " ")
                 || input.ToLower().StartsWith(niceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + niceWords[i]))
             {
-                Debug.Log(newText);
                 newText = newText.ToLower().Replace(niceWords[i], "<color=lime>" + niceWords[i] + "</color>");
             }
         }
@@ -73,6 +77,7 @@ public class SentimentAnalysis : MonoBehaviour {
     }
     public float getSAValue(string input)
     {
+        Debug.Log("Analysing: " + input);
         nasty = 0;
         nice = 0;
         for (int i = 0; i < notSoNiceWords.Count; i++)
@@ -84,6 +89,7 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + notSoNiceWords[i]))
             {
+                Debug.Log("Nasty word " +notSoNiceWords[i]);
                 nasty++;
             }
         }
@@ -96,6 +102,7 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(niceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + niceWords[i]))
             {
+                Debug.Log("Nice word " + niceWords[i]);
                 nice++;
             }
         }
@@ -108,6 +115,7 @@ public class SentimentAnalysis : MonoBehaviour {
         if (nasty != 0)
             b = t * nasty;
         result = a - b;
+        Debug.Log(result);
         return result;
     }
 

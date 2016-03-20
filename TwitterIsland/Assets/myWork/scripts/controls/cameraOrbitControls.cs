@@ -52,7 +52,7 @@ public class cameraOrbitControls : MonoBehaviour
             if (currentIsland != islands.Count)
             {
                 newTarget = islands[currentIsland].transform.position;
-                Debug.Log(islands[currentIsland].name);
+                islands[currentIsland].GetComponent<finishedIsland>().updateUI();
                 currentIsland += direction;
             }
         }
@@ -62,6 +62,7 @@ public class cameraOrbitControls : MonoBehaviour
             {
                 currentIsland += direction;
                 newTarget = islands[currentIsland - 1].transform.position;
+                islands[currentIsland-1].GetComponent<finishedIsland>().updateUI();
             }
             else
             {

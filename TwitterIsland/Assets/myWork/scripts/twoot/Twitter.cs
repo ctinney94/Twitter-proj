@@ -33,6 +33,8 @@ namespace Twitter
 
     public class API
     {
+        private static string currentDisplayName;
+
         #region OAuth Token Methods
         // 1. Get Request-Token From Twitter
         // 2. Get PIN from User
@@ -266,7 +268,8 @@ namespace Twitter
             public tw_DateTime dateTime;
             public string Text;
             public string ID;
-            public string UserID;
+            //public string UserID;
+            public string DisplayName;
             public int RTs;
             public int Favs;
         }
@@ -297,13 +300,12 @@ namespace Twitter
                     extractMe = web.text;
                 else
                     extractMe = ammendOutputText;
-
+                
                 List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
                 List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
                 List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
                 List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
-                List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
-                Debug.Log(extractMe);
+                //List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
                 
                 //I don't actually have a reason why I need this tweet ID
                 //Would it be that awful if I didn't include it?
@@ -317,10 +319,8 @@ namespace Twitter
                     #region dateTime formating
                     string temp = "";
                     List<string> boop = new List<string>();
-                    Debug.Log(dateTime[i]);
                     for (int k = 0; k < dateTime[i].Length; k++)
                     {
-                        Debug.Log("hurtrrr");
                         if (dateTime[i][k] != ' ')
                             temp += dateTime[i][k];
                         else
@@ -334,10 +334,6 @@ namespace Twitter
                     }
                     temp = "";
                     List<string> doop = new List<string>();
-                    Debug.Log(boop[0]);
-                    Debug.Log(boop[1]);
-                    Debug.Log(boop[2]);
-                    Debug.Log(boop[3]);
                     for (int k = 0; k < boop[3].Length; k++)
                     {
                         if (boop[3][k] != ':')
@@ -365,10 +361,11 @@ namespace Twitter
 
                     thisTweet.dateTime = time;
                     thisTweet.Text = text[i];
-                    thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
+                    //thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
                     thisTweet.RTs = int.Parse(RTs[i]);
                     thisTweet.Favs = int.Parse(favs[i]);
                     thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
+                    thisTweet.DisplayName = currentDisplayName;
 
                     tweets.Add(thisTweet);
                 }
@@ -382,7 +379,7 @@ namespace Twitter
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = "Bearer " + AccessToken;
 
-            WWW web = new WWW("https://api.twitter.com/1.1/users/show.json?screen_name=" + name, null, headers);
+            WWW web = new WWW("https://api.twitter.com/1.1/users/show.json?screen_name=" + name+ "&include_entities=false", null, headers);
 
             while (!web.isDone)
             {
@@ -396,10 +393,16 @@ namespace Twitter
             else
             {
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-
-                Debug.Log(web.text);
+                                
                 List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
                 List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
+                List<string> displayName = extractData(web.text, ",\"name\":\"", "\",\"screen_name\":");
+
+                if (displayName[0] != " ")
+                    currentDisplayName = displayName[0];
+                else
+                    currentDisplayName = "Somebody with a non-ascii name";
+
                 caller.verified = Convert.ToBoolean(verified[0]);
                 URL[0] = URL[0].Remove(URL[0].IndexOf("_normal"), 7);
                 caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
@@ -499,7 +502,7 @@ namespace Twitter
             return returnMe;
         }
 
-        public static string ammendOutputText=null;
+        public static string ammendOutputText = null;
 
         #region OAuth Help Methods
         // The below help methods are modified from "WebRequestBuilder.cs" in Twitterizer(http://www.twitterizer.net/).

@@ -15,13 +15,16 @@ public class finishedIsland : MonoBehaviour
     public int islandIndex;
     GameObject tweetText;
     public SentimentAnalysis SA;
+    TextMesh meshy;
+    MenuMover IslandInfoUI;
 
     public void WakeUp()
     {
         worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
         tweetText = new GameObject("Tweet text");
         tweetText.transform.parent = transform;
-        var meshy = tweetText.AddComponent<TextMesh>();
+        tweetText.AddComponent<TextMesh>();
+        meshy = tweetText.GetComponent<TextMesh>();
         meshy.anchor = TextAnchor.LowerCenter;
         meshy.alignment = TextAlignment.Center;
         meshy.transform.position = GameObject.Find("flagpole " + islandIndex).transform.position + new Vector3(0,1,0);
@@ -31,6 +34,8 @@ public class finishedIsland : MonoBehaviour
 
         meshy.characterSize = nums.findRank(thisTweet.RTs) / 20;
         FormatString(thisTweet.Text, meshy);
+
+        IslandInfoUI= GameObject.Find("IslandInfo UI").GetComponent<MenuMover>();
     }
 
     void Update()
@@ -69,7 +74,6 @@ public class finishedIsland : MonoBehaviour
         }
     }
     
-
     void FormatString(string text, TextMesh textObject)
     {
         int maxLineChars = 35; //maximum number of characters per line...experiment with different values to make it work
@@ -176,6 +180,12 @@ public class finishedIsland : MonoBehaviour
                 poof.transform.position = hit.point;
             }
         }*/
+    }
+
+    public void updateUI()
+    {
+        float sentiment = GetComponentInChildren<mood>().moodness;
+        IslandInfoUI.updateUI(thisTweet,sentiment);
     }
 
     public int NearestVertexTo(Vector3 point)
