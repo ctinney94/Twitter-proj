@@ -8,11 +8,13 @@ public class finishedIsland : MonoBehaviour
     Color sand = Color.Lerp(Color.yellow, Color.white, 0.2f);
     Color rock = Color.gray;
     Color dirt = new Color(0.96f, 0.64f, 0.38f);
+
     [Range(0, 0.85f)]
     public float blackness = 0;
     Light worldLight;
     public Twitter.API.Tweet thisTweet;
     public int islandIndex;
+    float sizeRank, heightRank;
     GameObject tweetText;
     public SentimentAnalysis SA;
     TextMesh meshy;
@@ -32,6 +34,8 @@ public class finishedIsland : MonoBehaviour
 
         numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
 
+        sizeRank = nums.findRank(thisTweet.RTs);
+        heightRank =nums.findRank(thisTweet.Favs);
         meshy.characterSize = nums.findRank(thisTweet.RTs) / 20;
         FormatString(thisTweet.Text, meshy);
 
@@ -138,6 +142,10 @@ public class finishedIsland : MonoBehaviour
         if (Camera.main != null)
         {
             Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
+
+            if (Camera.main.GetComponent<cameraOrbitControls>().currentIsland != islandIndex)
+                updateUI();
+
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
             Camera.main.GetComponent<cameraOrbitControls>().newTargetOffset = Vector3.zero;
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
@@ -185,7 +193,7 @@ public class finishedIsland : MonoBehaviour
     public void updateUI()
     {
         float sentiment = GetComponentInChildren<mood>().moodness;
-        IslandInfoUI.updateUI(thisTweet,sentiment);
+        IslandInfoUI.updateUI(thisTweet,sentiment,heightRank,sizeRank);
     }
 
     public int NearestVertexTo(Vector3 point)

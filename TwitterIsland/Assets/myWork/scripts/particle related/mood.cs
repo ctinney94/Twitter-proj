@@ -73,12 +73,12 @@ public class mood : MonoBehaviour
                 rainbowD.transform.position = flag.transform.position + new Vector3(-22.5f, -4, -0);
             }
 
-            if (moodness > 0.8f)
+            if (moodness > 0.75f)
                 fireworks.enableEmission = true;
             else
                 fireworks.enableEmission = false;
 
-            if (moodness > 0.4f)
+            if (moodness > 0.25f)
             {
                 if (scale < 5)
                     rainbowA.enableEmission = true;

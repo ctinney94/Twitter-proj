@@ -16,7 +16,7 @@ public class IslandMaker : MonoBehaviour
     public SentimentAnalysis SA;
 
     public float meshScale = .1f, 
-        hexScale = 0.2f, 
+        hexScale = .2f, 
         favs = 1, 
         floorLevel;
 
@@ -663,7 +663,7 @@ public class IslandMaker : MonoBehaviour
             particles.transform.parent = hexs[0].transform;
             gulls.transform.parent = hexs[0].transform;
             gulls.GetComponent<gullMaker>().UpdateRadius(meshScale);
-            
+
             if (lastIsland != null)
             {
                 var oldBounds = lastIsland.GetComponent<MeshCollider>().sharedMesh.bounds;

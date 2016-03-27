@@ -268,7 +268,7 @@ namespace Twitter
             public tw_DateTime dateTime;
             public string Text;
             public string ID;
-            //public string UserID;
+            public string UserID;
             public string DisplayName;
             public int RTs;
             public int Favs;
@@ -291,7 +291,8 @@ namespace Twitter
             else
             {
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-                
+
+                Debug.Log(web.text);
                 //find user mentions
                 List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
                 //remove if true
@@ -300,12 +301,14 @@ namespace Twitter
                     extractMe = web.text;
                 else
                     extractMe = ammendOutputText;
-                
+
+                Debug.Log(extractMe);
+
                 List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
-                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
-                List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"entities\":");
+                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"entities\":");
+                List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
                 List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
-                //List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
+                List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
                 
                 //I don't actually have a reason why I need this tweet ID
                 //Would it be that awful if I didn't include it?
@@ -361,7 +364,7 @@ namespace Twitter
 
                     thisTweet.dateTime = time;
                     thisTweet.Text = text[i];
-                    //thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
+                    thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
                     thisTweet.RTs = int.Parse(RTs[i]);
                     thisTweet.Favs = int.Parse(favs[i]);
                     thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));

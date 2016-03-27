@@ -11,6 +11,8 @@ public class gullMaker : MonoBehaviour {
     GameObject islandMenus, gullcam;
     List<GameObject> myGulls = new List<GameObject>();
 
+    public Material SecretWaluigiSkin;
+
     public AudioClip[] gullNoises;
 
     // Use this for initialization
@@ -47,12 +49,18 @@ public class gullMaker : MonoBehaviour {
         }
         gulls = hashtags;
 
-        //Sorry guys :(
-        //destoryGulls();
-        makeGulls(gulls);
+        if (text.ToLower().Contains("waluigi"))
+        {
+            gulls++;
+            makeGulls(gulls, true);
+        }
+        else
+        {
+            makeGulls(gulls, false);
+        }
     }
 
-    void makeGulls(int gulls)
+    void makeGulls(int gulls,bool secret)
     {
         List<string> gullNames = new List<string>();
         using (StreamReader sr = new StreamReader("Assets/myWork/gullNames.txt"))
@@ -69,12 +77,20 @@ public class gullMaker : MonoBehaviour {
             GameObject gullyGuy = Instantiate(gull);
             gullyGuy.GetComponent<gull>().offset = i * (360 / gulls);
 
-            int theChosenGull = Random.Range(0, gullNames.Count-1);
-
+            if (i == 0 && secret)
+            {
+                gullyGuy.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = new Color(136f / 255f, 21f / 255f, 216f / 255f);
+                gullyGuy.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].SetColor("_EmissionColor", Color.black);
+                gullyGuy.name = "Waluigi Chips";
+            }
+            else
+            {
+                int theChosenGull = Random.Range(0, gullNames.Count - 1);
+                gullyGuy.name = gullNames[theChosenGull];
+                gullNames.Remove(gullNames[theChosenGull]);
+            }
             gullyGuy.GetComponent<Animator>().SetFloat("offset", Random.value);
             gullyGuy.GetComponent<Animator>().SetFloat("speed", Random.Range(0.75f, 1.4f));
-            gullyGuy.name = gullNames[theChosenGull];
-            gullNames.Remove(gullNames[theChosenGull]);
             gullyGuy.tag = "gull";
             gullyGuy.transform.parent = gameObject.transform;
             myGulls.Add(gullyGuy);

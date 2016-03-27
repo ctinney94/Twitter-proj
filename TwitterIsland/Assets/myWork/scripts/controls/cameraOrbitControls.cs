@@ -85,15 +85,21 @@ public class cameraOrbitControls : MonoBehaviour
             //Enable gull button
             if (islands[currentIsland - 1].GetComponentInChildren<gullMaker>().gulls > 0)
             {
-                gullCamButton.GetComponent<Image>().enabled = true;
-                gullCamButton.GetComponent<Button>().enabled = true;
-                gullCamButton.GetComponentInChildren<Text>().enabled = true;
+                if (gullCamButton.activeInHierarchy)
+                {
+                    gullCamButton.GetComponent<Image>().enabled = true;
+                    gullCamButton.GetComponent<Button>().enabled = true;
+                    gullCamButton.GetComponentInChildren<Text>().enabled = true;
+                }
             }
             else
             {
-                gullCamButton.GetComponent<Image>().enabled = false;
-                gullCamButton.GetComponent<Button>().enabled = false;
-                gullCamButton.GetComponentInChildren<Text>().enabled = false;
+                if (gullCamButton.activeInHierarchy)
+                {
+                    gullCamButton.GetComponent<Image>().enabled = false;
+                    gullCamButton.GetComponent<Button>().enabled = false;
+                    gullCamButton.GetComponentInChildren<Text>().enabled = false;
+                }
             }
 
             //Walk around button
@@ -108,7 +114,7 @@ public class cameraOrbitControls : MonoBehaviour
         }
         else
         {
-            if (gullCamButton != null)
+            if (gullCamButton.activeInHierarchy)
             {
                 gullCamButton.GetComponent<Image>().enabled = false;
                 gullCamButton.GetComponent<Button>().enabled = false;

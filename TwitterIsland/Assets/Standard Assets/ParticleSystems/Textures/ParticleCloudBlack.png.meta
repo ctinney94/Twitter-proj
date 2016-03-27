@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f021920588fd9764ea1c2868da1d6eb3
+guid: f932615e1f78e8c439ec82575eb00163
 TextureImporter:
   fileIDToRecycleName: {}
   serializedVersion: 2
@@ -43,8 +43,24 @@ TextureImporter:
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
   alphaIsTransparency: 0
-  textureType: 0
-  buildTargetSettings: []
+  textureType: -1
+  buildTargetSettings:
+  - buildTarget: iPhone
+    maxTextureSize: 128
+    textureFormat: -1
+    compressionQuality: 50
+  - buildTarget: Android
+    maxTextureSize: 128
+    textureFormat: -1
+    compressionQuality: 50
+  - buildTarget: BlackBerry
+    maxTextureSize: 128
+    textureFormat: -1
+    compressionQuality: 50
+  - buildTarget: WP8
+    maxTextureSize: 128
+    textureFormat: -1
+    compressionQuality: 50
   spriteSheet:
     sprites: []
   spritePackingTag: 
