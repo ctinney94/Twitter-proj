@@ -119,9 +119,18 @@ public class cameraOrbitControls : MonoBehaviour
                 gullCamButton.GetComponent<Image>().enabled = false;
                 gullCamButton.GetComponent<Button>().enabled = false;
                 gullCamButton.GetComponentInChildren<Text>().enabled = false;
-                LeftArrow.SetActive(false);
-                walkAroundButton.SetActive(false);
-                RightArrow.SetActive(true);
+                if (islands.Count > 0)
+                {
+                    LeftArrow.SetActive(false);
+                    walkAroundButton.SetActive(false);
+                    RightArrow.SetActive(true);
+                }
+                else
+                {
+                    LeftArrow.SetActive(false);
+                    walkAroundButton.SetActive(false);
+                    RightArrow.SetActive(false);
+                }
             }
         }
     }

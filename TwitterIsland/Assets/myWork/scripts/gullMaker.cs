@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class gullMaker : MonoBehaviour {
 
     public int gulls = 0;
-    GameObject gull;
+    GameObject gull, birthdayGull;
     GameObject islandMenus, gullcam;
     List<GameObject> myGulls = new List<GameObject>();
 
@@ -71,7 +71,7 @@ public class gullMaker : MonoBehaviour {
             }
         }
 
-        gull = Resources.Load("gull") as GameObject;
+        gull = Resources.Load("gull_birthday") as GameObject;
         for (int i = 0; i < gulls; i++)
         {
             GameObject gullyGuy = Instantiate(gull);

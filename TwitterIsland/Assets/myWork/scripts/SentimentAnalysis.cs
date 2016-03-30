@@ -77,7 +77,6 @@ public class SentimentAnalysis : MonoBehaviour {
     }
     public float getSAValue(string input)
     {
-        Debug.Log("Analysing: " + input);
         nasty = 0;
         nice = 0;
         for (int i = 0; i < notSoNiceWords.Count; i++)
@@ -115,7 +114,6 @@ public class SentimentAnalysis : MonoBehaviour {
         if (nasty != 0)
             b = t * nasty;
         result = a - b;
-        Debug.Log(result);
         return result;
     }
 

@@ -279,7 +279,7 @@ namespace Twitter
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = "Bearer " + AccessToken;
 
-            WWW web = new WWW("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=" + name + "&count=" + count + "&trim_user=1" + "&include_rts=0&exclude_replies=true&contributor_details=false", null, headers);
+            WWW web = new WWW("https://api.twitter.com/1.1/statuses/"+"user"+"_timeline.json?screen_name=" + name + "&count=" + count + "&trim_user=1" + "&include_rts=0&exclude_replies=true&contributor_details=false", null, headers);
 
             while (!web.isDone)
             {
@@ -291,8 +291,7 @@ namespace Twitter
             else
             {
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-
-                Debug.Log(web.text);
+                
                 //find user mentions
                 List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
                 //remove if true
@@ -301,9 +300,7 @@ namespace Twitter
                     extractMe = web.text;
                 else
                     extractMe = ammendOutputText;
-
-                Debug.Log(extractMe);
-
+                
                 List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
                 List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"entities\":");
                 List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
@@ -406,6 +403,7 @@ namespace Twitter
                 else
                     currentDisplayName = "Somebody with a non-ascii name";
 
+                Debug.Log(web.text);
                 caller.verified = Convert.ToBoolean(verified[0]);
                 URL[0] = URL[0].Remove(URL[0].IndexOf("_normal"), 7);
                 caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
