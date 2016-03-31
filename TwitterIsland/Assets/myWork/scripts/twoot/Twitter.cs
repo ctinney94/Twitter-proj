@@ -393,7 +393,9 @@ namespace Twitter
             else
             {
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-                                
+
+                Debug.Log(web.text);   
+                
                 List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
                 List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
                 List<string> displayName = extractData(web.text, ",\"name\":\"", "\",\"screen_name\":");
@@ -458,6 +460,9 @@ namespace Twitter
 
             List<string> returnMe = new List<string>();
 
+            if (startPos.Count != stopPos.Count)
+                startPos.Remove(startPos[startPos.Count - 1]);
+
             //for (int j = 0; j < startPos.Count; j++)
             for (int j = startPos.Count-1; j>-1;j--)
             {
@@ -467,6 +472,7 @@ namespace Twitter
                     output += outputText[c];
                 }
 
+                #region the whole user mentions bit
                 if (start != ",\"user_mentions\":")
                 {
                     output = output.Replace(start, "");
@@ -497,7 +503,8 @@ namespace Twitter
                     output = null;
                     ammendOutputText = outputText;
                 }
-
+                #endregion
+                
                 returnMe.Add(output);
             }
             return returnMe;

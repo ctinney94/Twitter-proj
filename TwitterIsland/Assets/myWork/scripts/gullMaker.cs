@@ -16,11 +16,13 @@ public class gullMaker : MonoBehaviour {
     public AudioClip[] gullNoises;
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         islandMenus = GameObject.Find("Island menus");
         gullcam = GameObject.Find("Gullcam");
         GameObject.Find("Gull cam!").GetComponent<gullCam>().gullCollections.Add(this);
+        gull = Resources.Load("gull") as GameObject;
+        birthdayGull = Resources.Load("gull_birthday") as GameObject;
     }
 
     public void reloadGulls(string text)
@@ -49,18 +51,17 @@ public class gullMaker : MonoBehaviour {
         }
         gulls = hashtags;
 
-        if (text.ToLower().Contains("waluigi"))
-        {
-            gulls++;
-            makeGulls(gulls, true);
-        }
-        else
-        {
-            makeGulls(gulls, false);
-        }
+        int secrets = 0;
+
+        if (text.Contains("waluigi"))
+            secrets++;
+        if (text.ToLower().Contains("birthday"))
+            secrets++;
+
+        makeGulls(gulls, text.ToLower());
     }
 
-    void makeGulls(int gulls,bool secret)
+    void makeGulls(int gulls, string input)
     {
         List<string> gullNames = new List<string>();
         using (StreamReader sr = new StreamReader("Assets/myWork/gullNames.txt"))
@@ -71,29 +72,41 @@ public class gullMaker : MonoBehaviour {
             }
         }
 
-        gull = Resources.Load("gull_birthday") as GameObject;
+        if (input.Contains("waluigi"))
+        {
+            GameObject gullyGuy = Instantiate(gull);
+            gullyGuy.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = new Color(136f / 255f, 21f / 255f, 216f / 255f);
+            gullyGuy.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].SetColor("_EmissionColor", Color.black);
+            gullyGuy.name = "Waluigi Chips";
+            gullyGuy.transform.parent = gameObject.transform;
+            myGulls.Add(gullyGuy);
+        }
+        if (input.Contains("birthday"))
+        {
+            GameObject gullyGuy = Instantiate(birthdayGull);
+            int theChosenGull = Random.Range(0, gullNames.Count - 1);
+            gullyGuy.name = gullNames[theChosenGull];
+            gullyGuy.transform.parent = gameObject.transform;
+            myGulls.Add(gullyGuy);
+        }
         for (int i = 0; i < gulls; i++)
         {
             GameObject gullyGuy = Instantiate(gull);
-            gullyGuy.GetComponent<gull>().offset = i * (360 / gulls);
-
-            if (i == 0 && secret)
-            {
-                gullyGuy.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = new Color(136f / 255f, 21f / 255f, 216f / 255f);
-                gullyGuy.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].SetColor("_EmissionColor", Color.black);
-                gullyGuy.name = "Waluigi Chips";
-            }
-            else
-            {
-                int theChosenGull = Random.Range(0, gullNames.Count - 1);
-                gullyGuy.name = gullNames[theChosenGull];
-                gullNames.Remove(gullNames[theChosenGull]);
-            }
-            gullyGuy.GetComponent<Animator>().SetFloat("offset", Random.value);
-            gullyGuy.GetComponent<Animator>().SetFloat("speed", Random.Range(0.75f, 1.4f));
-            gullyGuy.tag = "gull";
+            int theChosenGull = Random.Range(0, gullNames.Count - 1);
+            gullyGuy.name = gullNames[theChosenGull];
+            gullNames.Remove(gullNames[theChosenGull]);
             gullyGuy.transform.parent = gameObject.transform;
             myGulls.Add(gullyGuy);
+        }
+
+        int o = 0;
+        foreach(GameObject gull in myGulls)
+        {
+            gull.GetComponent<gull>().offset = o * (360 / myGulls.Count);
+            gull.GetComponent<Animator>().SetFloat("offset", Random.value);
+            gull.GetComponent<Animator>().SetFloat("speed", Random.Range(0.75f, 1.4f));
+            gull.tag = "gull";
+            o++;
         }
     }
 
@@ -141,7 +154,7 @@ public class gullMaker : MonoBehaviour {
             }
             Camera.main.transform.parent = myGulls[randomGull].transform;
 
-            Camera.main.transform.localPosition = new Vector3(7.2f, 11.81f, -21);
+            Camera.main.transform.localPosition = new Vector3(7.2f, 11.81f, -27);
             Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
 
             GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
