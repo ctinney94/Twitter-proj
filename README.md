@@ -1,12 +1,28 @@
-# Twitter Island Project
+# Tweet Islands
 
-##To do list for this project
+##Important things to do
 
-ADD SANTITY CHECK IF A USER HAS PROTECTED TWEETS.
-in whch case, don't bother trying to pull tweets
-it aint gon werk
+- Write report
+- Make demo video
+ 	- things to go over
 
-- Implement basic sentiment analysis using lexicon
-	- Should add support for emojis
-- Verb/adjective support for SA
-- Fix pinch zoom/pan on mobile version
+##Future goals
+
+- Android version
+	- HuD
+	- Controls
+	- Any API problems
+- Snow effect for christmas islands!
+- Make the waluigi gull make 'wa' noises
+- Have birthday gulls make party whistle noises
+- Sound options
+- Sound options
+- Sound options
+
+##Pie in the sky
+
+- GOLF
+- Show islands from other users
+- Share islands on twitter
+	- Screenshot n that
+- Seperate islands for PROFILES
