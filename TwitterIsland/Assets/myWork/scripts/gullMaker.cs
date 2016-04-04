@@ -13,6 +13,7 @@ public class gullMaker : MonoBehaviour {
 
     public Material SecretWaluigiSkin;
 
+
     public AudioClip[] gullNoises;
 
     // Use this for initialization

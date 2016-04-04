@@ -187,9 +187,12 @@ public class HexInfo : MonoBehaviour
         }
     }
 
-    public void addHeight(float maxLeast, float heightScale, int numOfHexs)
+    public void addHeight(float maxLeast, float heightScale, int numOfHexs, bool noise)
     {
-        if (numOfHexs < 12)
+        float beachLimit= .25f;
+        float forestLimit = .5f;
+
+        if (numOfHexs < 13)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -204,16 +207,18 @@ public class HexInfo : MonoBehaviour
             int random = 0;
             if (Random.value > 0.8f)
             {
-                random++;
+                if (noise)
+                    random++;
             }
-            if (dist < 0.25f)
+
+            if (dist <= beachLimit)
             {
                 for (int i = 0; i < 7; i++)
                 {
                     moveVert(i, ((least / 5) * heightScale), sand);
                 }
             }
-            else if (dist > 0.249f && dist < 0.5f)
+            else if (dist > beachLimit && dist <= forestLimit)
             {
                 for (int i = 0; i < 7; i++)
                 {

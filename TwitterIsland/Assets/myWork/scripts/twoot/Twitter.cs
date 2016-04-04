@@ -238,11 +238,11 @@ namespace Twitter
             headers["Authorization"] = "Basic " + URL_ENCODED_KEY_AND_SECRET;
 
             WWW web = new WWW("https://api.twitter.com/oauth2/token", body, headers);
-
             while(!web.isDone)
             {
                 Debug.Log("Retrieving acess token...");
             }
+            Debug.Log(web.text);
             string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
             output = output.Replace("\"}", "");
 
@@ -287,11 +287,14 @@ namespace Twitter
             }
 
             if (web.error != null)
+            {
+                GameObject.Find("Error Text").GetComponent<Text>().enabled = true;
                 GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
+            }
             else
             {
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-                
+
                 //find user mentions
                 List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
                 //remove if true
@@ -300,13 +303,13 @@ namespace Twitter
                     extractMe = web.text;
                 else
                     extractMe = ammendOutputText;
-                
+
                 List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
                 List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"entities\":");
                 List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
                 List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
                 List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
-                
+
                 //I don't actually have a reason why I need this tweet ID
                 //Would it be that awful if I didn't include it?
                 List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
@@ -387,6 +390,7 @@ namespace Twitter
             }
             if (web.error != null)
             {
+                GameObject.Find("Error Text").GetComponent<Text>().enabled = true;
                 GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
                 Debug.Log(web.error);
             }

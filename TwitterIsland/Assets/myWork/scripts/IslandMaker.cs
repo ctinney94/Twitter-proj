@@ -15,6 +15,9 @@ public class IslandMaker : MonoBehaviour
     GameObject particles;
     public SentimentAnalysis SA;
 
+    [SerializeField]
+    public bool enableNoise { get; set; }
+
     public float meshScale = .1f, 
         hexScale = .2f, 
         favs = 1, 
@@ -33,6 +36,7 @@ public class IslandMaker : MonoBehaviour
     #region Initialization
     void Start()
 	{
+        enableNoise = true;
         MeshSetup();
         //Fill this pentagon in with hexagons.
 	}
@@ -316,7 +320,7 @@ public class IslandMaker : MonoBehaviour
             {
                 //Add some height to the hexs
                 yield return new WaitForSeconds(0.0001f);
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
+                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count,enableNoise);
             }
         }
         
@@ -395,7 +399,7 @@ public class IslandMaker : MonoBehaviour
             for (int i = 0; i < hexs.Count; i++)
             {
                 //Add some height to the hexs
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
+                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count, enableNoise);
             }
         }
     

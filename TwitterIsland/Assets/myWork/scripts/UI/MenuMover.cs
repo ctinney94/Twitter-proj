@@ -20,22 +20,25 @@ public class MenuMover : MonoBehaviour {
     void Update()
     {
         #region Slider lerping
-        if (menuBit.GetComponent<Image>().color.a > .4 && lerp)
+        if (menuBit.activeSelf)
         {
-            lerpHeight = Mathf.Lerp(lerpHeight, m_height, Time.deltaTime*2);
-            lerpSize = Mathf.Lerp(lerpSize, m_size, Time.deltaTime*2);
+            if (menuBit.GetComponent<Image>().color.a > .4 && lerp)
+            {
+                lerpHeight = Mathf.Lerp(lerpHeight, m_height, Time.deltaTime * 2);
+                lerpSize = Mathf.Lerp(lerpSize, m_size, Time.deltaTime * 2);
 
-            heightGO.GetComponentInChildren<Text>().text = "" + Mathf.FloorToInt(lerpHeight);
-            heightGO.GetComponent<Slider>().value = lerpHeight - Mathf.FloorToInt(lerpHeight);
-            sizeGO.GetComponentInChildren<Text>().text = "" + Mathf.FloorToInt(lerpSize);
-            sizeGO.GetComponent<Slider>().value = lerpSize - Mathf.FloorToInt(lerpSize);
-        }
-        else if (menuBit.GetComponent<Image>().color.a < .05f)
-        {
-            heightGO.GetComponentInChildren<Text>().text = "0";
-            heightGO.GetComponent<Slider>().value = 0;
-            sizeGO.GetComponentInChildren<Text>().text = "0";
-            sizeGO.GetComponent<Slider>().value = 0;
+                heightGO.GetComponentInChildren<Text>().text = "" + Mathf.FloorToInt(lerpHeight);
+                heightGO.GetComponent<Slider>().value = lerpHeight - Mathf.FloorToInt(lerpHeight);
+                sizeGO.GetComponentInChildren<Text>().text = "" + Mathf.FloorToInt(lerpSize);
+                sizeGO.GetComponent<Slider>().value = lerpSize - Mathf.FloorToInt(lerpSize);
+            }
+            else if (menuBit.GetComponent<Image>().color.a < .05f)
+            {
+                heightGO.GetComponentInChildren<Text>().text = "0";
+                heightGO.GetComponent<Slider>().value = 0;
+                sizeGO.GetComponentInChildren<Text>().text = "0";
+                sizeGO.GetComponent<Slider>().value = 0;
+            }
         }
         #endregion
     }
@@ -44,6 +47,7 @@ public class MenuMover : MonoBehaviour {
     {
         StopCoroutine(revert(newTweet,sentiment));
 
+        menuBit.SetActive(true);
         menuBit.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>"+
             "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>"+
             "\n\nSentiment: " + "<size=16>       </size>";

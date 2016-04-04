@@ -34,9 +34,9 @@ public class finishedIsland : MonoBehaviour
 
         numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
 
-        sizeRank = nums.findRank(thisTweet.RTs);
-        heightRank =nums.findRank(thisTweet.Favs);
-        meshy.characterSize = nums.findRank(thisTweet.RTs) / 20;
+        sizeRank = nums.findRank(thisTweet.RTs, false);
+        heightRank =nums.findRank(thisTweet.Favs,true);
+        meshy.characterSize = nums.findRank(thisTweet.RTs,false) / 20;
         FormatString(thisTweet.Text, meshy);
 
         IslandInfoUI= GameObject.Find("IslandInfo UI").GetComponent<MenuMover>();

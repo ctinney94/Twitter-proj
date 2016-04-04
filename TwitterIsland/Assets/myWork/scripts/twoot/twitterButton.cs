@@ -42,6 +42,7 @@ public class twitterButton : MonoBehaviour {
 
     public void GetTweets()
     {
+        GetComponentInParent<HudFader>().buttonControl(false);
         if (!running)
         {
             running = true;
@@ -66,6 +67,7 @@ public class twitterButton : MonoBehaviour {
     IEnumerator makeIsland()
     {
         islandBuildingText.SetActive(true);
+        GameObject.Find("retirval stats").GetComponent<Text>().enabled = true;
         GameObject.Find("retirval stats").GetComponent<Text>().text = (tweets.Count + " tweets retrieved successfully");
         for (int i = 0; i < tweets.Count; i++)
         {
@@ -90,6 +92,8 @@ public class twitterButton : MonoBehaviour {
             IslandMaker.mergeIsland(gulls, tweets[i]);
             yield return new WaitForSeconds(.25f);
         }
+        tweets.Clear();
+        GetComponentInParent<HudFader>().buttonControl(true);
         islandBuildingText.SetActive(false);
         running = false;
     }

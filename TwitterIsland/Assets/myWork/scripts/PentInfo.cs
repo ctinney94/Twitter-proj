@@ -323,7 +323,7 @@ public class PentInfo : MonoBehaviour
             {
                 //Add some height to the hexs
                 yield return new WaitForSeconds(0.0001f);
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
+                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count,true);
             }
         }
         
@@ -397,7 +397,7 @@ public class PentInfo : MonoBehaviour
             for (int i = 0; i < hexs.Count; i++)
             {
                 //Add some height to the hexs
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count);
+                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count,true);
             }
         }
     

@@ -35,10 +35,18 @@ public class numbersToSliders : MonoBehaviour
             4188620,
         };
 
-    public float findRank(float num)
+    int max=0;
+
+    public float findRank(float num, bool height)
     {
+        if (height)
+            if (max != 0)
+                num = max;
+
+        if (num > 4188620)
+            num = 4188620;
         int rank = 0;
-        for (int i = 0; i < rankings.Length; i++)
+        for (int i = 0; i < rankings.Length-1; i++)
         {
             if (num >= rankings[i])
                 rank++;
@@ -50,7 +58,7 @@ public class numbersToSliders : MonoBehaviour
     {
         if (RTs != "")
         {
-            float j = findRank(float.Parse(RTs));
+            float j = findRank(float.Parse(RTs),false);
             j /= 25;
             j *= scaleSlider.maxValue;
             scaleSlider.value = j;
@@ -60,7 +68,7 @@ public class numbersToSliders : MonoBehaviour
 
     public float RTs(int RTs)
     {
-        float j = findRank((float)(RTs));
+        float j = findRank((float)(RTs),false);
         j /= 25;
         j *= 50;
         return j;
@@ -70,7 +78,7 @@ public class numbersToSliders : MonoBehaviour
     {
         if (favs != "")
         {
-            float j = findRank(float.Parse(favs));
+            float j = findRank(float.Parse(favs),true);
             j /= 25;
             j *= heightSlider.maxValue;
             heightSlider.value = j;
@@ -79,7 +87,7 @@ public class numbersToSliders : MonoBehaviour
 
     public float favs(int favs)
     {
-        float j = findRank((float)favs);
+        float j = findRank((float)favs,true);
         j /= 25;
         j *= 1;
         return j;
@@ -129,5 +137,13 @@ public class numbersToSliders : MonoBehaviour
             float favser = rankings[(int)favs - 1] + (rem * (rankings[(int)favs] - rankings[(int)favs - 1]));
             GetComponent<InputField>().text = "" + (int)favser;
         }
+    }
+
+    public void setMax(bool b)
+    {
+        if (b)
+            max = 4188620;
+        else
+            max = 0;
     }
 }
