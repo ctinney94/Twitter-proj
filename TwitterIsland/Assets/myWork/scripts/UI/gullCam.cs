@@ -8,11 +8,13 @@ public class gullCam : MonoBehaviour {
 
 	public void cutToGullCam()
     {
+        //Enter GULL CAM view
         gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].gullCam();
     }
 
     public void exitGullCam()
     {
+        //Exit view
         gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].exitGullCam();
     }
 }

@@ -4,21 +4,20 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine.UI;
 
+//This script handles the creation of seagulls placed around islands
+
 public class gullMaker : MonoBehaviour {
 
     public int gulls = 0;
     GameObject gull, birthdayGull;
     GameObject islandMenus, gullcam;
     List<GameObject> myGulls = new List<GameObject>();
-
     public Material SecretWaluigiSkin;
-
-
     public AudioClip[] gullNoises;
-
-    // Use this for initialization
+    
     void Awake()
     {
+        //Set up references
         islandMenus = GameObject.Find("Island menus");
         gullcam = GameObject.Find("Gullcam");
         GameObject.Find("Gull cam!").GetComponent<gullCam>().gullCollections.Add(this);
@@ -135,7 +134,6 @@ public class gullMaker : MonoBehaviour {
     {
         if (myGulls.Count != 0)
         {
-
             var audio = gullcam.GetComponent<AudioSource>();
             audio.PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
             islandMenus.SetActive(false);
@@ -143,21 +141,22 @@ public class gullMaker : MonoBehaviour {
 
             //Grab the camera, disable island menu canvas, enable a new one
             Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
-            //Camera.main.GetComponent<mobileControls>().enabled = false;
+
 
             int randomGull = Random.Range(0, myGulls.Count);
             if (myGulls.Count > 2)
             {
+                //Make sure the new seagull isn't the same as the old one
                 while (Camera.main.transform.parent == myGulls[randomGull].transform)
-                {
                     randomGull = Random.Range(0, myGulls.Count);
-                }                
             }
-            Camera.main.transform.parent = myGulls[randomGull].transform;
 
+            //Move the camera to look at the seagull
+            Camera.main.transform.parent = myGulls[randomGull].transform;
             Camera.main.transform.localPosition = new Vector3(7.2f, 11.81f, -27);
             Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
 
+            //Set text for UI element
             GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
         }
         else

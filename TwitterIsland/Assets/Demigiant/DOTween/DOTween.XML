@@ -345,7 +345,7 @@
             Kills all tweens, clears all cached tween pools and plugins and resets the max Tweeners/Sequences capacities to the default values.
             </summary>
             <param name="destroy">If TRUE also destroys DOTween's gameObject and resets its initializiation, default settings and everything else
-            (so that next time you use it it will need to be re-initialized)</param>
+            (so that next time you use it will need to be re-initialized)</param>
         </member>
         <member name="M:DG.Tweening.DOTween.ClearCachedTweens">
             <summary>

@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-//I can't be fucked to fix you right now.
+//THIS IS AN OUTDATES VERSION OF THE ISLAND CREATION PIPELINE
+//Please refer to IslandMaker.cs for up to date pipeline
 
 public class PentInfo : MonoBehaviour
 {
@@ -217,8 +218,6 @@ public class PentInfo : MonoBehaviour
         CreateHexs = true;
         h = 0;
         w = 0;
-
-        UpdatePentMesh();
         Destroy(flag);
         dirtFailures = 0;
         LargestLowestValue = 0;
@@ -303,7 +302,7 @@ public class PentInfo : MonoBehaviour
 
     IEnumerator CreateIslandDELAY()
     {
-        if (hexs[0].GetComponent<HexInfo>().least == 0)
+        if (hexs[0].GetComponent<HexInfo>().heightValue == 0)
         {
             //Find pals
             detectHexEdges();
@@ -316,8 +315,8 @@ public class PentInfo : MonoBehaviour
             //Find the highest point on the map (the hex with the largest [least] value
             for (int i = 0; i < hexs.Count; i++)
             {
-                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
+                if (hexs[i].GetComponent<HexInfo>().heightValue > LargestLowestValue)
+                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().heightValue;
             }
             for (int i = 0; i < hexs.Count; i++)
             {
@@ -354,7 +353,7 @@ public class PentInfo : MonoBehaviour
         //Find highest point on map
         for (int i = 0; i < hexs.Count; i++)
         {
-            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
+            if (hexs[i].GetComponent<HexInfo>().heightValue == LargestLowestValue)
             {
                 Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
                 for (int j = 0; j < points.Length; j++)
@@ -378,7 +377,7 @@ public class PentInfo : MonoBehaviour
 
     public void CreateIsland()
     {
-        if (hexs[0].GetComponent<HexInfo>().least == 0)
+        if (hexs[0].GetComponent<HexInfo>().heightValue == 0)
         {
             //Find pals
             detectHexEdges();
@@ -391,8 +390,8 @@ public class PentInfo : MonoBehaviour
             //Find the highest point on the map (the hex with the largest [least] value
             for (int i = 0; i < hexs.Count; i++)
             {
-                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
+                if (hexs[i].GetComponent<HexInfo>().heightValue > LargestLowestValue)
+                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().heightValue;
             }
             for (int i = 0; i < hexs.Count; i++)
             {
@@ -425,7 +424,7 @@ public class PentInfo : MonoBehaviour
         //Find highest point on map
         for (int i = 0; i < hexs.Count; i++)
         {
-            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
+            if (hexs[i].GetComponent<HexInfo>().heightValue == LargestLowestValue)
             {
                 Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
                 for (int j = 0; j < points.Length; j++)
@@ -575,16 +574,16 @@ public class PentInfo : MonoBehaviour
             var randomHex = hexs[random].GetComponent<HexInfo>();
 
             //Is the random hex one we can use to start a path?
-            if (((randomHex.least / LargestLowestValue) > 0.25f))
+            if (((randomHex.heightValue / LargestLowestValue) > 0.25f))
             {
-                if (randomHex.least < ((int)(0.25 * LargestLowestValue)) + 2)
+                if (randomHex.heightValue < ((int)(0.25 * LargestLowestValue)) + 2)
                 {
                     //We have a hex we can use!
                     while (!dirtAdded)
                     {
                         var startingHex = (int)Random.Range(0, randomHex.pals.Length);
 
-                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().least / LargestLowestValue <= 0.25f)
+                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().heightValue / LargestLowestValue <= 0.25f)
                         {
                             int temp2 = startingHex + 4;
                             if (temp2 > 5)

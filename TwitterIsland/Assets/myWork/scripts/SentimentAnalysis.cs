@@ -6,8 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 public class SentimentAnalysis : MonoBehaviour {
-
-    //public Text input;
+    
     public List<string> niceWords = new List<string>();
     public List<string> notSoNiceWords = new List<string>();
     public TextAsset positiveWords, negativeWords;
@@ -34,13 +33,7 @@ public class SentimentAnalysis : MonoBehaviour {
             notSoNiceWords.Add(s);
         }
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        //CheckText(input.text);
-	}
-
+    
     public string getFormattedText(string input)
     {
         string newText = input;
@@ -88,7 +81,6 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + notSoNiceWords[i]))
             {
-                Debug.Log("Nasty word " +notSoNiceWords[i]);
                 nasty++;
             }
         }
@@ -101,7 +93,6 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(niceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + niceWords[i]))
             {
-                Debug.Log("Nice word " + niceWords[i]);
                 nice++;
             }
         }
@@ -120,12 +111,7 @@ public class SentimentAnalysis : MonoBehaviour {
     public void CheckText(string input)
     {
         string newText = input;
-
-        /*char[] delimChars = { ' ', '\n', ',', '.', ';', '#' };
-        string[] words = input.Split(delimChars);
-        foreach (string s in words)
-            Debug.Log(s);*/
-
+        
         nasty = 0;
         nice = 0;
         for (int i = 0; i < notSoNiceWords.Count; i++)
@@ -137,16 +123,14 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + notSoNiceWords[i]))
             {
-                Debug.Log(newText);
-                Debug.Log(notSoNiceWords[i]);
                 newText = newText.ToLower().Replace(notSoNiceWords[i], "<color=red>" + notSoNiceWords[i] + "</color>");
-                Debug.Log(newText);
                 nasty++;
-                Debug.Log(notSoNiceWords[i] + " detected");
             }
         }
         for (int i = 0; i < niceWords.Count; i++)
         {
+            //A Regex expression would've been a far more elegant solution compared to this
+            //At least I can guarentue this method works.
             if (input.ToLower().Contains(" " + niceWords[i] + " ")
                 || input.ToLower().Contains("." + niceWords[i] + " ")
                 || input.ToLower().Contains(" " + niceWords[i] + ".")
@@ -156,7 +140,6 @@ public class SentimentAnalysis : MonoBehaviour {
             {
                 newText = newText.ToLower().Replace(niceWords[i], "<color=lime>" + niceWords[i] + "</color>");
                 nice++;
-                Debug.Log(niceWords[i] + " detected");
             }
         }
         float t = nice + nasty;

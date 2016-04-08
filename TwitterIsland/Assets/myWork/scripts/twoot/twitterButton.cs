@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 
 public class twitterButton : MonoBehaviour {
 
-    loginButton details;
+    public string consumerKey, consumerSecret;
     public int tweetsToGrab;
     public List<Twitter.API.Tweet> tweets;
     public InputField usernameInput;
@@ -18,28 +18,8 @@ public class twitterButton : MonoBehaviour {
     public GameObject gulley;
     public GameObject tweetCountText,islandBuildingText;
     public bool verified;
-
-    // Use this for initialization
-    void Start()
-    {
-        details = GameObject.Find("Login Button").GetComponent<loginButton>();
-    }
-
-    public void postTweet()
-    {
-        string m_Tweet = GameObject.Find("Tweet Input").GetComponent<InputField>().text;
-
-        StartCoroutine(Twitter.API.PostTweet(m_Tweet, details.consumerKey, details.consumerSecret, details.m_AccessTokenResponse,
-                           new Twitter.PostTweetCallback(this.OnPostTweet)));
-    }
-
-    void OnPostTweet(bool success)
-    {
-        print("OnPostTweet - " + (success ? "succedded." : "failed."));
-    }
-
+        
     bool running;
-
     public void GetTweets()
     {
         GetComponentInParent<HudFader>().buttonControl(false);
@@ -48,27 +28,21 @@ public class twitterButton : MonoBehaviour {
             running = true;
             if (usernameInput.text != null)
             {
-                Twitter.API.GetProfile(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
-                Twitter.API.GetUserTimeline(usernameInput.text, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
+                Twitter.API.GetProfile(usernameInput.text, Twitter.API.GetTwitterAccessToken(consumerKey, consumerSecret), this);
+                Twitter.API.GetUserTimeline(usernameInput.text, Twitter.API.GetTwitterAccessToken(consumerKey, consumerSecret), tweetsToGrab, this);
             }
-            else
-            {
-                Twitter.API.GetProfile(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), this);
-                Twitter.API.GetUserTimeline(details.ScreenName, Twitter.API.GetTwitterAccessToken(details.consumerKey, details.consumerSecret), tweetsToGrab, this);
-            }
-            //Once we have the tweets, do islands!
-            //for each tweet
+            //Once we have the tweets, Make some islands!
             StartCoroutine(makeIsland());
         }
         else
-            Debug.Log("Island creartion process already running - please wait"); //Chill fam, fuck.
+            Debug.Log("Island creation process already running - please wait"); //Chill fam, fuck.
     }
 
     IEnumerator makeIsland()
     {
         islandBuildingText.SetActive(true);
-        GameObject.Find("retirval stats").GetComponent<Text>().enabled = true;
-        GameObject.Find("retirval stats").GetComponent<Text>().text = (tweets.Count + " tweets retrieved successfully");
+        GameObject.Find("retrieval stats").GetComponent<Text>().enabled = true;
+        GameObject.Find("retrieval stats").GetComponent<Text>().text = (tweets.Count + " tweets retrieved successfully");
         for (int i = 0; i < tweets.Count; i++)
         {
             islandBuildingText.GetComponent<Text>().text = "Building Islands..." + "\n" + (i + 1) + "/" + tweets.Count;
@@ -76,7 +50,6 @@ public class twitterButton : MonoBehaviour {
             IslandMaker.favs = nums.favs(tweets[i].Favs);
             IslandMaker.meshScale = nums.RTs(tweets[i].RTs);
             IslandMaker.verified = verified;
-            IslandMaker.UpdatePentMesh(null);
 
             IslandMaker.avatar = avatarImage;
             IslandMaker.updateHexs(tweets[i].Text);

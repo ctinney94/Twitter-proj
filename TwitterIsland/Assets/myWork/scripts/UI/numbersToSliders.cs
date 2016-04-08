@@ -4,8 +4,12 @@ using System.Collections;
 
 public class numbersToSliders : MonoBehaviour
 {
-    public Slider scaleSlider, heightSlider;
-    public InputField rtsInput;
+    //Not currently used
+    //public Slider scaleSlider, heightSlider;
+    //public InputField rtsInput;
+
+    //The number of likes or re-tweets required for rank
+    //For information on how this system was created, please consult the research report associated with this project
     int[] rankings =
         {
             0,
@@ -35,45 +39,64 @@ public class numbersToSliders : MonoBehaviour
             4188620,
         };
 
-    int max=0;
+    int max = 0;
 
+    //Find the rank of the given value
     public float findRank(float num, bool height)
     {
+        //If this is a height value
         if (height)
-            if (max != 0)
-                num = max;
+            if (max != 0)//And if we want to maximum height value
+                num = max;//Set height value to max
 
+        //If value is greater than max, clamp it to max
         if (num > 4188620)
             num = 4188620;
+
         int rank = 0;
-        for (int i = 0; i < rankings.Length-1; i++)
+
+        //Find rank in integer form
+        for (int i = 0; i < rankings.Length - 1; i++)
         {
             if (num >= rankings[i])
                 rank++;
         }
-        return rank +((num - rankings[rank - 1]) / (rankings[rank] - rankings[rank - 1]));
-    }
-
-    public void RTs(string RTs)
-    {
-        if (RTs != "")
-        {
-            float j = findRank(float.Parse(RTs),false);
-            j /= 25;
-            j *= scaleSlider.maxValue;
-            scaleSlider.value = j;
-            GameObject.Find("PentTest").GetComponent<PentInfo>().UpdatePentMesh();
-        }
+        //Find decimal places for rank to add to previously obtained value, then return that value
+        return rank + ((num - rankings[rank - 1]) / (rankings[rank] - rankings[rank - 1]));
     }
 
     public float RTs(int RTs)
     {
-        float j = findRank((float)(RTs),false);
+        //Find rank from number of re-tweets
+        float j = findRank((float)(RTs), false);
+
+        //Some number fudging to get the kind of range I want
         j /= 25;
         j *= 50;
         return j;
     }
+    public float favs(int favs)
+    {
+        //Find rank from number of favourites
+        float j = findRank((float)favs, true);
+        //Some number fudging to get the kind of range I want
+        j /= 25;
+        j *= 1;
+        return j;
+    }
 
+    //Toggle maximum height values
+    public void setMax(bool b)
+    {
+        if (b)
+            max = 4188620;
+        else
+            max = 0;
+    }
+
+    #region  A whole bunch of functions which are no longer used
+
+    /*
     public void favs(string favs)
     {
         if (favs != "")
@@ -84,13 +107,17 @@ public class numbersToSliders : MonoBehaviour
             heightSlider.value = j;
         }
     }
-
-    public float favs(int favs)
+    
+    public void RTs(string RTs)
     {
-        float j = findRank((float)favs,true);
-        j /= 25;
-        j *= 1;
-        return j;
+        if (RTs != "")
+        {
+            float j = findRank(float.Parse(RTs),false);
+            j /= 25;
+            j *= scaleSlider.maxValue;
+            scaleSlider.value = j;
+            //GameObject.Find("PentTest").GetComponent<PentInfo>().UpdatePentMesh();
+        }
     }
 
     public void scaleToRTs(float scale)
@@ -137,13 +164,6 @@ public class numbersToSliders : MonoBehaviour
             float favser = rankings[(int)favs - 1] + (rem * (rankings[(int)favs] - rankings[(int)favs - 1]));
             GetComponent<InputField>().text = "" + (int)favser;
         }
-    }
-
-    public void setMax(bool b)
-    {
-        if (b)
-            max = 4188620;
-        else
-            max = 0;
-    }
+    }*/
+    #endregion
 }

@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+//The basis of camera orbiting and zooming was created from the following source;
 //SOURCE:
 //http://wiki.unity3d.com/index.php?title=MouseOrbitZoom
 
-[AddComponentMenu("Camera-Control/3dsMax Camera Style")]
 public class cameraOrbitControls : MonoBehaviour
 {
     public List<GameObject> islands = new List<GameObject>();
@@ -45,8 +45,10 @@ public class cameraOrbitControls : MonoBehaviour
     
     public Vector3 newTarget;
 
+    //Change the camera target to a different island
     public void changeTarget(int direction)
     {
+        //Switch to the next island to the right
         if (direction > 0)
         {
             if (currentIsland != islands.Count)
@@ -56,6 +58,7 @@ public class cameraOrbitControls : MonoBehaviour
                 currentIsland += direction;
             }
         }
+        //Switch to the island on the left
         else
         {
             if (currentIsland >1)
@@ -64,17 +67,18 @@ public class cameraOrbitControls : MonoBehaviour
                 newTarget = islands[currentIsland - 1].transform.position;
                 islands[currentIsland-1].GetComponent<finishedIsland>().updateUI();
             }
+            //Back to 
             else
             {
                 currentIsland = 0;
                 newTarget = Vector3.zero;
             }
         }
-        if (islands.Count > 0 && currentIsland > 0)
+        /*if (islands.Count > 0 && currentIsland > 0)
         {
             GameObject.Find("WorldLight").GetComponent<lighting>().newShadowStrength = islands[currentIsland - 1].GetComponent<finishedIsland>().blackness;
             GameObject.Find("WorldLight").GetComponent<lighting>().newTimeOfDay = (float)islands[currentIsland - 1].GetComponent<finishedIsland>().thisTweet.dateTime.Hour / 24;
-        }
+        }*/
     }
 
     public void Update()
@@ -161,45 +165,41 @@ public class cameraOrbitControls : MonoBehaviour
         yDeg = Vector3.Angle(Vector3.up, transform.up);
     }
 
-    /*
-     * Camera logic on LateUpdate to only update after all character movement logic has been handled. 
-     */
+    //Camera logic on LateUpdate to only update after all character movement logic has been handled. 
     void LateUpdate()
     {
-        //Lerp target
+        //Lerp camera position to target
         target.position = Vector3.Lerp(target.position, newTarget + newTargetOffset, Time.deltaTime * 5);
         if (target.position == newTarget + newTargetOffset)
             target.position = newTarget+ newTargetOffset;
 
-        // If Control and Alt and Middle button? ZOOM!
+        //Right click used to pan camera
         if (Input.GetMouseButton(2))
         {
             dummyTarget.rotation = transform.rotation;
             dummyTarget.position = newTarget + newTargetOffset;
-            //grab the rotation of the camera so we can move in a psuedo local XY space
+            //grab the rotation of the camera so we can move in a pseudo local XY space
             dummyTarget.rotation = transform.rotation;
             dummyTarget.Translate(Vector3.right * -Input.GetAxis("Mouse X") * panSpeed);
             dummyTarget.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
 
             newTargetOffset = dummyTarget.position - newTarget;
         }
-        // If middle mouse and left alt are selected? ORBIT
+        //If Left mouse button is being held down, orbit camera
         else if (Input.GetMouseButton(0))
         {
             xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
             yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
-
-            ////////OrbitAngle
-
+            
             //Clamp the vertical axis for the orbit
             yDeg = ClampAngle(yDeg, yMinLimit, yMaxLimit);
             // set camera rotation f
             desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
         }
-        // otherwise if middle mouse is selected, we pan by way of transforming the target in screenspace
+        //Otherwise if middle mouse is selected, we pan by way of transforming the target in screenspace
         else if (Input.GetMouseButton(1))
         {
-            //grab the rotation of the camera so we can move in a psuedo local XY space
+            //grab the rotation of the camera so we can move in a pseudo local XY space
             target.rotation = transform.rotation;
             target.Translate(Vector3.right * -Input.GetAxis("Mouse X") * panSpeed);
             target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);

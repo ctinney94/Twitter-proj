@@ -3,16 +3,21 @@ using System.Collections;
 
 public class finishedIsland : MonoBehaviour
 {
-
+    //Island colour scheme
     Color grass = Color.Lerp(Color.green, Color.black, 0.5f);
     Color sand = Color.Lerp(Color.yellow, Color.white, 0.2f);
     Color rock = Color.gray;
     Color dirt = new Color(0.96f, 0.64f, 0.38f);
 
+    //Lighting shadow strength, influenced by mood variable of the attached particle system
+    //See mood/sentiment analysis scripts for more info
     [Range(0, 0.85f)]
     public float blackness = 0;
     Light worldLight;
+
+    //The tweet associated with this island
     public Twitter.API.Tweet thisTweet;
+
     public int islandIndex;
     float sizeRank, heightRank;
     GameObject tweetText;
@@ -20,73 +25,93 @@ public class finishedIsland : MonoBehaviour
     TextMesh meshy;
     MenuMover IslandInfoUI;
 
+    //Initialization
     public void WakeUp()
     {
+        //Set up references
         worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
         tweetText = new GameObject("Tweet text");
         tweetText.transform.parent = transform;
         tweetText.AddComponent<TextMesh>();
+        numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
+        IslandInfoUI= GameObject.Find("IslandInfo UI").GetComponent<MenuMover>();
+
+        //Create a text mesh object to float above the island, displaying the tweet
         meshy = tweetText.GetComponent<TextMesh>();
         meshy.anchor = TextAnchor.LowerCenter;
         meshy.alignment = TextAlignment.Center;
+        //Place the text mesh above the flagpole, the highest point on the island, in the middle
         meshy.transform.position = GameObject.Find("flagpole " + islandIndex).transform.position + new Vector3(0,1,0);
         meshy.fontSize = 50;
-
-        numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
-
-        sizeRank = nums.findRank(thisTweet.RTs, false);
-        heightRank =nums.findRank(thisTweet.Favs,true);
+        //Scale the character size of the text mesh based on number of re-tweets
         meshy.characterSize = nums.findRank(thisTweet.RTs,false) / 20;
+        //Format the tweet text appropriately for display
         FormatString(thisTweet.Text, meshy);
 
-        IslandInfoUI= GameObject.Find("IslandInfo UI").GetComponent<MenuMover>();
+        //Find the height and size rank for the associated tweet
+        sizeRank = nums.findRank(thisTweet.RTs, false);
+        heightRank =nums.findRank(thisTweet.Favs,true);
     }
 
     void Update()
     {
         //Distance from Camera
         float distance;
-        if (Camera.main!=null)
-            distance= Vector3.Distance(tweetText.transform.position, Camera.main.transform.position);
-        else
-            distance = Vector3.Distance(tweetText.transform.position, GameObject.Find("Camera").transform.position);
-
-
-        if (distance < 250)
+        if (Camera.main != null)
         {
-            tweetText.SetActive(true);
-            float val = Mathf.Clamp(1 / distance * 15, 0, .5f);
-            tweetText.transform.localScale = new Vector3(val, val, val);
+            //Find the distance between the text mesh and the main camera
+            distance = Vector3.Distance(tweetText.transform.position, Camera.main.transform.position);
 
+            //If the camera is close enough...
+            if (distance < 250)
+            {
+                //Enable text
+                tweetText.SetActive(true);
+                //Scale text based of distance to camera
+                float val = Mathf.Clamp(1 / distance * 15, 0, .5f);
+                tweetText.transform.localScale = new Vector3(val, val, val);
+            }
+            else
+                tweetText.SetActive(false);
         }
-        else
-            tweetText.SetActive(false);
 
+        //If text is enabled
         if (tweetText != null)
         {
-            if (Camera.main != null)
+            //And if the island view is active
+            if (Camera.main)
             {
+                //Rotate the text mesh to face the main camera
                 tweetText.transform.LookAt(2*tweetText.transform.position - Camera.main.transform.position);
-                var d = tweetText.transform.localRotation.eulerAngles;
-                d.y += 180;
-                //tweetText.transform.localRotation = Quaternion.Euler(d);
             }
             else
             {
+                //Rotate the text mesh to face the other camera
                 tweetText.transform.LookAt(2 * tweetText.transform.position - GameObject.Find("Camera").transform.position);
+
+                //Find the distance between the text mesh and the other camera
+                distance = Vector3.Distance(tweetText.transform.position, GameObject.Find("Camera").transform.position);
+                
+                //Scale text based of distance to camera
+                float val = Mathf.Clamp(distance/50, .05f, .5f);
+                tweetText.transform.localScale = new Vector3(val, val, val);
             }
         }
     }
-    
+
+    //Format the input string with line breaks, apply to the text mesh object
+    //Slightly modified from code in the following post;
+    //SOURCE:
+    //http://forum.unity3d.com/threads/3d-text-wrap.32227/#post-321756
     void FormatString(string text, TextMesh textObject)
     {
-        int maxLineChars = 35; //maximum number of characters per line...experiment with different values to make it work
+        //maximum number of characters per line
+        int maxLineChars = 35;
+        int charCount = 0;
+        var result = "";
 
         string[] words;
-        var result = "";
-        int charCount = 0;
-        words = text.Split(" "[0]); //Split the string into seperate words
-        result = "";
+        words = text.Split(" "[0]); //Split the string into separate words
 
         for (var index = 0; index < words.Length; index++)
         {
@@ -115,10 +140,12 @@ public class finishedIsland : MonoBehaviour
             }
         }
         result = result.Replace("\\n", "\n ");
+
+        //Analyse the sentiment of this text
         textObject.text = SA.getFormattedText(result);
     }
 
-    //not currently used
+    //Not currently used
     void OnTriggerStay(Collider col)
     {
         int val = 250;
@@ -136,24 +163,29 @@ public class finishedIsland : MonoBehaviour
             transform.position = newPos;
         }
     }
-
+    
+    //When clicked on, change the target of the camera to this island
     void OnMouseDown()
     {
         if (Camera.main != null)
         {
+            //Change target to this
             Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
 
+            //If this island is not the currently selected island, update the UI to display new info
             if (Camera.main.GetComponent<cameraOrbitControls>().currentIsland != islandIndex)
                 updateUI();
 
             Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
             Camera.main.GetComponent<cameraOrbitControls>().newTargetOffset = Vector3.zero;
+
+            //Change world light shadow strength to that appropriate of the island
             worldLight.GetComponent<lighting>().newShadowStrength = blackness;
-            worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
+            //worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }
+
         //I tried adding the poofs back in as a thing.
         //Turns out looking through every single vertex of a big island is kinda time consuming, and slows the program right down.
-
         /*Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Debug.DrawRay(ray.origin, ray.direction, Color.green);
 
@@ -190,12 +222,16 @@ public class finishedIsland : MonoBehaviour
         }*/
     }
 
+    //Update information to display in UI
     public void updateUI()
     {
+        //Grab sentiment value from game object parented to the island
         float sentiment = GetComponentInChildren<mood>().moodness;
+        //Update UI with information for this island
         IslandInfoUI.updateUI(thisTweet,sentiment,heightRank,sizeRank);
     }
 
+    //Not currently used
     public int NearestVertexTo(Vector3 point)
     {
         // convert point to local space

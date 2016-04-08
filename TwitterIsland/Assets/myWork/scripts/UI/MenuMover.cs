@@ -275,6 +275,7 @@ public class MenuMover : MonoBehaviour {
         #endregion
 
         Text uiText = menuBit.GetComponentInChildren<Text>();
+        if (uiText)
         uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
             "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
             "\n\nSentiment: " + "<size=16>       </size>";

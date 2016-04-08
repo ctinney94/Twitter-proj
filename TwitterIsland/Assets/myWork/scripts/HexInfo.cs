@@ -4,25 +4,24 @@ using System.Collections.Generic;
 
 public class HexInfo : MonoBehaviour
 {
-    //basic hexagon mesh making
-    public Vector3[] Vertices;
-    public Vector2[] uv;
-    public int[] Triangles;
     public Material mat;
-    public Rigidbody rig;
-    //public float scale = 0.25f;
-    Color[] newColours;
+
+    //Number of hexagons that border this one
     public int numOfPals = 0;
-
-    Color grass = Color.Lerp(Color.green, Color.black, 0.5f);
-    Color sand = Color.Lerp(Color.yellow, Color.white, 0.2f);
-    Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f);
-    Color rock = Color.gray;
-    Color dirt = new Color(0.96f, 0.64f, 0.38f);
-    public GameObject camp;
-
     public GameObject[] pals = { null, null, null, null, null, null };
 
+    //Colours used in the vertex colouring process
+    Color[] newColours;
+    Color grass = Color.Lerp(Color.green, Color.black, 0.5f);
+    Color sand = Color.Lerp(Color.yellow, Color.white, 0.2f);
+    Color rock = Color.gray;
+    Color dirt = new Color(0.96f, 0.64f, 0.38f);
+    Color wetSand = Color.Lerp(Color.blue, Color.yellow, 0.25f); //Currently not used
+    
+    public GameObject camp;
+
+    //When clicked on, create partivle effects at cursor position
+    //Currently not used since hexs are combined in the island merging process, removing this class in the process.
     void OnMouseDown()
     {
         Color centreColour = getColors()[6];
@@ -52,34 +51,34 @@ public class HexInfo : MonoBehaviour
     {
         return GetComponent<MeshFilter>().mesh.vertices;
     }
+
     public Color[] getColors()
     {
         return GetComponent<MeshFilter>().mesh.colors;
     }
 
+    //Create a hexagonal mesh
     public void MeshSetup(float scale)
     {
-        #region verts
-        float floorLevel = 0f;
+        #region Vertex, triangle and UV creation
         Vector3[] initVerts =
         {
-            //These are the values required to create a hexagon with a side length of 6
-            new Vector3(-3f, floorLevel, -Mathf.Sqrt(36-9)),    //0
-            new Vector3(-6f, floorLevel, 0),                    //1
-            new Vector3(-3f, floorLevel, Mathf.Sqrt(36-9)),     //2
-            new Vector3(3f, floorLevel, Mathf.Sqrt(36-9)),      //3
-            new Vector3(6f, floorLevel, 0),                     //4
-            new Vector3(3f, floorLevel, -Mathf.Sqrt(36-9)),      //5
-            new Vector3(0,0,0),
-            };
+                //Based off this hex here:
+                //https://s-media-cache-ak0.pinimg.com/236x/7e/f2/a7/7ef2a733a6fa0fe4ae0d64cfbb1f5b2c.jpg
 
+                //These are the values required to create a hexagon with a side length of 6
+                new Vector3(-3f, 0, -Mathf.Sqrt(36-9)),    //0
+                new Vector3(-6f, 0, 0),                    //1
+                new Vector3(-3f, 0, Mathf.Sqrt(36-9)),     //2
+                new Vector3(3f, 0, Mathf.Sqrt(36-9)),      //3
+                new Vector3(6f, 0, 0),                     //4
+                new Vector3(3f, 0, -Mathf.Sqrt(36-9)),     //5
+                new Vector3(0,0,0),
+        };
+
+        //Scale these vertices to the input scale value
         for (int i = 0; i < initVerts.Length; i++)
             initVerts[i] = Vector3.Scale(initVerts[i], new Vector3(scale, 1, scale));
-        //Based off this hex here:
-        //https://s-media-cache-ak0.pinimg.com/236x/7e/f2/a7/7ef2a733a6fa0fe4ae0d64cfbb1f5b2c.jpg
-        #endregion
-
-        #region triangles
 
         int[] triangles =
        {
@@ -89,16 +88,9 @@ public class HexInfo : MonoBehaviour
             4,6,3,
             5,6,4,
             0,6,5,
-
-            /*1,5,0,
-            1,4,5,
-            1,2,4,
-            2,3,4*/
        };
-        #endregion
 
-        #region uv
-        uv = new Vector2[]
+        Vector2[] uv=
         {
             new Vector2(0.25f,0),   //0
             new Vector2(0,0.5f),    //1
@@ -110,45 +102,49 @@ public class HexInfo : MonoBehaviour
         };
         #endregion
 
-        #region finalize
-        //create a mesh object to pass our data into
+        #region assembly
+        //Create a mesh to pass data into
         Mesh mesh = new Mesh();
-        //add our vertices to the mesh
+        //Add verts to the mesh
         mesh.vertices = initVerts;
-        //add our triangles to the mesh
+        //add triangles to the mesh
         mesh.triangles = triangles;
-        //add out UV coordinates to the mesh
+        //Add UV coordinates to the mesh
         mesh.uv = uv;
 
-        //add a mesh filter to the GameObject the script is attached to; cache it for later
+        //Create mesh filter and render components to this mesh can be viewed
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        //add a mesh renderer to the GO the script is attached to
-
+        //Also add a collider
         MeshCollider meshCol = gameObject.AddComponent<MeshCollider>();
 
-        //and material
+        //...and a material
         meshRenderer.material = mat;
 
         //make it play nicely with lighting
         mesh.RecalculateNormals();
-
-        //set the GO's meshFilter's mesh to be the one we just made
+        
+        //Set the new meshfilter to use the hexagonal mesh created in the previous section
         meshFilter.mesh = mesh;
-        rig = gameObject.AddComponent<Rigidbody>();
-        rig.isKinematic = true;
         meshCol.sharedMesh = mesh;
-        //UV TESTING
-        //renderer.material.mainTexture = texture;
+
+        //A rigidbody is required for raycasting to work between the hexagons
+        gameObject.AddComponent<Rigidbody>().isKinematic = true;
+
+        //Initialize colour array
         newColours = new Color[initVerts.Length];
         mesh.colors = newColours;
         #endregion
     }
 
+    //Height weightings for each direction
     public int[] dirWeightings = { 0, 0, 0, 0, 0, 0 };
-    public float avg, most, least;
+    public float heightValue;
+
+    //Find the height value of this hexagon
     public void hexWeighter(int totalHexs)
     {
+        //For each neighbouring hexagon, increment numOfPals;
         for (int i = 0; i < pals.Length; i++)
         {
             if (pals[i] != null)
@@ -159,108 +155,125 @@ public class HexInfo : MonoBehaviour
         {
             if (pals[i] != null)
             {
-                dirWeightings[i]++;//We have at least 1 pal in this direction :)
+                //We have at least 1 neighbouring hexagon in this direction
+
+                //Increment direction weighting
+                dirWeightings[i]++;
 
                 var nextHex = getNextPals(pals[i], i);
-                do
-                {
-                    if (nextHex != null)
-                    {
-                        dirWeightings[i]++;
-                        nextHex = getNextPals(nextHex, i);
-                    }
-                } while (nextHex != null);
-            }
-        }
-        avg = (dirWeightings[0] + dirWeightings[1] + dirWeightings[2] + dirWeightings[3] + dirWeightings[4] + dirWeightings[5]) / 6;
-        for (int i = 0; i < 6; i++)
-        {
-            if (dirWeightings[i] > most)
-                most = dirWeightings[i];
-        }
 
-        least = 1000;
+                //If this hexagon also features a border hexagon in the same direction
+                while (nextHex != null)
+                {
+                    //Increment direction weighting
+                    dirWeightings[i]++;
+                    nextHex = getNextPals(nextHex, i);
+                }
+            }
+            else
+                break;            
+        }
+        
+        //Find the lowest directional value
+        float least = 1000;
         for (int i = 0; i < 6; i++)
         {
             if (dirWeightings[i] < least)
                 least = dirWeightings[i];
         }
+
+        //Set height value to lowest number of bordering hexagons then extend in a given direction
+        heightValue = least;
     }
 
-    public void addHeight(float maxLeast, float heightScale, int numOfHexs, bool noise)
+    //Add height to the hexagon based on distance from the centre point of the island
+    //...as well as other factors
+    public void addHeight(float maxHeight, float heightScale, int numOfHexs, bool noiseEnabled)
     {
         float beachLimit= .25f;
         float forestLimit = .5f;
 
+        //If the island is really small
         if (numOfHexs < 13)
         {
+            //For each vertex of the hexagon mesh
             for (int i = 0; i < 7; i++)
             {
+                //Move vertex upwards, based on the number of neighbouring hexagons
                 moveVert(i, numOfPals * 0.5f * heightScale, sand);
             }
         }
         else
         {
-            float dist = least / maxLeast;
+            //The % distance this hexagon is away from the centre of the island
+            float dist = heightValue / maxHeight;
             //% of closeness to centre
             //0 is beach
-            int random = 0;
+            int heightNoise = 0;
             if (Random.value > 0.8f)
             {
-                if (noise)
-                    random++;
+                if (noiseEnabled)
+                    heightNoise++;
             }
 
+            //If the hexagon is part of the outer edge of the island
             if (dist <= beachLimit)
             {
                 for (int i = 0; i < 7; i++)
                 {
-                    moveVert(i, ((least / 5) * heightScale), sand);
+                    //Move each vertex upwards based on height value and scale
+                    moveVert(i, ((heightValue / 5) * heightScale), sand);
                 }
             }
             else if (dist > beachLimit && dist <= forestLimit)
             {
                 for (int i = 0; i < 7; i++)
                 {
-                    moveVert(i, ((least / 3) * heightScale) + random, grass);
+                    //Move each vertex upwards based on height value and scale
+                    //Also add noise if applicable
+                    moveVert(i, ((heightValue / 3) * heightScale) + heightNoise, grass);
                 }
             }
             else
             {
                 for (int i = 0; i < 7; i++)
                 {
-                    //this peaks should rise exptonentially
-                    //well not quite exponentially, but it sho
-                    //moveVert(i, ((least * least) * .1f) + ((avg - offset - 2) * .3f) + random, rock);
-
-                    float startingPoint = (maxLeast / 2);
-
-                    float hexsIn = least - startingPoint;
-                    moveVert(i, (((least / 3) * heightScale) + ((hexsIn * 2) * heightScale)) + random, rock);
+                    float startingPoint = (maxHeight / 2);
+                    //The number of hexs between this hexagon and the outer 50% of the island
+                    float hexsIn = heightValue - startingPoint;
+                    //Move each vertex upwards based on height value and scale
+                    //Also add noise if applicable
+                    //Add additional height based on the number of hexagons between this hex and the outer 50% of hexagons 
+                    moveVert(i, (((heightValue / 3) * heightScale) + ((hexsIn * 2) * heightScale)) + heightNoise, rock);
                 }
             }
         }
     }
 
+    //Add colour values to vertices based on height and gradient values
     public void heightColour(float maxLeast)
     {
-        Vertices = getVerts();
-
+        //NOTE:
+        //Using a value of -99 in the moveVert() method won't move the vertex
         var ran = Random.value;
-        //Add basic colours for sand, grass and the wetsand around the base of the island
+
+        //For each vertex...
         for (int i = 0; i < 7; i++)
         {
-
-            if (Vertices[i].y > 0.5f && Vertices[i].y < 6 || (least / maxLeast) > 0.25f)
+            //If the vertex y value between 0.5 and 6 
+            if (getVerts()[i].y > 0.5f && getVerts()[i].y < 6 || (heightValue / maxLeast) > 0.25f)
             {
+                //Colour the vertice green
                 if (ran > 0.25f)
                     moveVert(i, -99, grass);
+                //And maybe a slightly different shader of green too
                 else
                     moveVert(i, -99, Color.Lerp(Color.black, grass, 0.8f));
             }
-            if (Vertices[i].y < 0.6f)
+            //If the vertex y value is lower than 0.6
+            if (getVerts()[i].y < 0.6f)
             {
-
+                //Colour the vertice yellow to create a sandy beach
                 if (ran > 0.25f)
                     moveVert(i, -99, sand);
                 else
@@ -268,18 +281,22 @@ public class HexInfo : MonoBehaviour
             }
         }
 
-        //If gradient is mighty big, add some rocky hillside
+        //Also for each vertex...
         for (int i = 0; i < 7; i++)
         {
+            //Find the gradient between the current vertex of the one opposite it in the hexagon
             int vertTocCheck = i + 3;
             if (vertTocCheck > 5)
                 vertTocCheck -= 6;
-            float gradient = Vertices[vertTocCheck].y - Vertices[i].y;
+            float gradient = getVerts()[vertTocCheck].y - getVerts()[i].y;
 
+            //If the gradient is larger than 1
             if (gradient > 1f || gradient < -1f)
             {
+                //Then for each vertex of the hexagon
                 for (int j = 0; j < 7; j++)
                 {
+                    //Colour the vertex grey or brown to represent a slope
                     if (ran > 0.15f)
                         moveVert(j, -99, rock);
                     else
@@ -289,15 +306,16 @@ public class HexInfo : MonoBehaviour
             }
         }
 
-        //Sprinkle some now on top :)
+        //Sprinkle some snow on top
         for (int i = 0; i < 7; i++)
         {
-            if (Vertices[i].y > 10f)
+            if (getVerts()[i].y > 10f)
                 moveVert(i, -99, Color.white);
         }
     }
 
-    public GameObject getNextPals(GameObject hex, int direction)//Returns true if you can keep going that way, and false if you can't
+    //Returns any neighbouring hexagons of a given hex in a given direction
+    public GameObject getNextPals(GameObject hex, int direction)
     {
         if (hex.GetComponent<HexInfo>().pals[direction] != null)
             return hex.GetComponent<HexInfo>().pals[direction];
@@ -305,6 +323,7 @@ public class HexInfo : MonoBehaviour
             return null;
     }
 
+    //This colour blending function is currently not utilized.
     public void blendCols(int vertNum)
     {
         int i1 = vertNum - 1;
@@ -323,24 +342,38 @@ public class HexInfo : MonoBehaviour
         {
             var borderHex = pals[vertNum].GetComponent<HexInfo>();
             var borderHex2 = pals[i1].GetComponent<HexInfo>();
-
-
+            
+            //Find the colour values for the border vertice 
             var newCol = (borderHex.getColors()[i4] + borderHex2.getColors()[i3] + getColors()[vertNum]) / 3;
             moveVert(vertNum, -99, newCol);
             borderHex.moveVert(i4, -99, newCol);
             borderHex2.moveVert(i3, -99, newCol);
         }
         //Old code for centre vert
-        //var newColy = (myCols[0] + myCols[1] + myCols[2] + myCols[3] + myCols[4] + myCols[5]) / 6;
+        //var newColy = (getColors()[0] + getColors()[1] + getColors()[2] + getColors()[3] + getColors()[4] + getColors()[5]) / 6;
 
     }
 
+    //Joins the vertices of different hexagons together
     public void interlopeCorner(int vertNum)
     {
         Vector3[] myVerts = getVerts();
 
         switch (vertNum)
         {
+            //Each case remembles something along the lines of the following pseudo
+            //------------------------------------------------------------------------
+            //If the hexagon has 2 neighbouring hexagons at a point
+            //Find the average y position of the 3 overlapping vertices
+            //Move each of the 3 vertices to this average point.
+
+            //Else if hexagons has any other neighbours
+            //Find the average between those points, and move the vertices
+
+            //If the hexagons has no neighbours at a point, it must be on the edge of the island mesh
+            //In which case, move the vertice down into the ocean.
+            //------------------------------------------------------------------------
+
             case 0:
                 #region 0
                 if (pals[5] != null && pals[0] != null)
@@ -535,8 +568,11 @@ public class HexInfo : MonoBehaviour
                 #endregion
                 break;
             case 6:
+                //For the centre point of the hexagons, find the average y position for each vertex
                 var newPointy = (myVerts[0].y + myVerts[1].y + myVerts[2].y + myVerts[3].y + myVerts[4].y + myVerts[5].y) / 6;
+                //Giving bias the vetex's current y value
                 newPointy = (newPointy + myVerts[6].y) / 2;
+                //Move vertex into position
                 moveVert(6, newPointy, Color.black);
                 break;
         }
@@ -546,7 +582,7 @@ public class HexInfo : MonoBehaviour
     {
         Vector3[] myVerts = GetComponent<MeshFilter>().mesh.vertices;
 
-        #region Colour starting dirt and centre point
+        #region Colour starting dirt and center point
 
         moveVert(start, myVerts[start].y, Color.Lerp(Color.black, dirt, 0.75f));
 
@@ -585,7 +621,7 @@ public class HexInfo : MonoBehaviour
                 randomDir = start;
 
             //If it's too steep
-            if (pals[randomDir].GetComponent<HexInfo>().Vertices[6].y > Vertices[6].y + 1)
+            if (pals[randomDir].GetComponent<HexInfo>().getVerts()[6].y > getVerts()[6].y + 1)
             {
                 noGos++;
                 randomDir = start;
@@ -610,7 +646,7 @@ public class HexInfo : MonoBehaviour
                 nextVert += 6;
 
             //If the nextvert Isn't like the one I was just checking for, keep going
-            if ((pals[randomDir].GetComponent<HexInfo>().least / maxLeast) >= 0.25f)
+            if ((pals[randomDir].GetComponent<HexInfo>().heightValue / maxLeast) >= 0.25f)
             {
                 length++;
                 pals[randomDir].GetComponent<HexInfo>().dirtPath(nextVert, maxLeast, length, caller);
@@ -640,7 +676,7 @@ public class HexInfo : MonoBehaviour
                 newPointy = (newPointy + myVerts[6]) / 2;
                 camp.transform.position = newPointy + transform.position;
                 camp.transform.Rotate(new Vector3(0, 150 + (60 * start), 0));
-
+                
                 var hut = camp.GetComponentInChildren<hut>().gameObject;
                 var campfire = camp.GetComponentInChildren<campfire>().gameObject;
 
@@ -664,11 +700,14 @@ public class HexInfo : MonoBehaviour
         }
     }
 
+    //Edit the position or colour of a vertex
     public void moveVert(int vertNum, float height, Color newColour)
     {
+        //Grab the current vertices
         Mesh mesh = GetComponent<MeshFilter>().mesh;
         Vector3[] oldVerts = mesh.vertices;
 
+        //As well as the vertex height values
         float[] Heights =
             {
             oldVerts[0].y,
@@ -680,9 +719,11 @@ public class HexInfo : MonoBehaviour
             oldVerts[6].y
         };
 
+        //Set new height value
         if (height != -99)
             Heights[vertNum] = height;
 
+        //Create a new set of vertices to use, with the new height values
         Vector3[] newVerts =
         {
             new Vector3(oldVerts[0].x, Heights[0], oldVerts[0].z),    //0
@@ -702,7 +743,10 @@ public class HexInfo : MonoBehaviour
         }
         #endregion
 
+        //Set the mesh vertices to the new vertices
         mesh.vertices = newVerts;
+
+        //Recalculate mesh bounds and normals
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 

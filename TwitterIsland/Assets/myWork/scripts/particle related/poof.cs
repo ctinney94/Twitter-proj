@@ -3,9 +3,8 @@ using System.Collections;
 
 public class poof : MonoBehaviour
 {
-
     ParticleSystem ps;
-    // Use this for initialization
+
     void Start()
     {
         ps = GetComponent<ParticleSystem>();
@@ -16,6 +15,7 @@ public class poof : MonoBehaviour
     {
         if (!ps.IsAlive())
         {
+            //If particle system has finished playing and is longer alive, destroy this game object.
             Destroy(gameObject);
         }
     }

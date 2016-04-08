@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+//This is the island builder class
+//It handles the size and shape of the pentagonal object used to create islands
+//Also manages the creation of hexs and the handling of data 
 public class IslandMaker : MonoBehaviour
 {
-    //basic pentgon mesh making
-	public Vector3[] pentVerts;
-	public Vector2[] uv;
-	public int[] Triangles;
+    //basic pentagon mesh making
     public Mesh mesh;
     public Material PentMat, HexMat, wireframeMat;
     public static Texture2D avatar;
@@ -41,19 +41,26 @@ public class IslandMaker : MonoBehaviour
         //Fill this pentagon in with hexagons.
 	}
 
+    //Create pentagonal mesh
     void MeshSetup()
     {
-        #region verts
+        #region vertex set-up
         
         Vector3[] pentVerts =
         {
+            //Points calculated using this regular pentagon calculator, given a side length of 1
+            //The origin/centre of this shape is (0,0,0)
+            //http://www.calculatorsoup.com/calculators/geometry-plane/polygon.php
+            
+            //Calculations for each point can be seen in this diagram:
+            //http://i.imgur.com/Ad5DPcu.jpg
             new Vector3((-0.5f-0.5f)*meshScale,floorLevel,(-0.688f-0.688f) *meshScale),//0
             new Vector3((-0.809f-0.809f)*meshScale,floorLevel,(0.263f+0.263f)*meshScale),//1
             new Vector3(0,floorLevel, (0.851f+0.851f)*meshScale),//2
             new Vector3((0.809f+0.809f)*meshScale,floorLevel,(0.263f+0.263f) *meshScale),//3
             new Vector3((0.5f+0.5f)*meshScale,floorLevel,(-0.688f-0.688f) *meshScale),//4
-
             
+            //Same as above, only 1 unit below
             new Vector3((-0.5f-0.5f)*meshScale,floorLevel-1,(-0.688f-0.688f) *meshScale),//0
             new Vector3((-0.809f -0.809f)*meshScale,floorLevel-1,(0.263f+0.263f)*meshScale),//1
             new Vector3(0,floorLevel-1, (0.851f+(0.851f))*meshScale),//2
@@ -62,14 +69,10 @@ public class IslandMaker : MonoBehaviour
         };
         #endregion
 
-        #region triangles
+        #region triangles set-up
 
         int[] triangles =
        {
-            /*1,4,0,
-            1,3,4,
-            1,2,3*/
-
             9,5,4,
             4,5,0,
             8,9,4,
@@ -91,96 +94,97 @@ public class IslandMaker : MonoBehaviour
        };
         #endregion
 
-        #region uv
-        uv = new Vector2[]
-        {
-            new Vector2(-3,0),
-            new Vector2(0,2),
-            new Vector2(3,0),
-            new Vector2(2,-4),
-            new Vector2(-2,4),
-        };
-        #endregion
+        //Create a mesh to pass data into
+        mesh = new Mesh();
+        //Add verts to the mesh
+        mesh.vertices = pentVerts;
+        //add triangles to the mesh
+        mesh.triangles = triangles;
+        //Add UV coordinates to the mesh
 
-        #region finalize
+        //Create mesh filter and render components to this mesh can be viewed
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        mesh = new Mesh();
-
+        //Also add a collider
         MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
 
-        mesh.vertices = pentVerts;
-        mesh.triangles = triangles;
-
-        //add out UV coordinates to the mesh
-        //mesh.uv = uv;
-
+        //...and a material
         meshRenderer.material = PentMat;
 
         //make it play nicely with lighting
         mesh.RecalculateNormals();
         mesh.name = "Pentagonal";
-        //set the GO's meshFilter's mesh to be the one we just made
-        meshFilter.mesh = mesh;
 
+        //Set the new meshfilter to use the hexagonal mesh created in the previous section
+        meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
+
         meshCollider.convex = true;
         meshCollider.isTrigger = true;
-
-        //UV TESTING
-        //renderer.material.mainTexture = texture;
-
-        #endregion
     }
     #endregion
 
     #region HuD and interactivity functions
 
-    public void setPentVisibility(bool hi)
+    //Pretty self explanatory
+    public void setPentVisibility(bool b)
     {
-        GetComponent<MeshRenderer>().enabled = hi;
-        GetComponent<MeshCollider>().enabled = hi;
+        GetComponent<MeshRenderer>().enabled = b;
+        GetComponent<MeshCollider>().enabled = b;
     }
     
-
+    //Remove any hexagon touching the pentagon from the list of items to be destroyed
     void OnTriggerEnter(Collider col)
     {
         if (col.tag!="Player")
          itemsToDestroy.Remove(col.gameObject);
     }
-
-    string oldText = "test";
+    
+    //Reshape the pentagonal shape based on text input
     public void UpdatePentMesh(string inputText)
     {
-        if (inputText == null)
-            inputText = oldText;
-
-        oldText = inputText;
         inputText = inputText.ToLower();
-        char[] vowels = { 'a', 'e', 'i', 'o', 'u' };
-        int[] vowelCount = new int[] { 1, 1, 1, 1, 1 };
+        char[] vowels = { 'a', 'e', 'i', 'o', 'u' };//Vowels of the English language
+        int[] vowelCount = new int[] { 1, 1, 1, 1, 1 };//Vowels feature a base count of 1
 
+        //Count the number of vowels present in the string
         for (int i = 0; i < inputText.Length; i++)
             for (int v = 0; v < 5; v++)
                 if (inputText[i] == vowels[v])
                     ++vowelCount[v];
 
-        //The max amount a vowel direction should go in is 8*amount;
+        //Find the highest frequency of all vowels
         int mostVowels=0;
         for (int i=0; i < vowelCount.Length;i++)
             if (vowelCount[i] > mostVowels)
                 mostVowels = vowelCount[i];
 
+        //Set a maximum distance for vertices to extend in
         float max = (1.0f / mostVowels);
+        //Ensures the mesh is scaled to a regular size
+        //Another scale value can then be used
 
         Vector3[] NewPentVerts =
         {
+            //Please refer to the MeshSetup() section of this script for reference on vertex creation
+            //This is essentially the same thing, only moving the vertices out from the centre for each vowel
+            //Like so;
+            //          I
+            //         ,'.
+            //       ,'   `.
+            //     ,'       `.
+            //   ,'           `. O
+            // E \             /
+            //    \           /
+            //     \         /
+            //      \_______/
+            //      A        U
+
             new Vector3((-0.5f-(0.5f*(vowelCount[0]*max)))*meshScale,floorLevel,(-0.688f-(0.688f*(vowelCount[0]*max))) *meshScale),//0
             new Vector3((-0.809f-(0.809f*(vowelCount[1]*max)))*meshScale,floorLevel,(0.263f+(0.263f*(vowelCount[1]*max)))*meshScale),//1
             new Vector3(0,floorLevel, (0.851f+(0.851f*(vowelCount[2]*max)))*meshScale),//2
             new Vector3((0.809f+(0.809f*(vowelCount[3]*max)))*meshScale,floorLevel,(0.263f+(0.263f*(vowelCount[3]*max))) *meshScale),//3
             new Vector3((0.5f+(0.5f*(vowelCount[4]*max)))*meshScale,floorLevel,(-0.688f-(0.688f*(vowelCount[4]*max))) *meshScale),//4
-
             
             new Vector3((-0.5f-(0.5f*(vowelCount[0]*max)))*meshScale,floorLevel-1,(-0.688f-(0.688f*(vowelCount[0]*max))) *meshScale),//0
             new Vector3((-0.809f -(0.809f*(vowelCount[1]*max)))*meshScale,floorLevel-1,(0.263f+(0.263f*(vowelCount[1]*max)))*meshScale),//1
@@ -189,10 +193,7 @@ public class IslandMaker : MonoBehaviour
             new Vector3((0.5f+(0.5f*(vowelCount[4]*max)))*meshScale,floorLevel-1,(-0.688f-(0.688f*(vowelCount[4]*max))) *meshScale),//4
         };
         mesh.vertices = NewPentVerts;
-
-        //Is this line actually did something, that'd be fucking marvelous, but noooo
-        //gameObject.GetComponent<MeshCollider>().sharedMesh = mesh;
-
+        
         //I am destorying and remaking the collider all the time
         //If anyone find this I want them to know I'm not proud of what I've done here
         DestroyImmediate(GetComponent<MeshCollider>());
@@ -206,24 +207,27 @@ public class IslandMaker : MonoBehaviour
 
     #region islandRelated
 
+    //Create a grid a hexagons
     public void updateHexs(string text)
     {
-        for (int i = 0; i < hexs.Count; i++)
-        {
-            Destroy(hexs[i].gameObject);
-        }
-        hexs.Clear();
+        //Initialization n that
         CreateHexs = true;
         h = 0;
         w = 0;
+        largestHeightValue = 0;
+        setPentVisibility(true);
 
+        //Reshape the pentagonal shape based on the text input
         UpdatePentMesh(text);
-        LargestLowestValue = 0;
+
+        //Go make some hexagons
         SpawnHexNEW();
     }
 
+    //Hexagon time baby
     void SpawnHexNEW()
     {
+        //Find max and min values for bounds
         Vector3 max = GetComponent<MeshCollider>().bounds.max;
         Vector3 min = GetComponent<MeshCollider>().bounds.min;
 
@@ -265,11 +269,17 @@ public class IslandMaker : MonoBehaviour
             }
             else
             {
+                //Move along
                 w++;
                 hexs.Add(hex);
+
+                //Every hexagon is born impure
+                //Sanctuary can be found within the warm boson of the pentagon
+                //All glory to the pentagon 
                 itemsToDestroy.Add(hex);
             }
 
+            //If the created hex has reached a line above the maximum bounds, get rid of it and stop making hexs
             if (hex.transform.position.z > max.z + 2 * (hexScale * Mathf.Sqrt(36 - 9)))
             {
                 CreateHexs = false;
@@ -279,9 +289,11 @@ public class IslandMaker : MonoBehaviour
         }
         #endregion
 
-        Invoke("hexRemoval",.5f);
+        //Allow a few moments for the pentagon mesh to be updated until anything is destroyed
+       Invoke("hexRemoval",.5f);
     }
 
+    //Remove any hexagons of the new island mesh outside of the pentagonal mesh
     void hexRemoval()
     {
         for (int j = 0; j < itemsToDestroy.Count; j++)
@@ -290,17 +302,20 @@ public class IslandMaker : MonoBehaviour
             Destroy(itemsToDestroy[j]);
         }
         itemsToDestroy.Clear();
-        setPentVisibility(false);
         //StartCoroutine(CreateIslandDELAY());
+
+        //Let's make an island
         Invoke("CreateIsland", .5f);
     }
 
     [HideInInspector]
-    public float LargestLowestValue = 0;
+    public float largestHeightValue = 0;
 
+    //Only used for making cool videos, does the same job as CreateIsland only with a delay between hex creation
+    //Probs out of date
     IEnumerator CreateIslandDELAY()
     {
-        if (hexs[0].GetComponent<HexInfo>().least == 0)
+        if (hexs[0].GetComponent<HexInfo>().heightValue == 0)
         {
             //Find pals
             detectHexEdges();
@@ -313,14 +328,14 @@ public class IslandMaker : MonoBehaviour
             //Find the highest point on the map (the hex with the largest [least] value
             for (int i = 0; i < hexs.Count; i++)
             {
-                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
+                if (hexs[i].GetComponent<HexInfo>().heightValue > largestHeightValue)
+                    largestHeightValue = hexs[i].GetComponent<HexInfo>().heightValue;
             }
             for (int i = 0; i < hexs.Count; i++)
             {
                 //Add some height to the hexs
                 yield return new WaitForSeconds(0.0001f);
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count,enableNoise);
+                hexs[i].GetComponent<HexInfo>().addHeight(largestHeightValue, favs, hexs.Count,enableNoise);
             }
         }
         
@@ -343,7 +358,7 @@ public class IslandMaker : MonoBehaviour
         for (int i = 0; i < hexs.Count; i++)
         {
             yield return new WaitForSeconds(0.0001f);
-            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
+            hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue);
         }
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;
@@ -351,7 +366,7 @@ public class IslandMaker : MonoBehaviour
         //Find highest point on map
         for (int i = 0; i < hexs.Count; i++)
         {
-            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
+            if (hexs[i].GetComponent<HexInfo>().heightValue == largestHeightValue)
             {
                 Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
                 for (int j = 0; j < points.Length; j++)
@@ -377,58 +392,69 @@ public class IslandMaker : MonoBehaviour
 
     public bool verified;
 
+    //Take a wild guess
+    //That's right! It does make island!
     public void CreateIsland()
     {
         #region all that islands creating shit
-        if (hexs[0].GetComponent<HexInfo>().least == 0)
+        //If nothing's been done yet
+        if (hexs[0].GetComponent<HexInfo>().heightValue == 0)
         {
-            //Find pals
+            //Find bordering hexagons
             detectHexEdges();
+
+            //For each hexagon...
             for (int i = 0; i < hexs.Count; i++)
             {
                 //Add weightings to the island based on the number of hexs between itself and the edge of the mesh
                 hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
             }
 
-            //Find the highest point on the map (the hex with the largest [least] value
+            //Find the highest point on the map (the hex with the largest height value)
             for (int i = 0; i < hexs.Count; i++)
             {
-                if (hexs[i].GetComponent<HexInfo>().least > LargestLowestValue)
-                    LargestLowestValue = hexs[i].GetComponent<HexInfo>().least;
+                if (hexs[i].GetComponent<HexInfo>().heightValue > largestHeightValue)
+                    largestHeightValue = hexs[i].GetComponent<HexInfo>().heightValue;
             }
             for (int i = 0; i < hexs.Count; i++)
             {
-                //Add some height to the hexs
-                hexs[i].GetComponent<HexInfo>().addHeight(LargestLowestValue, favs, hexs.Count, enableNoise);
+                //Add some height to the hexs using the previously obtained value and # of likes/favs
+                hexs[i].GetComponent<HexInfo>().addHeight(largestHeightValue, favs, hexs.Count, enableNoise);
             }
         }
     
-        //Smooth island out
+        //Smooth out the island
+        //For each hex created...
         for (int i = hexs.Count - 1; i > -1; i--)
         {
+            //For each vertice of the hexagon...
             for (int j = 0; j < 7; j++)
             {
+                //If there's a camp on this hex, get rid of it.
                 if (hexs[i].GetComponent<HexInfo>().camp != null)
                     Destroy(hexs[i].GetComponent<HexInfo>().camp);
 
+                //Smooth current vertex
                 hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
             }
-            //Update collision mesh
+            //Update mesh
             hexs[i].GetComponent<MeshCollider>().sharedMesh = hexs[i].GetComponent<MeshFilter>().mesh;
         }
 
         //Colour the hexs based on position
         for (int i = 0; i < hexs.Count; i++)
-            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
+            hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue);
 
+        setPentVisibility(false);
         #endregion
+
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;
 
-        //Find highest point on map
+        //Find highest point on current island
         for (int i = 0; i < hexs.Count; i++)
         {
-            if (hexs[i].GetComponent<HexInfo>().least == LargestLowestValue)
+            if (hexs[i].GetComponent<HexInfo>().heightValue == largestHeightValue)
             {
                 Vector3[] points = hexs[i].GetComponent<HexInfo>().getVerts();
                 for (int j = 0; j < points.Length; j++)
@@ -441,7 +467,7 @@ public class IslandMaker : MonoBehaviour
                 }
             }
         }
-        //Place flag at top point!
+        //Place flag at the highest point of the island
         if (flag != null)
             Destroy(flag);
 
@@ -449,11 +475,12 @@ public class IslandMaker : MonoBehaviour
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
 
-        //IF WE'RE VERIFIED
+        //If the current user is verified, try makign a dirt path and hut
         if (verified)
-        dirtPath();
+            dirtPath();
     }
 
+    //Find out which hexagons border eachother
     public void detectHexEdges()
     {
         //For each hex, raycast in each direction around them and return the gameobject hit, store as a pal
@@ -461,54 +488,50 @@ public class IslandMaker : MonoBehaviour
         {
             Vector3 hexOrigin = hexs[i].transform.position;
 
-            Vector3 above = hexOrigin + new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
-            Vector3 below = hexOrigin - new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2);
-            Vector3 upperLeft = hexOrigin + new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 upperRight = hexOrigin + new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 lowerRight = hexOrigin - new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
-            Vector3 lowerLeft = hexOrigin - new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale);
+            Vector3[] directions = {
+                //lower left
+                hexOrigin - new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale),
+
+                 //Upper left
+                hexOrigin + new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale),
+
+                //Above
+                hexOrigin + new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2),    
+                
+                //Upper right
+                hexOrigin + new Vector3(4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale),
+
+                //Lower right
+                hexOrigin - new Vector3(-4.5f * hexScale * 2, 0, Mathf.Sqrt(36 - 9) * hexScale),
+
+                //Below
+                hexOrigin - new Vector3(0, 0, (Mathf.Sqrt(36 - 9) * hexScale) * 2)
+            };
 
             RaycastHit hit;
             Ray ray;
-            hexOrigin += new Vector3(0, 1, 0);
-            ray = new Ray(hexOrigin, lowerLeft - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[0] = hit.transform.gameObject;
-            }
 
-            ray = new Ray(hexOrigin, upperLeft - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[1] = hit.transform.gameObject;
-            }
+            //We need to start from above since the hexagons are 2D
+            //If we try to go straight sideways, the raycast won't hit anything
+            hexOrigin += Vector3.up;
 
-            ray = new Ray(hexOrigin, above - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            int d = 0;
+            //Fpr each direction
+            foreach (Vector3 v3 in directions)
             {
-                hexs[i].GetComponent<HexInfo>().pals[2] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, upperRight - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[3] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, lowerRight - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[4] = hit.transform.gameObject;
-            }
-
-            ray = new Ray(hexOrigin, below - hexOrigin);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-            {
-                hexs[i].GetComponent<HexInfo>().pals[5] = hit.transform.gameObject;
+                //Raycast around the hexagon
+                ray = new Ray(hexOrigin, v3 - hexOrigin);
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+                {
+                    //If a target is hit, add the target to the list of bording hexs
+                    hexs[i].GetComponent<HexInfo>().pals[d] = hit.transform.gameObject;
+                }
+                d++;
             }
         }
     }
 
+    //Not used in current version | OUTDATED
     public void blendColours()
     {
         for (int i = 0; i < hexs.Count; i++)
@@ -571,10 +594,12 @@ public class IslandMaker : MonoBehaviour
         }
     }
 
+    //Creates a random path and colours vertices along it
+    //Also places a little hut at the end of the path
     public void dirtPath()
     {
-        bool dirtAdded = false;
 
+        bool dirtAdded = false;
         while (!dirtAdded)
         {
             //pick a random hex which is nest to a border hex (first green hex inward)
@@ -582,16 +607,16 @@ public class IslandMaker : MonoBehaviour
             var randomHex = hexs[random].GetComponent<HexInfo>();
 
             //Is the random hex one we can use to start a path?
-            if (((randomHex.least / LargestLowestValue) > 0.25f))
+            if (((randomHex.heightValue / largestHeightValue) > 0.25f))
             {
-                if (randomHex.least < ((int)(0.25 * LargestLowestValue)) + 2)
+                if (randomHex.heightValue < ((int)(0.25 * largestHeightValue)) + 2)
                 {
                     //We have a hex we can use!
                     while (!dirtAdded)
                     {
                         var startingHex = (int)Random.Range(0, randomHex.pals.Length);
 
-                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().least / LargestLowestValue <= 0.25f)
+                        if (randomHex.pals[startingHex].GetComponent<HexInfo>().heightValue / largestHeightValue <= 0.25f)
                         {
                             int temp2 = startingHex + 4;
                             if (temp2 > 5)
@@ -605,7 +630,7 @@ public class IslandMaker : MonoBehaviour
 
                             randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp2, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
                             randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
-                            randomHex.dirtPath(startingHex, LargestLowestValue, 1,this);
+                            randomHex.dirtPath(startingHex, largestHeightValue, 1,this);
                             dirtAdded = true;
                         }
                     }
@@ -618,6 +643,7 @@ public class IslandMaker : MonoBehaviour
 
     public List<GameObject> camps = new List<GameObject>();
     
+    //Combine all the hexagon objects together into a single island game object
     public void mergeIsland(GameObject gulls, Twitter.API.Tweet THETWEET)
     {
         //now do particle related things

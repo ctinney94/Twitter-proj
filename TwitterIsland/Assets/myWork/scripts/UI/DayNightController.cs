@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+//Not used in current version of Tweet Islands.
+
+
 public class DayNightController : MonoBehaviour
 {
 
@@ -35,17 +39,14 @@ public class DayNightController : MonoBehaviour
         float intensityMultiplier = 1;
         if (currentTimeOfDay < 0.23f || currentTimeOfDay > 0.73f)
         {
-            Debug.Log(1);
             intensityMultiplier = 0.1f;
         }
         else if (currentTimeOfDay <= 0.25f)
         {
-            Debug.Log(2);
             intensityMultiplier = Mathf.Clamp01((currentTimeOfDay - 0.23f) * (1 / 0.02f));
         }
         else if (currentTimeOfDay >= 0.75f)
         {
-            Debug.Log(3);
             intensityMultiplier = Mathf.Clamp01(1 - ((currentTimeOfDay - 0.5f) * (1 / 0.02f)));
         }
         //sun.intensity = sunInitialIntensity * intensityMultiplier;
