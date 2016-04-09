@@ -14,9 +14,10 @@ public class SentimentAnalysis : MonoBehaviour {
     public mood moodThing;
     public TextMesh textObj;
 
-    // Use this for initialization
+    //Initialization
     void Start()
     {
+        //Split the text files of pos/neg words into word arrays
         string[] words = Regex.Split(positiveWords.text, "\n|\r|\r\n");
 
         foreach (string s in words)
@@ -34,11 +35,15 @@ public class SentimentAnalysis : MonoBehaviour {
         }
     }
     
+    //Returns the input string highlighting pos/neg words in colour
     public string getFormattedText(string input)
     {
         string newText = input;
+
+        //Check the text for nasty words
         for (int i = 0; i < notSoNiceWords.Count; i++)
         {
+            //Probs could've used regex here
             if (input.ToLower().Contains(" " + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains("." + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains(" " + notSoNiceWords[i] + ".")
@@ -48,12 +53,15 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" "+notSoNiceWords[i]))
             {
+                //Replace word with red text
                 newText = newText.ToLower().Replace(notSoNiceWords[i], "<color=red>" + notSoNiceWords[i] + "</color>");
             }
         }
         
+        //Check the text for nice words
         for (int i = 0; i < niceWords.Count; i++)
         {
+            //Probs could've used regex here
             if (input.ToLower().Contains(" " + niceWords[i] + " ")
                 || input.ToLower().Contains("." + niceWords[i] + " ")
                 || input.ToLower().Contains(" " + niceWords[i] + ".")
@@ -63,17 +71,23 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(niceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + niceWords[i]))
             {
+                //Replace word with green text
                 newText = newText.ToLower().Replace(niceWords[i], "<color=lime>" + niceWords[i] + "</color>");
             }
         }
         return newText;
     }
+
+    //Return a value from -1 to 1 for the sentiment of a given string
     public float getSAValue(string input)
     {
         nasty = 0;
         nice = 0;
+        
+        //Check the text for nasty words
         for (int i = 0; i < notSoNiceWords.Count; i++)
         {
+            //Probs could've used regex here
             if (input.ToLower().Contains(" " + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains("." + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains(" " + notSoNiceWords[i] + ".")
@@ -81,11 +95,15 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + notSoNiceWords[i]))
             {
+                //Found a nasty word :(
                 nasty++;
             }
         }
+
+        //Check the text for nice words
         for (int i = 0; i < niceWords.Count; i++)
         {
+            //Probs could've used regex here
             if (input.ToLower().Contains(" " + niceWords[i] + " ")
                 || input.ToLower().Contains("." + niceWords[i] + " ")
                 || input.ToLower().Contains(" " + niceWords[i] + ".")
@@ -93,10 +111,13 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(niceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + niceWords[i]))
             {
+                //Found a nice word!
                 nice++;
             }
         }
-        float t = nice + nasty;
+
+        //Find sentiment value from number of pos/neg words detected
+        float t = nice + nasty;//Total words detected
         float result, a = 0, b = 0;
         if (t != 0)
             t = 1 / t;
@@ -108,6 +129,7 @@ public class SentimentAnalysis : MonoBehaviour {
         return result;
     }
 
+    //Not currenty used, basically the same as the other functions here
     public void CheckText(string input)
     {
         string newText = input;
@@ -116,6 +138,7 @@ public class SentimentAnalysis : MonoBehaviour {
         nice = 0;
         for (int i = 0; i < notSoNiceWords.Count; i++)
         {
+            //Probs could've used regex here
             if (input.ToLower().Contains(" " + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains("." + notSoNiceWords[i] + " ")
                 || input.ToLower().Contains(" " + notSoNiceWords[i] + ".")
@@ -123,6 +146,7 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(notSoNiceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + notSoNiceWords[i]))
             {
+                //Replace word with red text
                 newText = newText.ToLower().Replace(notSoNiceWords[i], "<color=red>" + notSoNiceWords[i] + "</color>");
                 nasty++;
             }
@@ -130,7 +154,7 @@ public class SentimentAnalysis : MonoBehaviour {
         for (int i = 0; i < niceWords.Count; i++)
         {
             //A Regex expression would've been a far more elegant solution compared to this
-            //At least I can guarentue this method works.
+            //At least I can guarantee this method works.
             if (input.ToLower().Contains(" " + niceWords[i] + " ")
                 || input.ToLower().Contains("." + niceWords[i] + " ")
                 || input.ToLower().Contains(" " + niceWords[i] + ".")
@@ -138,11 +162,14 @@ public class SentimentAnalysis : MonoBehaviour {
                 || input.ToLower().StartsWith(niceWords[i] + ",")
                 || input.ToLower().EndsWith(" " + niceWords[i]))
             {
+                //Replace word with green text
                 newText = newText.ToLower().Replace(niceWords[i], "<color=lime>" + niceWords[i] + "</color>");
                 nice++;
             }
         }
-        float t = nice + nasty;
+
+        //Find sentiment value from number of pos/neg words detected
+        float t = nice + nasty;//Total words detected
         float result, a = 0, b = 0;
         if (t != 0)
             t = 1 / t;
@@ -153,6 +180,7 @@ public class SentimentAnalysis : MonoBehaviour {
         result = a - b;
         moodThing.moodness = result;
 
+        //Update text mesh text
         if (textObj)
             textObj.text = newText;
     }

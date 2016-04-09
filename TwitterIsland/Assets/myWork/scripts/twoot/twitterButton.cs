@@ -84,10 +84,15 @@ public class twitterButton : MonoBehaviour {
             IslandMaker.mergeIsland(gulls, tweets[i]);
             yield return new WaitForSeconds(.25f);
         }
+
+        //Now we've made all the islands, get rid of the tweet data used
         tweets.Clear();
+        //Turn buttons back on
         GetComponentInParent<HudFader>().buttonControl(true);
         islandBuildingText.SetActive(false);
         running = false;
+
+        //We done here
     }
 
     //Take avatar URL, find image, turn it into a texture to use as a flag later on

@@ -4,29 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+//For use interacting with the twitter API
 namespace Twitter
 {
-
-    public class RequestTokenResponse
-    {
-        public string Token { get; set; }
-        public string TokenSecret { get; set; }
-    }
-
-    public class AccessTokenResponse
-    {
-        public string Token { get; set; }
-        public string TokenSecret { get; set; }
-        public string UserId { get; set; }
-        public string ScreenName { get; set; }
-    }
-
     public class API
     {
+        //Username used in the most recent API call
         private static string currentDisplayName;
-        
+
         #region Twitter API Methods
-        
+
+        //Authorization set-up
+        //Adapted from the following source:
+        //SOURCE:
+        //http://www.conlanrios.com/2013/10/twitter-application-only-authentication.html
         public static string GetTwitterAccessToken(string consumerKey, string consumerSecret)
         {
             string URL_ENCODED_KEY_AND_SECRET = Convert.ToBase64String(Encoding.UTF8.GetBytes(consumerKey + ":"+consumerSecret));
@@ -40,13 +31,16 @@ namespace Twitter
             WWW web = new WWW("https://api.twitter.com/oauth2/token", body, headers);
             while(!web.isDone)
             {
-                Debug.Log("Retrieving acess token...");
+                Debug.Log("Retrieving access token...");
             }
+            //Format string response
             string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
             output = output.Replace("\"}", "");
 
             return output;
         }
+
+        //Data types used for tweet data as well as detailed time info
 
         [System.Serializable]
         public class tw_DateTime
@@ -73,11 +67,15 @@ namespace Twitter
             public int Favs;
         }
 
+        //Grab a selection of tweets from a user
         public static void GetUserTimeline(string name, string AccessToken, int count, twitterButton caller)
         {
+            //Set-up API call
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = "Bearer " + AccessToken;
 
+            //DO AN API CALL
+            //For this program, the parameters used below will likely need to be changed bar username and # of tweets to pull
             WWW web = new WWW("https://api.twitter.com/1.1/statuses/"+"user"+"_timeline.json?screen_name=" + name + "&count=" + count + "&trim_user=1" + "&include_rts=0&exclude_replies=true&contributor_details=false", null, headers);
 
             while (!web.isDone)
@@ -85,82 +83,88 @@ namespace Twitter
                 Debug.Log("Processing request...");
             }
 
+            //We have an error x(
             if (web.error != null)
             {
+                //Output error to UI
                 GameObject.Find("Error Text").GetComponent<Text>().enabled = true;
                 GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
             }
             else
             {
+                //We good
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
 
-                //find user mentions
+                //Find user mentions sections of tweet
                 List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
-                //remove if true
+                //If detected, remove.
                 string extractMe;
                 if (ammendOutputText == null)
                     extractMe = web.text;
                 else
                     extractMe = ammendOutputText;
 
+                //Extract relevant data from web response
                 List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
                 List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"entities\":");
                 List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
                 List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
                 List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
-
-                //I don't actually have a reason why I need this tweet ID
-                //Would it be that awful if I didn't include it?
                 List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
 
+                //This is what will be used to create islands
                 List<Tweet> tweets = new List<Tweet>();
 
+                //For each detected tweet
                 for (int i = 0; i < text.Count; i++)
                 {
+                    //Create a new tweet
                     Tweet thisTweet = new Tweet();
-                    #region dateTime formating
+
+                    #region dateTime formatting
                     string temp = "";
-                    List<string> boop = new List<string>();
+                    List<string> date = new List<string>();
                     for (int k = 0; k < dateTime[i].Length; k++)
                     {
                         if (dateTime[i][k] != ' ')
                             temp += dateTime[i][k];
                         else
                         {
-                            boop.Add(temp);
+                            date.Add(temp);
                             temp = "";
                         }
 
                         if (k == dateTime[i].Length - 1)
-                            boop.Add(temp);
+                            date.Add(temp);
                     }
                     temp = "";
-                    List<string> doop = new List<string>();
-                    for (int k = 0; k < boop[3].Length; k++)
+                    List<string> timeOfDay = new List<string>();
+                    for (int k = 0; k < date[3].Length; k++)
                     {
-                        if (boop[3][k] != ':')
-                            temp += boop[3][k];
+                        if (date[3][k] != ':')
+                            temp += date[3][k];
                         else
                         {
-                            doop.Add(temp);
+                            timeOfDay.Add(temp);
                             temp = "";
                         }
 
-                        if (k == boop[3].Length - 1)
-                            doop.Add(temp);
+                        if (k == date[3].Length - 1)
+                            timeOfDay.Add(temp);
                     }
 
                     tw_DateTime time = new tw_DateTime();
-                    time.Weekday = boop[0];
-                    time.Month = boop[1];
-                    time.Day = int.Parse(boop[2]);
-                    time.Hour = int.Parse(doop[0]);
-                    time.Minute = int.Parse(doop[1]);
-                    time.Second = int.Parse(doop[2]);
-                    time.Year = int.Parse(boop[5]);
-                    time.Offset = boop[4];
+                    time.Weekday = date[0];
+                    time.Month = date[1];
+                    time.Day = int.Parse(date[2]);
+                    time.Hour = int.Parse(timeOfDay[0]);
+                    time.Minute = int.Parse(timeOfDay[1]);
+                    time.Second = int.Parse(timeOfDay[2]);
+                    time.Year = int.Parse(date[5]);
+                    time.Offset = date[4];
                     #endregion
 
+                    //Add data to tweet
                     thisTweet.dateTime = time;
                     thisTweet.Text = text[i];
                     thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
@@ -169,56 +173,72 @@ namespace Twitter
                     thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
                     thisTweet.DisplayName = currentDisplayName;
 
+                    //Add tweet
                     tweets.Add(thisTweet);
                 }
+                //Send the tweet data back to the button used to call this function
                 caller.tweets = tweets;
                 ammendOutputText = null;
             }
         }
 
+        //Retrieve user profile information
         public static void GetProfile(string name, string AccessToken, twitterButton caller)
         {
+            //Set-up API call
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = "Bearer " + AccessToken;
 
+            //DO AN API CALL
+            //For this program, the parameters used below will likely need to be changed bar username and # of tweets to pull
             WWW web = new WWW("https://api.twitter.com/1.1/users/show.json?screen_name=" + name+ "&include_entities=false", null, headers);
 
             while (!web.isDone)
             {
                 Debug.Log("Processing request...");
             }
+
+            //We have an error x(
             if (web.error != null)
             {
+                //Output error to UI
                 GameObject.Find("Error Text").GetComponent<Text>().enabled = true;
                 GameObject.Find("Error Text").GetComponent<Text>().text = web.error;
                 Debug.Log(web.error);
             }
             else
             {
+                //We good
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-                                
+                 
+                //Extract data from web response               
                 List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
                 List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
                 List<string> displayName = extractData(web.text, ",\"name\":\"", "\",\"screen_name\":");
 
+                //Output display name
                 if (displayName[0] != " ")
                     currentDisplayName = displayName[0];
                 else
                     currentDisplayName = "Somebody with a non-ascii name";
                 
+                //Output verified status of current user
                 caller.verified = Convert.ToBoolean(verified[0]);
+                //Format avatar URL to retrieve full size image
                 URL[0] = URL[0].Remove(URL[0].IndexOf("_normal"), 7);
+                //Create a texture from the users avatar (grab from URL)
                 caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
             }
         }
         #endregion
         
+        //Used for extracting data from API response
         public static List<string> extractData(string outputText, string start, string end)
         {
             List<int> startPos = new List<int>();
             List<int> stopPos = new List<int>();
             int i = 0;
-            //Find all the position of all mentions of "text":
+            //Find all the position of all mentions of start string:
             while ((i=outputText.IndexOf(start,i))!=-1)
             {
                 startPos.Add(i);
@@ -226,19 +246,21 @@ namespace Twitter
             }
 
             i = 0;
-            //Do the same for "source":
+            //Do the same for end string:
             while ((i = outputText.IndexOf(end, i)) != -1)
             {
                 stopPos.Add(i);
                 i++;
             }
 
+            //Data to return
             List<string> returnMe = new List<string>();
 
+            //If we have a different number of start and end points, something has gone wrong
             if (startPos.Count != stopPos.Count)
-                startPos.Remove(startPos[startPos.Count - 1]);
+                startPos.Remove(startPos[startPos.Count - 1]);//Try fixing
 
-            //for (int j = 0; j < startPos.Count; j++)
+            
             for (int j = startPos.Count-1; j>-1;j--)
             {
                 string output = "";
@@ -247,15 +269,17 @@ namespace Twitter
                     output += outputText[c];
                 }
 
-                #region the whole user mentions bit
                 if (start != ",\"user_mentions\":")
                 {
+                    //Format output string
                     output = output.Replace(start, "");
+                    //Remove emoji type things
                     output = output.Replace("\ud83c[\udf00-\udfff]", " ! ");
                     output = output.Replace("\\\"", "\"");
                     output = output.Replace("\\/", "/");
                     output = output.Replace("&amp;", "&");
 
+                    //Attempt at emoji removal
                     List<int> EmojisOrSimilar = new List<int>();
                     i = 0;
                     while ((i = output.IndexOf("\\u", i)) != -1)
@@ -266,26 +290,26 @@ namespace Twitter
 
                     for (int u = EmojisOrSimilar.Count - 1; u > -1; u--)
                     {
+                        //Emoji text is typically 6 characters long
                         output = output.Remove(EmojisOrSimilar[u], 6);
                         output.Insert(EmojisOrSimilar[u], "*!*");
                     }
                 }
-                if (output != "[]" && start == ",\"user_mentions\":")
+                else if (output != "[]")
                 {
-                    //Then remove text from original input.
+                    //Remove text from original input and return
                     //Remove each section of the string STARTING AT THE END AND WORKING BACK
                     outputText = outputText.Remove(startPos[j] + 1, output.Length + start.Length - 1);
                     output = null;
                     ammendOutputText = outputText;
                 }
-                #endregion
                 
                 returnMe.Add(output);
             }
             return returnMe;
         }
 
-        public static string ammendOutputText = null;
-        
+        //Used with above function
+        public static string ammendOutputText = null;        
     }
 }

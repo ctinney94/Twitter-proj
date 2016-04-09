@@ -72,6 +72,7 @@ public class gullMaker : MonoBehaviour {
             }
         }
 
+        #region Special gulls!
         if (input.Contains("waluigi"))
         {
             GameObject gullyGuy = Instantiate(gull);
@@ -89,6 +90,7 @@ public class gullMaker : MonoBehaviour {
             gullyGuy.transform.parent = gameObject.transform;
             myGulls.Add(gullyGuy);
         }
+        #endregion
         for (int i = 0; i < gulls; i++)
         {
             GameObject gullyGuy = Instantiate(gull);
