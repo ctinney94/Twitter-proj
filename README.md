@@ -1,9 +1,9 @@
 # Tweet Islands
-
-Tweet Islands was created by Craig Tinney
-Unless otherwise specified in files, all content in the myWork is all my own production.
-Some of the textures used in materials were taken from this pack:
-https://www.assetstore.unity3d.com/en/#!/content/19242
+![alt tag](https://raw.githubusercontent.com/GibletsofJesus/Twitter-proj/master/TwitterIsland/Assets/myWork/textures/banner.png)<br>
+Tweet Islands was created by Craig Tinney<br>
+Unless otherwise specified in files, all content in the myWork is all my own production.<br>
+Some of the textures used in materials were taken from [this pack.](
+https://www.assetstore.unity3d.com/en/#!/content/19242)
 
 Other than that it's either default Unity assets or something I've put together
 
@@ -11,7 +11,6 @@ Other than that it's either default Unity assets or something I've put together
 
 - Write report
 - Make demo video
- 	- things to go over
 
 ##Future goals
 
