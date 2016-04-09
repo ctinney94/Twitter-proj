@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine.UI;
 
+//Script used for first person movement
+//Hold Shift to sprint at x3 speed
+//Hold Space to fly upwards
+
 public class FPSmovement : MonoBehaviour {
 
     public float mouseSensitivity = 4;

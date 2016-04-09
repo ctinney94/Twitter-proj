@@ -578,82 +578,111 @@ public class HexInfo : MonoBehaviour
         }
     }
 
+    //Used for colouring vertices for a dirt path
+    //Also determines direction of path
     public void dirtPath(int start, float maxLeast, int length, IslandMaker caller)
     {
-        Vector3[] myVerts = GetComponent<MeshFilter>().mesh.vertices;
+        #region Colour starting dirt and centre point
 
-        #region Colour starting dirt and center point
+        //Colour the starting vertex dirt colour
+        moveVert(start, getVerts()[start].y, Color.Lerp(Color.black, dirt, 0.75f));
 
-        moveVert(start, myVerts[start].y, Color.Lerp(Color.black, dirt, 0.75f));
+        //Find the bordering hexs to the coloured vertex as well as the vertex next to it
+        //...and the bordering vertex the vertex next to the original vertex coloured.
+        //I hope that all makes sense
 
+        //Number fudging to get appropriate vertices
         int temp_ = start + 1;
         if (temp_ > 5)
             temp_ -= 6;
+
         int temp2_ = start + 2;
         if (temp2_ > 5)
             temp2_ -= 6;
+
         int temp5_ = start + 5;
         if (temp5_ > 5)
             temp5_ -= 6;
 
+        //Colour the bordering vertices in dirt
         pals[temp5_].GetComponent<HexInfo>().moveVert(temp2_, -99, Color.Lerp(Color.black, dirt, 0.75f));
         pals[temp_].GetComponent<HexInfo>().moveVert(temp5_, -99, Color.Lerp(Color.black, dirt, 0.75f));
 
+        //Colour vertex directly next to the starting vertex
         if (start != 5)
-            moveVert(start + 1, myVerts[start + 1].y, Color.Lerp(Color.black, dirt, 0.75f));
+            moveVert(start + 1, getVerts()[start + 1].y, Color.Lerp(Color.black, dirt, 0.75f));
         else
-            moveVert(0, myVerts[0].y, Color.Lerp(Color.black, dirt, 0.75f));
+            moveVert(0, getVerts()[0].y, Color.Lerp(Color.black, dirt, 0.75f));
 
-        moveVert(6, myVerts[6].y, Color.Lerp(Color.black, dirt, 0.75f));
+        //Also colour the centre vertex
+        moveVert(6, getVerts()[6].y, Color.Lerp(Color.black, dirt, 0.75f));
 
         #endregion
         //Now choose a random vert to go in the direction of
-        //Must not be the starting point, the centre or either vertex to the sode of the starting point
+        //Must not be the starting point, the centre or either vertex to the side of the starting point
         #region Choose a direction to go
-        int randomDir = start, noGos = 0;
+
+        int randomDir = start;
+
+        //Possible directions
+        List<int> dirs = new List<int>();
+        for (int i = 0; i < 6; i++)
+            dirs.Add(i);
+
+        //Find a new direction to continue the path along, making sure we can't go backwards
         while (randomDir == start || randomDir == start + 1 || randomDir == start - 1)
         {
-            randomDir = (int)Random.Range(-0.49f, 5.49f);
-            int temp = start + 2;
-            if (temp > 5)
-                temp -= 6;
-            if (randomDir == temp)
-                randomDir = start;
-
-            //If it's too steep
-            if (pals[randomDir].GetComponent<HexInfo>().getVerts()[6].y > getVerts()[6].y + 1)
+            //If we still have directions left to try
+            if (dirs.Count > 1)
             {
-                noGos++;
-                randomDir = start;
+                //Pick a random direction not already tried
+                randomDir = dirs[Random.Range(0, dirs.Count)];
+                int temp = start + 2;
+                if (temp > 5)
+                    temp -= 6;
+                if (randomDir == temp)
+                    randomDir = start;
+                
+                //This chosen direction is too steep, choose another one.
+                if (pals[randomDir].GetComponent<HexInfo>().getVerts()[6].y > getVerts()[6].y + .8f)
+                {
+                    //Make sure we don't choose this one again
+                    dirs.Remove(randomDir);
+                    randomDir = start;
+                }
+                else //All options have been exhausted, we're buggered.
+                    break;
             }
-            if (noGos == 3)
-            {
-                randomDir = 99;//You've been very naughty, time for you to get fucked up.
-            }
+            else //Escape value
+                randomDir = 99;
         }
         #endregion
 
+        //If everything is fine and error free...
         if (randomDir != 99)
         {
-            moveVert(randomDir, myVerts[randomDir].y, Color.Lerp(Color.black, dirt, 0.75f));
+            //Colour the next vertices where the path is headed
+            moveVert(randomDir, -99, Color.Lerp(Color.black, dirt, 0.75f));
             if (randomDir != 5)
-                moveVert(randomDir + 1, myVerts[randomDir + 1].y, Color.Lerp(Color.black, dirt, 0.75f));
+                moveVert(randomDir + 1, -99, Color.Lerp(Color.black, dirt, 0.75f));
             else
-                moveVert(0, myVerts[0].y, Color.Lerp(Color.black, dirt, 0.75f));
+                moveVert(0, -99, Color.Lerp(Color.black, dirt, 0.75f));
 
             var nextVert = randomDir - 3;
             if (nextVert < 0)
                 nextVert += 6;
 
             //If the nextvert Isn't like the one I was just checking for, keep going
-            if ((pals[randomDir].GetComponent<HexInfo>().heightValue / maxLeast) >= 0.25f)
+            if ((pals[randomDir].GetComponent<HexInfo>().heightValue / maxLeast) >= 0.25f && length < 25)
             {
+                //Also if it isn't too long.
+                //Don't want to get stuck in a loop.
                 length++;
                 pals[randomDir].GetComponent<HexInfo>().dirtPath(nextVert, maxLeast, length, caller);
             }
             else
             {
-                //The dirt path has ended
+                //The dirt path has ended, colour this whole hex as dirt
                 for (int i = 0; i < 6; i++)
                 {
                     moveVert(i, -99, Color.Lerp(Color.black, dirt, 0.75f));
@@ -671,15 +700,17 @@ public class HexInfo : MonoBehaviour
                 if (camp == null)
                     camp = Instantiate(Resources.Load("camp") as GameObject);
 
-                //Move hole site into position
-                var newPointy = (myVerts[0] + myVerts[1] + myVerts[2] + myVerts[3] + myVerts[4] + myVerts[5] + myVerts[6]) / 6;
-                newPointy = (newPointy + myVerts[6]) / 2;
+                //Move camp site into position
+                var newPointy = (getVerts()[0] + getVerts()[1] + getVerts()[2] + getVerts()[3] + getVerts()[4] + getVerts()[5] + getVerts()[6]) / 6;
+                newPointy = (newPointy + getVerts()[6]) / 2;
                 camp.transform.position = newPointy + transform.position;
                 camp.transform.Rotate(new Vector3(0, 150 + (60 * start), 0));
                 
+                //Get the each part from the prefab
                 var hut = camp.GetComponentInChildren<hut>().gameObject;
                 var campfire = camp.GetComponentInChildren<campfire>().gameObject;
 
+                //Ho boy I do love fudge
                 int temp3 = start + 3;
                 if (temp3 > 5)
                     temp3 -= 6;
@@ -687,14 +718,17 @@ public class HexInfo : MonoBehaviour
                 if (temp4 > 5)
                     temp4 -= 6;
 
-                newPointy = (myVerts[temp3] + myVerts[temp4]) / 2;
-                newPointy = (newPointy * 3 + myVerts[6]) / 4;
+                //Find the average height for these vertices
+                newPointy = (getVerts()[temp3] + getVerts()[temp4]) / 2;
+                newPointy = (newPointy * 3 + getVerts()[6]) / 4;
+                //Position the campsite more appropriately given the uneven ground
                 hut.transform.position = new Vector3(hut.transform.position.x, transform.position.y + newPointy.y, hut.transform.position.z);
-                campfire.transform.position = transform.position + myVerts[6];
+                campfire.transform.position = transform.position + getVerts()[6];
                 
                 campfire.transform.parent = hut.transform;
                 caller.camps.Add(hut);
 
+                //Colour the centre vertex dirt
                 moveVert(6, -99, dirt);
             }
         }

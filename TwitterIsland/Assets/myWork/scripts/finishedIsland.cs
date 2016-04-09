@@ -44,7 +44,7 @@ public class finishedIsland : MonoBehaviour
         meshy.transform.position = GameObject.Find("flagpole " + islandIndex).transform.position + new Vector3(0,1,0);
         meshy.fontSize = 50;
         //Scale the character size of the text mesh based on number of re-tweets
-        meshy.characterSize = nums.findRank(thisTweet.RTs,false) / 20;
+        meshy.characterSize = Mathf.Clamp(nums.findRank(thisTweet.RTs,false) / 20,0.25f,1);
         //Format the tweet text appropriately for display
         FormatString(thisTweet.Text, meshy);
 
@@ -53,49 +53,73 @@ public class finishedIsland : MonoBehaviour
         heightRank =nums.findRank(thisTweet.Favs,true);
     }
 
+    //Rotate and scale text mesh displayed tweet above island
     void Update()
     {
         //Distance from Camera
         float distance;
-        if (Camera.main != null)
+
+        //If the island view is active
+        if (Camera.main)
         {
+            //Rotate the text mesh to face the main camera
+            tweetText.transform.LookAt(2 * tweetText.transform.position - Camera.main.transform.position);
+            
             //Find the distance between the text mesh and the main camera
             distance = Vector3.Distance(tweetText.transform.position, Camera.main.transform.position);
 
             //If the camera is close enough...
-            if (distance < 250)
+            if (distance < 100)
             {
                 //Enable text
                 tweetText.SetActive(true);
                 //Scale text based of distance to camera
-                float val = Mathf.Clamp(1 / distance * 15, 0, .5f);
+                float val = Mathf.Clamp(1 / distance * 10, 0, .5f);
                 tweetText.transform.localScale = new Vector3(val, val, val);
             }
             else
-                tweetText.SetActive(false);
+                tweetText.transform.localScale = Vector3.zero;
         }
-
-        //If text is enabled
-        if (tweetText != null)
+        else
         {
-            //And if the island view is active
-            if (Camera.main)
+            //Rotate the text mesh to face the other camera
+            tweetText.transform.LookAt(2 * tweetText.transform.position - GameObject.Find("Camera").transform.position);
+
+            //Find the distance between the text mesh and the other camera
+            distance = Vector3.Distance(tweetText.transform.position, GameObject.Find("Camera").transform.position);
+
+            //If the text is within a range
+            if (distance < 50)
             {
-                //Rotate the text mesh to face the main camera
-                tweetText.transform.LookAt(2*tweetText.transform.position - Camera.main.transform.position);
+                //Scale text based of distance to camera
+                float val = Mathf.Clamp(distance / 50, .05f, .5f);
+                tweetText.transform.localScale = new Vector3(val, val, val);
+                tweetText.GetComponent<TextMesh>().color = Color.white;
+                if (!tweetText.GetComponent<TextMesh>().richText)
+                {
+                    //Get the original text back
+                    FormatString(thisTweet.Text, meshy);
+                    tweetText.GetComponent<TextMesh>().richText = true;
+                }
             }
             else
             {
-                //Rotate the text mesh to face the other camera
-                tweetText.transform.LookAt(2 * tweetText.transform.position - GameObject.Find("Camera").transform.position);
+                tweetText.transform.localScale = Vector3.one / 2;
 
-                //Find the distance between the text mesh and the other camera
-                distance = Vector3.Distance(tweetText.transform.position, GameObject.Find("Camera").transform.position);
-                
-                //Scale text based of distance to camera
-                float val = Mathf.Clamp(distance/50, .05f, .5f);
-                tweetText.transform.localScale = new Vector3(val, val, val);
+                //Fade the text depending on distance from camera
+                //Rich text has to be replaced and disabled due to the lack of alpha channel options
+                if (tweetText.GetComponent<TextMesh>().richText)
+                {
+                    string text = tweetText.GetComponent<TextMesh>().text;
+                    text = text.Replace("<color=red>", "");
+                    text = text.Replace("<color=lime>", "");
+                    text = text.Replace("</color>", "");
+                    tweetText.GetComponent<TextMesh>().text = text;
+                    tweetText.GetComponent<TextMesh>().richText = false;
+                }
+                tweetText.GetComponent<TextMesh>().color = Color.Lerp(Color.white, new Color(1, 1, 1, 0), (distance - 50) / 25);
             }
+
         }
     }
 

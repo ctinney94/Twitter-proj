@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//NOT USED IN CURRENT VERSION
+
 public class lighting : MonoBehaviour {
     bool lerp;
     public float newShadowStrength, newTimeOfDay;
@@ -17,7 +19,6 @@ public class lighting : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-
         if (newShadowStrength != worldLight.shadowStrength)
             worldLight.shadowStrength = Mathf.Lerp(worldLight.shadowStrength, newShadowStrength, Time.deltaTime * 10);
 

@@ -67,7 +67,7 @@ public class cameraOrbitControls : MonoBehaviour
                 newTarget = islands[currentIsland - 1].transform.position;
                 islands[currentIsland-1].GetComponent<finishedIsland>().updateUI();
             }
-            //Back to 
+            //Back to starting view, where islands are created
             else
             {
                 currentIsland = 0;
@@ -86,7 +86,7 @@ public class cameraOrbitControls : MonoBehaviour
         //Update UI
         if (currentIsland > 0)
         {
-            //Enable gull button
+            //Enable gull button if gulls are present
             if (islands[currentIsland - 1].GetComponentInChildren<gullMaker>().gulls > 0)
             {
                 if (gullCamButton.activeInHierarchy)
@@ -118,6 +118,7 @@ public class cameraOrbitControls : MonoBehaviour
         }
         else
         {
+            //Turn everything off if in starting view
             if (gullCamButton.activeInHierarchy)
             {
                 gullCamButton.GetComponent<Image>().enabled = false;

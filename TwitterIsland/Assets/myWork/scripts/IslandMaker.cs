@@ -616,8 +616,10 @@ public class IslandMaker : MonoBehaviour
                     {
                         var startingHex = (int)Random.Range(0, randomHex.pals.Length);
 
+                        //Can we continue the path in this direction?
                         if (randomHex.pals[startingHex].GetComponent<HexInfo>().heightValue / largestHeightValue <= 0.25f)
                         {
+                            //Some number fudging required for grabbing the correct vertex numbers of the hexagon
                             int temp2 = startingHex + 4;
                             if (temp2 > 5)
                                 temp2 -= 6;
@@ -628,8 +630,11 @@ public class IslandMaker : MonoBehaviour
                             if (pal > 5)
                                 pal -= 6;
 
+                            //Colour some vertices as dirt
                             randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp2, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
                             randomHex.pals[pal].GetComponent<HexInfo>().moveVert(temp3, -99, Color.Lerp(Color.black, new Color(0.96f, 0.64f, 0.38f), 0.75f));
+
+                            //Start making a dirt path
                             randomHex.dirtPath(startingHex, largestHeightValue, 1,this);
                             dirtAdded = true;
                         }
@@ -640,7 +645,6 @@ public class IslandMaker : MonoBehaviour
     }
 
     GameObject lastIsland;
-
     public List<GameObject> camps = new List<GameObject>();
     
     //Combine all the hexagon objects together into a single island game object
@@ -708,19 +712,25 @@ public class IslandMaker : MonoBehaviour
             hexs.Clear();
         }
         #endregion
+
+        //Parent the camps, seagulls and particle effects to the island
         for (int i = 0; i < camps.Count; i++)
             camps[i].transform.parent = lastIsland.transform;
         gulls.transform.parent = lastIsland.transform;
         particles.transform.parent = lastIsland.transform;
         
+        //Change the name of the flagpole and remove anything not required
         flag.name = "flagpole " + finishedIslands;
         flag = null;
         Destroy(lastIsland.GetComponent<HexInfo>());
 
+        //Set up island values
         var island = lastIsland.AddComponent<finishedIsland>();
         island.thisTweet = THETWEET;
         island.islandIndex = finishedIslands;
         island.SA = SA;
+
+        //Initialize island
         island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
 
@@ -733,8 +743,7 @@ public class IslandMaker : MonoBehaviour
         //Tag as Island
         lastIsland.tag = "Island";
 
-        #endregion
-        //This (sometyimes) crashes everything when included
+        //This (sometimes) crashes everything when included
 
         /*var val = 250;
         Debug.Log("oh shit here we go");
@@ -749,5 +758,5 @@ public class IslandMaker : MonoBehaviour
         }*/
         camps.Clear();
     }
-    
+        #endregion
 }
