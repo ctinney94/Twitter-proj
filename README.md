@@ -1,5 +1,12 @@
 # Tweet Islands
 
+Tweet Islands was created by Craig Tinney
+Unless otherwise specified in files, all content in the myWork is all my own production.
+Some of the textures used in materials were taken from this pack:
+https://www.assetstore.unity3d.com/en/#!/content/19242
+
+Other than that it's either default Unity assets or something I've put together
+
 ##Important things to do
 
 - Write report
