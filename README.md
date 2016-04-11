@@ -29,6 +29,8 @@ Other than that it's either default Unity assets or something I've put together
 - Sound options
 - Sound options
 - Sound options
+- Could release scalable cloud particle system on the asset store
+- Could release Twitter cript also for interacting with the public API
 
 ##Pie in the sky
 
