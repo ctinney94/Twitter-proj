@@ -10,10 +10,15 @@ Other than that it's either default Unity assets or something I've put together
 ##Important things to do
 
 - Write report
-- Make demo video
+- ~~Make demo video~~
 
 ##Future goals
 
+- Fix that bug where if you quote a tweet you get all the juicy stats for it
+- Make something for replies
+	- Boats / ships?
+	- Other Islands?
+	- Maybe a item that scales based on # of relpies...
 - Android version
 	- HuD
 	- Controls
