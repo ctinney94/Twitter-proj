@@ -11,6 +11,9 @@ Other than that it's either default Unity assets or something I've put together
 
 - Write report
 - ~~Make demo video~~
+- Lower quality settings make the water look like SHIT
+- Tell people NOT to use the awful settings
+
 
 ##Future goals
 
