@@ -12,7 +12,8 @@ Other than that it's either default Unity assets or something I've put together
 - Write report
 - ~~Make demo video~~
 - Lower quality settings make the water look like SHIT
-- Tell people NOT to use the awful settings
+- Edit lowest 2 quality settings to use hard + soft shadows
+- Remove some stuff from input, people might get the wrong idea.
 
 
 ##Future goals
