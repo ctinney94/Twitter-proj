@@ -87,7 +87,7 @@ public class cameraOrbitControls : MonoBehaviour
         if (currentIsland > 0)
         {
             //Enable gull button if gulls are present
-            if (islands[currentIsland - 1].GetComponentInChildren<gullMaker>().gulls > 0)
+            if (islands[currentIsland - 1].GetComponentInChildren<gullMaker>().myGulls.Count > 0)
             {
                 if (gullCamButton.activeInHierarchy)
                 {

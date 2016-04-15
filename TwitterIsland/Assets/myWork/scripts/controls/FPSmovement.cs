@@ -52,7 +52,7 @@ public class FPSmovement : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Tab))
             mouse = !mouse;
-
+        
         if (Input.GetKeyDown(KeyCode.LeftShift))
             moveSpeed *= 3;
 

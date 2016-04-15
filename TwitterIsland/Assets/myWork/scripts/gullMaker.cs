@@ -8,10 +8,10 @@ using UnityEngine.UI;
 
 public class gullMaker : MonoBehaviour {
 
-    public int gulls = 0;
-    GameObject gull, birthdayGull;
+    int gulls = 0;
+    GameObject gull, birthdayGull, valentineSeagull;
     GameObject islandMenus, gullcam;
-    List<GameObject> myGulls = new List<GameObject>();
+    public List<GameObject> myGulls = new List<GameObject>();
     public Material SecretWaluigiSkin;
     public AudioClip[] gullNoises;
     
@@ -23,6 +23,7 @@ public class gullMaker : MonoBehaviour {
         GameObject.Find("Gull cam!").GetComponent<gullCam>().gullCollections.Add(this);
         gull = Resources.Load("gull") as GameObject;
         birthdayGull = Resources.Load("gull_birthday") as GameObject;
+        valentineSeagull = Resources.Load("gull_valentine") as GameObject;
     }
 
     public void reloadGulls(string text)
@@ -51,13 +52,6 @@ public class gullMaker : MonoBehaviour {
         }
         gulls = hashtags;
 
-        int secrets = 0;
-
-        if (text.Contains("waluigi"))
-            secrets++;
-        if (text.ToLower().Contains("birthday"))
-            secrets++;
-
         makeGulls(gulls, text.ToLower());
     }
 
@@ -72,6 +66,15 @@ public class gullMaker : MonoBehaviour {
             }
         }
 
+        for (int i = 0; i < gulls; i++)
+        {
+            GameObject gullyGuy = Instantiate(gull);
+            int theChosenGull = Random.Range(0, gullNames.Count - 1);
+            gullyGuy.name = gullNames[theChosenGull];
+            gullNames.Remove(gullNames[theChosenGull]);
+            gullyGuy.transform.parent = gameObject.transform;
+            myGulls.Add(gullyGuy);
+        }
         #region Special gulls!
         if (input.Contains("waluigi"))
         {
@@ -90,16 +93,15 @@ public class gullMaker : MonoBehaviour {
             gullyGuy.transform.parent = gameObject.transform;
             myGulls.Add(gullyGuy);
         }
-        #endregion
-        for (int i = 0; i < gulls; i++)
+        if (input.Contains("love") || input.Contains("valentine"))
         {
-            GameObject gullyGuy = Instantiate(gull);
+            GameObject gullyGuy = Instantiate(valentineSeagull);
             int theChosenGull = Random.Range(0, gullNames.Count - 1);
             gullyGuy.name = gullNames[theChosenGull];
-            gullNames.Remove(gullNames[theChosenGull]);
             gullyGuy.transform.parent = gameObject.transform;
             myGulls.Add(gullyGuy);
         }
+        #endregion
 
         int o = 0;
         foreach(GameObject gull in myGulls)

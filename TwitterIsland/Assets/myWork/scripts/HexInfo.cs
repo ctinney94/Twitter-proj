@@ -20,7 +20,7 @@ public class HexInfo : MonoBehaviour
     
     public GameObject camp;
 
-    //When clicked on, create partivle effects at cursor position
+    //When clicked on, create particle effects at cursor position
     //Currently not used since hexs are combined in the island merging process, removing this class in the process.
     void OnMouseDown()
     {

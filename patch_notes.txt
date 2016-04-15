@@ -1,0 +1,17 @@
+====================
+	1.03		
+====================
+- Added valentine seagull
+- Added welcome screen
+
+
+====================
+	1.02
+====================
+- Minor bug fixes
+
+
+====================
+	1.01
+====================
+- Added manual to download
