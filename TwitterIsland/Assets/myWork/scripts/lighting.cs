@@ -30,5 +30,5 @@ public class lighting : MonoBehaviour {
 
             newTimeOfDay += (Time.deltaTime / 30f);
         }
-    }
+    }  
 }

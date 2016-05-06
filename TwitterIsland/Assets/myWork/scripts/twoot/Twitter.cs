@@ -196,6 +196,7 @@ namespace Twitter
 
         //Data types used for tweet data as well as detailed time info
         #region screenshotDoing
+            
         public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response, twitterButton caller)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
@@ -205,20 +206,20 @@ namespace Twitter
             WWWForm form = new WWWForm();
             form.AddField("media_data", encodedImage);
 
-            Debug.Log("post");
+            Debug.Log("uploading to twitter...");
             // HTTP header
             var headers = new Dictionary<string, string>();
             headers["Authorization"] = GetHeaderWithAccessToken("POST", "https://upload.twitter.com/1.1/media/upload.json", consumerKey, consumerSecret, response, parameters);
-            headers["Content-Transfer-Encoding"]= "base64";
+            headers["Content-Transfer-Encoding"] = "base64";
             WWW web = new WWW("https://upload.twitter.com/1.1/media/upload.json", form.data, headers);
             yield return web;
-
-            Debug.Log(web.text);
-            if (web.error!="Null")
+            
+            if (web.error != "Null")
             {
                 string mediaID = web.text.Remove(web.text.IndexOf(','), web.text.Length - web.text.IndexOf(','));
                 mediaID = mediaID.Remove(0, 12);
                 Debug.Log(mediaID);
+
                 caller.postMe(mediaID);
             }
             else
@@ -231,14 +232,14 @@ namespace Twitter
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("status", text);
-            parameters.Add("media_ids", mediaID);
+            parameters.Add("media_ids", mediaID + "," +mediaID);
 
             // Add data to the form to post.
             WWWForm form = new WWWForm();
             form.AddField("status", text);
-            form.AddField("media_ids", mediaID);
+            form.AddField("media_ids", mediaID+","+ mediaID);
 
-            Debug.Log("post");
+            Debug.Log("Posting to Twitter...");
             // HTTP header
             var headers = new Dictionary<string, string>();
             headers["Authorization"] = GetHeaderWithAccessToken("POST", "https://api.twitter.com/1.1/statuses/update.json", consumerKey, consumerSecret, response, parameters);
@@ -319,8 +320,9 @@ namespace Twitter
                     extractMe = ammendOutputText;
 
                 //Extract relevant data from web response
+                Debug.Log(extractMe);
                 List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
-                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"entities\":");
+                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
                 List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
                 List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
                 List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
@@ -424,7 +426,7 @@ namespace Twitter
             {
                 //We good
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-                 
+                Debug.Log(web.text);
                 //Extract data from web response               
                 List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
                 List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
@@ -449,23 +451,25 @@ namespace Twitter
         //Used for extracting data from API response
         public static List<string> extractData(string outputText, string start, string end)
         {
+            #region Find all the position of all mentions of start string
             List<int> startPos = new List<int>();
             List<int> stopPos = new List<int>();
             int i = 0;
-            //Find all the position of all mentions of start string:
             while ((i=outputText.IndexOf(start,i))!=-1)
             {
                 startPos.Add(i);
                 i++;
             }
+            #endregion
 
+            #region Do the same for end string
             i = 0;
-            //Do the same for end string:
             while ((i = outputText.IndexOf(end, i)) != -1)
             {
                 stopPos.Add(i);
                 i++;
             }
+            #endregion
 
             //Data to return
             List<string> returnMe = new List<string>();
@@ -485,7 +489,7 @@ namespace Twitter
 
                 if (start != ",\"user_mentions\":")
                 {
-                    //Format output string
+                    #region Format output string
                     output = output.Replace(start, "");
                     //Remove emoji type things
                     output = output.Replace("\ud83c[\udf00-\udfff]", " ! ");
@@ -508,6 +512,7 @@ namespace Twitter
                         output = output.Remove(EmojisOrSimilar[u], 6);
                         output.Insert(EmojisOrSimilar[u], "*!*");
                     }
+                    #endregion
                 }
                 else if (output != "[]")
                 {

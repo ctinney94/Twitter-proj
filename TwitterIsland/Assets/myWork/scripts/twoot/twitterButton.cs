@@ -53,7 +53,7 @@ public class twitterButton : MonoBehaviour {
 
     public void postMe(string mediaID)
     {
-        StartCoroutine(Twitter.API.PostTweet("HELLO", mediaID, consumerKey, consumerSecret, m_AccessTokenResponse));
+        StartCoroutine(Twitter.API.PostTweet("This is a test", mediaID, consumerKey, consumerSecret, m_AccessTokenResponse));
     }
 
 

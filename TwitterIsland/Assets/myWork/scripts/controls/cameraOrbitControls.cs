@@ -19,7 +19,7 @@ public class cameraOrbitControls : MonoBehaviour
     float minDistance = 0.6f;
     float xSpeed = 120f;
     float ySpeed = 120;
-    int yMinLimit = 5;
+    int yMinLimit = -5;
     int yMaxLimit = 80;
     int zoomRate = 100;
     float panSpeed = 0.5f;

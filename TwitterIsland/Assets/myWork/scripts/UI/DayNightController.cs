@@ -9,8 +9,8 @@ public class DayNightController : MonoBehaviour
 {
 
     public Light sun, moon;
-    [Range(0, 1)]
-    public float currentTimeOfDay = 0, secondsInFullDay;
+    [Range(.25f, .75f)]
+    public float currentTimeOfDay = 0;
     float sunInitialIntensity;
 
     void Start()
@@ -19,10 +19,15 @@ public class DayNightController : MonoBehaviour
         UpdateSun();
     }
 
+    public void newTOD(float TOD)
+    {
+        currentTimeOfDay = TOD;
+    }
+
     void Update()
     {
         UpdateSun();
-        UpdateMoon();
+        //UpdateMoon();
         //currentTimeOfDay += (Time.deltaTime / secondsInFullDay);
     }
 
