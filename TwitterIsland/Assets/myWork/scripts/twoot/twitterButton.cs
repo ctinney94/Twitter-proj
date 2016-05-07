@@ -10,7 +10,16 @@ using System.Security.Cryptography;
 
 public class twitterButton : MonoBehaviour {
 
+    #region Singleton
+    private static twitterButton m_instance;
+    public static twitterButton instance
+    {
+        get { return m_instance; }
+    }
+    #endregion
+
     public string consumerKey, consumerSecret;
+    public Button postScreenshotButton;
     public int tweetsToGrab;
     public List<Twitter.API.Tweet> tweets;
     public InputField usernameInput, PINInput, textInput;
@@ -18,7 +27,7 @@ public class twitterButton : MonoBehaviour {
     public GameObject gulley;
     public GameObject tweetCountText,islandBuildingText;
     public bool verified;
-        
+    public Text userInfo, authError;
     bool running;
     
     //New API related things required for screenshot posting
@@ -26,14 +35,16 @@ public class twitterButton : MonoBehaviour {
     const string PLAYER_PREFS_TWITTER_USER_SCREEN_NAME = "TwitterUserScreenName";
     const string PLAYER_PREFS_TWITTER_USER_TOKEN = "TwitterUserToken";
     const string PLAYER_PREFS_TWITTER_USER_TOKEN_SECRET = "TwitterUserTokenSecret";
+    public string userName;
     public Twitter.RequestTokenResponse m_RequestTokenResponse;
     Twitter.AccessTokenResponse m_AccessTokenResponse;
 
     void Start()
     {
+        m_instance = this;
         LoadTwitterUserInfo();
     }
-
+    
     public void registerUser()
     {
         Debug.Log("Register button");
@@ -43,20 +54,36 @@ public class twitterButton : MonoBehaviour {
 
     public void SubitPIN()
     {
-        StartCoroutine(Twitter.API.GetAccessToken(consumerKey, consumerSecret, m_RequestTokenResponse.Token, PINInput.text, this.OnAccessTokenCallback));
+        if (m_RequestTokenResponse != null)
+        {
+            if (PINInput.text.Length == 7)
+            {
+                authError.enabled = false;
+                StartCoroutine(Twitter.API.GetAccessToken(consumerKey, consumerSecret, m_RequestTokenResponse.Token, PINInput.text, this.OnAccessTokenCallback, authError));
+            }
+            else
+            {
+                authError.enabled = true;
+                authError.text = "The PIN you entered is not long enough";
+            }
+        }
+        else
+        {
+            authError.enabled = true;
+            authError.text = "No token found, please open page for another PIN";
+        }
     }
 
-    public void PostScreenshotToTwitter(string encodedImage)
+    public void PostScreenshotToTwitter(string encodedImage, screenshot caller)
     {
-        StartCoroutine(Twitter.API.PostScreenshot(encodedImage, consumerKey, consumerSecret, m_AccessTokenResponse,this));
+        StartCoroutine(Twitter.API.PostScreenshot(encodedImage, consumerKey, consumerSecret, m_AccessTokenResponse,caller));
     }
 
-    public void postMe(string mediaID)
+    public void postMe(string status,string mediaID,Text output)
     {
-        StartCoroutine(Twitter.API.PostTweet("This is a test", mediaID, consumerKey, consumerSecret, m_AccessTokenResponse));
+        StartCoroutine(Twitter.API.PostTweet(status, mediaID, consumerKey, consumerSecret, m_AccessTokenResponse,output));
     }
-
-
+    
     #region Everything related to islanding
 
     //Grab some tweets (and profile info)
@@ -142,7 +169,6 @@ public class twitterButton : MonoBehaviour {
         yield return web;
         avatarImage = web.texture;
         IslandMaker.avatar = web.texture;
-        //GameObject.Find("Avatar").GetComponent<Image>().sprite = Sprite.Create(web.texture,new Rect(0,0,web.texture.width,web.texture.height), new Vector2(.5f,.5f));
     }
 
     //UI function
@@ -168,12 +194,20 @@ public class twitterButton : MonoBehaviour {
             !string.IsNullOrEmpty(m_AccessTokenResponse.Token) &&
             !string.IsNullOrEmpty(m_AccessTokenResponse.TokenSecret))
         {
+            userName = m_AccessTokenResponse.ScreenName;
+            userInfo.text = "Authorized as " + m_AccessTokenResponse.ScreenName + ". Ready to post.";
+            postScreenshotButton.interactable = true;
             string log = "LoadTwitterUserInfo - succeeded";
             log += "\n    UserId : " + m_AccessTokenResponse.UserId;
             log += "\n    ScreenName : " + m_AccessTokenResponse.ScreenName;
             log += "\n    Token : " + m_AccessTokenResponse.Token;
             log += "\n    TokenSecret : " + m_AccessTokenResponse.TokenSecret;
             print(log);
+        }
+        else
+        {
+            userInfo.text = "Unauthorized, PIN required to post.";
+            postScreenshotButton.interactable = false;
         }
     }
 
@@ -189,6 +223,10 @@ public class twitterButton : MonoBehaviour {
             print(log);
 
             m_AccessTokenResponse = response;
+            userName = response.ScreenName;
+
+            userInfo.text = "Authorized as "+response.ScreenName + ". Ready to post.";
+            postScreenshotButton.interactable = true;
 
             PlayerPrefs.SetString(PLAYER_PREFS_TWITTER_USER_ID, response.UserId);
             PlayerPrefs.SetString(PLAYER_PREFS_TWITTER_USER_SCREEN_NAME, response.ScreenName);
@@ -198,6 +236,7 @@ public class twitterButton : MonoBehaviour {
         else
         {
             print("OnAccessTokenCallback - failed.");
+            postScreenshotButton.interactable = false;
         }
     }
 }

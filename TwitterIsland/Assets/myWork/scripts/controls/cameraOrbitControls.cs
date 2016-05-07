@@ -11,6 +11,7 @@ public class cameraOrbitControls : MonoBehaviour
 {
     public List<GameObject> islands = new List<GameObject>();
     public int currentIsland = 0;
+    public List<TextMesh> textMeshObjects = new List<TextMesh>();
 
     public Transform target;
     public Vector3 targetOffset;
@@ -79,6 +80,15 @@ public class cameraOrbitControls : MonoBehaviour
             GameObject.Find("WorldLight").GetComponent<lighting>().newShadowStrength = islands[currentIsland - 1].GetComponent<finishedIsland>().blackness;
             GameObject.Find("WorldLight").GetComponent<lighting>().newTimeOfDay = (float)islands[currentIsland - 1].GetComponent<finishedIsland>().thisTweet.dateTime.Hour / 24;
         }*/
+    }
+
+    public void toggleTextMesh(bool toggle)
+    {
+        foreach (TextMesh t in textMeshObjects)
+        {
+            t.color = (toggle) ? Color.white : new Color(1, 1, 1, 0);
+            t.richText = toggle;
+        }
     }
 
     public void Update()

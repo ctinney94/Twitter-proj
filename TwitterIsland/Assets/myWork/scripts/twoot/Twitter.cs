@@ -8,6 +8,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Security.Cryptography;
+using DG.Tweening;
 
 //For use interacting with the twitter API
 namespace Twitter
@@ -113,7 +114,7 @@ namespace Twitter
             Application.OpenURL(string.Format(AuthorizationURL, requestToken));
         }
 
-        public static IEnumerator GetAccessToken(string consumerKey, string consumerSecret, string requestToken, string pin, AccessTokenCallback callback)
+        public static IEnumerator GetAccessToken(string consumerKey, string consumerSecret, string requestToken, string pin, AccessTokenCallback callback, Text errorText)
         {
             WWW web = WWWAccessToken(consumerKey, consumerSecret, requestToken, pin);
 
@@ -121,6 +122,8 @@ namespace Twitter
 
             if (!string.IsNullOrEmpty(web.error))
             {
+                errorText.text= web.error;
+                errorText.enabled = true;
                 Debug.Log(string.Format("GetAccessToken - failed. error : {0}", web.error));
             }
             else
@@ -139,6 +142,7 @@ namespace Twitter
                     !string.IsNullOrEmpty(response.ScreenName))
                 {
                     callback(true, response);
+                    errorText.enabled = false;
                 }
                 else
                 {
@@ -197,7 +201,7 @@ namespace Twitter
         //Data types used for tweet data as well as detailed time info
         #region screenshotDoing
             
-        public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response, twitterButton caller)
+        public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response,screenshot secondaryCaller)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("media_data", encodedImage);
@@ -218,9 +222,8 @@ namespace Twitter
             {
                 string mediaID = web.text.Remove(web.text.IndexOf(','), web.text.Length - web.text.IndexOf(','));
                 mediaID = mediaID.Remove(0, 12);
-                Debug.Log(mediaID);
-
-                caller.postMe(mediaID);
+                Debug.Log("Upload complete - " + mediaID);
+                secondaryCaller.mediaIDs.Add(mediaID);
             }
             else
             {
@@ -228,16 +231,16 @@ namespace Twitter
             }
         }
 
-        public static IEnumerator PostTweet(string text, string mediaID, string consumerKey, string consumerSecret, AccessTokenResponse response)
+        public static IEnumerator PostTweet(string text, string mediaID, string consumerKey, string consumerSecret, AccessTokenResponse response,Text outputText)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("status", text);
-            parameters.Add("media_ids", mediaID + "," +mediaID);
+            parameters.Add("media_ids", mediaID);// + "," +mediaID);
 
             // Add data to the form to post.
             WWWForm form = new WWWForm();
             form.AddField("status", text);
-            form.AddField("media_ids", mediaID+","+ mediaID);
+            form.AddField("media_ids", mediaID);// +","+ mediaID);
 
             Debug.Log("Posting to Twitter...");
             // HTTP header
@@ -249,7 +252,9 @@ namespace Twitter
             Debug.Log(web.text);
             if (web.error != "Null")
             {
-                //i hope we good
+                outputText.text = "Upload complete!";
+                yield return new WaitForSeconds(2);
+                outputText.DOFade(0, 1);
             }
             else
             {

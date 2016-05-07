@@ -32,9 +32,12 @@ public class finishedIsland : MonoBehaviour
         worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
         tweetText = new GameObject("Tweet text");
         tweetText.transform.parent = transform;
-        tweetText.AddComponent<TextMesh>();
+
+        //Add this text object to a list held by the main camera so we can enable/disable text
+        Camera.main.GetComponent<cameraOrbitControls>().textMeshObjects.Add(tweetText.AddComponent<TextMesh>());
+
         numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
-        IslandInfoUI= GameObject.Find("IslandInfo UI").GetComponent<MenuMover>();
+        IslandInfoUI = GameObject.Find("IslandInfo UI").GetComponent<MenuMover>();
 
         //Create a text mesh object to float above the island, displaying the tweet
         meshy = tweetText.GetComponent<TextMesh>();
