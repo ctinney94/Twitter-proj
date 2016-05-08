@@ -14,6 +14,7 @@ Other than that it's either default Unity assets or something I've put together
 - ~~Lower quality settings make the water look like SHIT~~
 - ~~Edit lowest 2 quality settings to use hard + soft shadows~~
 - Remove some stuff from input, people might get the wrong idea.
+	- And by that I mean the Input tab in the Player launcher
 
 
 ##Future goals
