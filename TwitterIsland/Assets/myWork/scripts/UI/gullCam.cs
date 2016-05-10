@@ -1,10 +1,26 @@
 ﻿using UnityEngine;
-using System.Collections;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class gullCam : MonoBehaviour {
 
     public List<gullMaker> gullCollections = new List<gullMaker>();
+    public Button thisButton;
+    void Awake()
+    {
+        thisButton = GetComponent<Button>();
+        thisButton.enabled = false;
+    }
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Joystick1Button3) && thisButton.enabled && thisButton.interactable)
+            EnterGullCam();
+    }
+
+    public void EnterGullCam()
+    {
+        thisButton.onClick.Invoke();
+    }
 
 	public void cutToGullCam()
     {

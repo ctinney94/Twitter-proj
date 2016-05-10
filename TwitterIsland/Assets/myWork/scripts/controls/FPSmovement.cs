@@ -10,17 +10,12 @@ using UnityEngine.UI;
 //Hold Space to fly upwards
 
 public class FPSmovement : MonoBehaviour {
-
+    
     public float mouseSensitivity = 4;
     public float moveSpeed = 0.1f;
     public GameObject cameraObject, mainCam, IslslandHuD;
     public bool allowJetpack;
-
-    // Use this for initialization
-    void Start()
-    {
-        //Cursor.visible = false;
-    }
+    
     public void enter()
     {
         int currentFlag = mainCam.GetComponent<cameraOrbitControls>().currentIsland;
@@ -50,18 +45,42 @@ public class FPSmovement : MonoBehaviour {
             cameraObject.transform.rotation *= Quaternion.Euler(-rotY, 0f, 0f);
         }
 
+        if (Mathf.Abs(Input.GetAxis("JoypadVertical")) > 0.1f || Mathf.Abs(Input.GetAxis("JoypadHorizontal")) > 0.1f)
+        {
+            float rotX = CrossPlatformInputManager.GetAxis("JoypadHorizontal") * mouseSensitivity;
+            float rotY = CrossPlatformInputManager.GetAxis("JoypadVertical") * mouseSensitivity;
+            gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
+            cameraObject.transform.rotation *= Quaternion.Euler(rotY, 0f, 0f);
+        }
+        if (Mathf.Abs(Input.GetAxis("JoypadVertical")) > 0.1f || Mathf.Abs(Input.GetAxis("JoypadHorizontal")) > 0.1f)
+        {
+            float rotX = CrossPlatformInputManager.GetAxis("JoypadHorizontal") * mouseSensitivity;
+            float rotY = CrossPlatformInputManager.GetAxis("JoypadVertical") * mouseSensitivity;
+            gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
+            cameraObject.transform.rotation *= Quaternion.Euler(rotY, 0f, 0f);
+        }
+
         if (Input.GetKeyDown(KeyCode.Tab))
             mouse = !mouse;
         
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.Joystick1Button8))
             moveSpeed *= 3;
 
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+        if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.Joystick1Button8))
             moveSpeed /= 3;
 
         float posX = 0, posZ = 0;
 
         #region movement
+
+        if (Mathf.Abs(Input.GetAxis("Left/Right")) > 0.1f)
+        {
+            posX = Input.GetAxis("Left/Right") * 2;
+        }
+        if (Mathf.Abs(Input.GetAxis("Up/Down")) > 0.1f)
+        {
+            posZ = Input.GetAxis("Up/Down") * 2;
+        }
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -99,7 +118,7 @@ public class FPSmovement : MonoBehaviour {
             gameObject.GetComponent<Rigidbody>().useGravity = true;
         #endregion
         
-        if (Input.GetKey(KeyCode.Escape))
+        if (Input.GetKey(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button6))
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;

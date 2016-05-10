@@ -13,6 +13,8 @@ public class cameraOrbitControls : MonoBehaviour
     public int currentIsland = 0;
     public List<TextMesh> textMeshObjects = new List<TextMesh>();
 
+    public GameObject FPSobject;
+
     public bool screenshotMode { get;  set; }
     public Transform target;
     public Vector3 targetOffset;
@@ -21,7 +23,7 @@ public class cameraOrbitControls : MonoBehaviour
     float minDistance = 0.6f;
     float xSpeed = 120f;
     float ySpeed = 120;
-    int yMinLimit = -5;
+    int yMinLimit = 1;
     int yMaxLimit = 80;
     int zoomRate = 100;
     float panSpeed = 0.5f;
@@ -176,14 +178,21 @@ public class cameraOrbitControls : MonoBehaviour
         yDeg = Vector3.Angle(Vector3.up, transform.up);
     }
 
+    bool moving;
+
     //Camera logic on LateUpdate to only update after all character movement logic has been handled. 
     void LateUpdate()
     {
         //Lerp camera position to target
         target.position = Vector3.Lerp(target.position, newTarget + newTargetOffset, Time.deltaTime * 5);
         if (target.position == newTarget + newTargetOffset)
-            target.position = newTarget+ newTargetOffset;
+        {
+            target.position = newTarget + newTargetOffset;
+        }
+        if (Vector3.Distance(target.position,newTarget) < 5)
+            moving = false;
 
+        #region mouseControls
         //Right click used to pan camera
         if (Input.GetMouseButton(2))
         {
@@ -216,6 +225,41 @@ public class cameraOrbitControls : MonoBehaviour
             target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
         }
 
+        // affect the desired Zoom distance if we roll the scrollwheel
+        desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
+        #endregion
+
+        #region 360 controls
+        //Orbit camera
+        if (Mathf.Abs(Input.GetAxis("JoypadVertical"))>0.1f || Mathf.Abs(Input.GetAxis("JoypadHorizontal")) > 0.1f)
+        {
+            xDeg -= Input.GetAxis("JoypadHorizontal") * xSpeed * 0.02f;
+            yDeg -= Input.GetAxis("JoypadVertical") * ySpeed * 0.02f;
+
+            //Clamp the vertical axis for the orbit
+            yDeg = ClampAngle(yDeg, yMinLimit, yMaxLimit);
+            // set camera rotation f
+            desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
+        }   
+
+        if (Input.GetKeyDown(KeyCode.Joystick1Button0))
+        {
+            FPSobject.SetActive(true);
+            FPSobject.GetComponent<FPSmovement>().enter();
+        }
+        if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > .1f && !moving)
+        {
+            moving = true;
+            if (transform.rotation.eulerAngles.y < 90 || transform.rotation.eulerAngles.y > 270)
+            changeTarget((Input.GetAxis("SwitchIsland") > 0 ? 1 : -1));
+            else
+                changeTarget((Input.GetAxis("SwitchIsland") > 0 ? -1 : 1));
+        }
+
+        //Zoom with triggers
+        desiredDistance -= Input.GetAxis("JoypadZoom") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
+        #endregion
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             //target.transform.position = Vector3.zero;
@@ -224,8 +268,6 @@ public class cameraOrbitControls : MonoBehaviour
 
         ////////Orbit Position
 
-        // affect the desired Zoom distance if we roll the scrollwheel
-        desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
         //clamp the zoom min/max
         desiredDistance = Mathf.Clamp(desiredDistance, minDistance, maxDistance);
         // For smoothing of the zoom, lerp distance

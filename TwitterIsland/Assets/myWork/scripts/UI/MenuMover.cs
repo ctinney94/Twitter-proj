@@ -7,7 +7,7 @@ public class MenuMover : MonoBehaviour {
 
     public GameObject menuBit;
     public GameObject sizeGO, heightGO;
-    string m_displayName, m_text,timeAgo;
+    public string m_displayName, m_text,timeAgo;
     float m_size, m_height;
     float lerpSize, lerpHeight;
     bool lerp;
@@ -41,16 +41,28 @@ public class MenuMover : MonoBehaviour {
             }
         }
         #endregion
+        if (Input.GetKeyDown(KeyCode.Joystick1Button2))
+        {
+            menuBit.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
+                "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
+                "\n\nSentiment: " + "<size=16>       </size>";
+            fade(0);
+        }
     }
 
     public void updateUI(Twitter.API.Tweet newTweet, float sentiment, float height, float size)
     {
-        StopCoroutine(revert(newTweet,sentiment));
+        menuBit.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
+            "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
+            "\n\nSentiment: " + "<size=16>       </size>";
+
+
+        StopCoroutine(revert(newTweet, sentiment));
 
         menuBit.SetActive(true);
-        menuBit.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>"+
-            "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>"+
-            "\n\nSentiment: " + "<size=16>       </size>";
+
+        //Fade out everything
+        fade(0);
 
         lerpSize = 0;
         lerpHeight = 0;
@@ -62,7 +74,7 @@ public class MenuMover : MonoBehaviour {
 
         //Calculate time between tweet post and now
         #region time between now and post
-        int MonthInt=0;
+        int MonthInt = 0;
         switch (newTweet.dateTime.Month)
         {
             case "Jan":
@@ -118,7 +130,7 @@ public class MenuMover : MonoBehaviour {
             if (hours >= 22)
                 timeAgo = "almost a day";
             else if (hours >= 5)
-                timeAgo = hours+" hours";
+                timeAgo = hours + " hours";
             else if (hours >= 3)
                 timeAgo = "a few hours";
             else if (hours >= 2)
@@ -133,7 +145,7 @@ public class MenuMover : MonoBehaviour {
                 if (mins > 54)
                     timeAgo = "about an hour";
                 else if (mins > 5)
-                    timeAgo = mins+" minutes";
+                    timeAgo = mins + " minutes";
                 else if (mins >= 3)
                     timeAgo = "a few minutes";
                 else if (mins >= 2)
@@ -157,8 +169,8 @@ public class MenuMover : MonoBehaviour {
                 else
                 {
                     //How many hours ago?
-                    if (h >1)
-                    timeAgo = h + " hours";
+                    if (h > 1)
+                        timeAgo = h + " hours";
                     else
                     {
                         float minutes = System.DateTime.Now.Minute - newTweet.dateTime.Minute;
@@ -169,7 +181,7 @@ public class MenuMover : MonoBehaviour {
             {
                 //how many YEARS
                 if (difference / 365 > 5)
-                    timeAgo = (int)(difference / 365 )+" years";
+                    timeAgo = (int)(difference / 365) + " years";
                 else if (difference / 365 >= 3)
                     timeAgo = "a few years";
                 else if (difference / 365 >= 2)
@@ -205,27 +217,6 @@ public class MenuMover : MonoBehaviour {
                 }
             }
         }
-        #endregion
-
-        #region  Fade out everything
-        menuBit.GetComponentInChildren<Text>().DOFade(0, .75f);
-        menuBit.GetComponent<Image>().DOFade(0, .75f);
-        menuBit.GetComponentsInChildren<Text>()[0].DOFade(0, .75f);
-        menuBit.GetComponentsInChildren<Text>()[2].DOFade(0, .75f);
-
-        Image[] images = sizeGO.GetComponentsInChildren<Image>();
-        foreach(Image i in images)
-        {
-            i.DOFade(0, .75f);
-        }
-        images = heightGO.GetComponentsInChildren<Image>();
-        foreach (Image i in images)
-        {
-            i.DOFade(0, .75f);
-        }
-
-        heightGO.GetComponentInChildren<Text>().DOFade(0, .75f);
-        sizeGO.GetComponentInChildren<Text>().DOFade(0, .75f);
         #endregion
 
         StartCoroutine(revert(newTweet, sentiment));
@@ -275,35 +266,38 @@ public class MenuMover : MonoBehaviour {
         #endregion
 
         Text uiText = menuBit.GetComponentInChildren<Text>();
-        if (uiText)
-        uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
-            "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
-            "\n\nSentiment: " + "<size=16>       </size>";
+            uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
+                "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
+                "\n\nSentiment: " + "<size=16>       </size>";
 
-        #region  Fade in the everything
-        menuBit.GetComponentsInChildren<Text>()[0].DOFade(1, .75f);
-        menuBit.GetComponentsInChildren<Text>()[2].DOFade(1, .75f);
-        menuBit.GetComponent<Image>().DOFade(.5f, .75f);
-
-        Image[] images = sizeGO.GetComponentsInChildren<Image>();
-        foreach (Image i in images)
-        {
-            i.DOFade(1, .75f);
-        }
-        images = heightGO.GetComponentsInChildren<Image>();
-        foreach (Image i in images)
-        {
-            i.DOFade(1, .75f);
-        }
-
-        heightGO.GetComponentInChildren<Text>().DOFade(1, .75f);
-        sizeGO.GetComponentInChildren<Text>().DOFade(1, .75f);
-        #endregion
+        //Fade in the everything
+        fade(1);
 
         yield return new WaitForSeconds(1.25f);
         uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
             "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
             "\n\nSentiment: " + "<size=16>" + sent + "</size>";
 
+    }
+
+    void fade(int inOut)
+    {
+        menuBit.GetComponentsInChildren<Text>()[0].DOFade(inOut, .75f);
+        menuBit.GetComponentsInChildren<Text>()[2].DOFade(inOut, .75f);
+        menuBit.GetComponent<Image>().DOFade((inOut > 0) ? .5f : 0, .75f);
+
+        Image[] images = sizeGO.GetComponentsInChildren<Image>();
+        foreach (Image i in images)
+        {
+            i.DOFade(inOut, .75f);
+        }
+        images = heightGO.GetComponentsInChildren<Image>();
+        foreach (Image i in images)
+        {
+            i.DOFade(inOut, .75f);
+        }
+
+        heightGO.GetComponentInChildren<Text>().DOFade(inOut, .75f);
+        sizeGO.GetComponentInChildren<Text>().DOFade(inOut, .75f);
     }
 }
