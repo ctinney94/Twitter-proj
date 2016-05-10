@@ -28,7 +28,7 @@ public class twitterButton : MonoBehaviour {
     public GameObject tweetCountText,islandBuildingText;
     public bool verified;
     public Text userInfo, authError;
-    bool running;
+    public bool running;
     
     //New API related things required for screenshot posting
     const string PLAYER_PREFS_TWITTER_USER_ID = "TwitterUserID";
@@ -74,9 +74,9 @@ public class twitterButton : MonoBehaviour {
         }
     }
 
-    public void PostScreenshotToTwitter(string encodedImage, screenshot caller)
+    public void PostScreenshotToTwitter(string encodedImage, screenshot caller,bool isBack)
     {
-        StartCoroutine(Twitter.API.PostScreenshot(encodedImage, consumerKey, consumerSecret, m_AccessTokenResponse,caller));
+        StartCoroutine(Twitter.API.PostScreenshot(encodedImage, consumerKey, consumerSecret, m_AccessTokenResponse,caller,isBack));
     }
 
     public void postMe(string status,string mediaID,Text output)

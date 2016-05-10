@@ -201,7 +201,7 @@ namespace Twitter
         //Data types used for tweet data as well as detailed time info
         #region screenshotDoing
             
-        public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response,screenshot secondaryCaller)
+        public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response,screenshot secondaryCaller,bool isBack)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("media_data", encodedImage);
@@ -223,7 +223,7 @@ namespace Twitter
                 string mediaID = web.text.Remove(web.text.IndexOf(','), web.text.Length - web.text.IndexOf(','));
                 mediaID = mediaID.Remove(0, 12);
                 Debug.Log("Upload complete - " + mediaID);
-                secondaryCaller.mediaIDs.Add(mediaID);
+                secondaryCaller.mediaIDs.Add(new KeyValuePair<string, bool>(mediaID,isBack));
             }
             else
             {
@@ -235,13 +235,14 @@ namespace Twitter
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("status", text);
-            parameters.Add("media_ids", mediaID);// + "," +mediaID);
+            parameters.Add("media_ids", mediaID);
 
             // Add data to the form to post.
             WWWForm form = new WWWForm();
             form.AddField("status", text);
-            form.AddField("media_ids", mediaID);// +","+ mediaID);
+            form.AddField("media_ids", mediaID);
 
+            Debug.Log(mediaID);
             Debug.Log("Posting to Twitter...");
             // HTTP header
             var headers = new Dictionary<string, string>();

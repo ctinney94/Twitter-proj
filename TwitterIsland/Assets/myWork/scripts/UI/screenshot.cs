@@ -11,7 +11,7 @@ public class screenshot : MonoBehaviour
     public Image[] imagesToTurnOff;
     public Text[] textToTurnOff;
 
-    public List<string> mediaIDs = new List<string>();
+    public List<KeyValuePair<string,bool>> mediaIDs = new List<KeyValuePair<string, bool>>();
 
     public Image screencap, postcardTopper,dummyBackground,stamp;
     public Text postcardTopperDATE, currentImageText, postCardAddress,outputText;
@@ -140,6 +140,7 @@ public class screenshot : MonoBehaviour
 
     public void postThePostcard(bool skipBack)
     {
+        StopCoroutine("capturePostCardBack");
         StartCoroutine(capturePostCardBack(skipBack));
     }
 
@@ -164,9 +165,9 @@ public class screenshot : MonoBehaviour
             {
                 i.SetActive(true);
             }
-            EncodeAndUpload(postcardBack);
+            EncodeAndUpload(postcardBack,true);
         }
-        EncodeAndUpload(screenshots[currentImage]);
+        EncodeAndUpload(screenshots[currentImage],false);
         FinalThingBeforeUpload.SetActive(true);
     }
 
@@ -260,10 +261,10 @@ public class screenshot : MonoBehaviour
 
     }
 
-    void EncodeAndUpload(Texture2D image)
+    void EncodeAndUpload(Texture2D image,bool isBack)
     {
         System.Convert.ToBase64String(image.EncodeToPNG());
-        twitterButton.instance.PostScreenshotToTwitter(System.Convert.ToBase64String(image.EncodeToPNG()),this);
+        twitterButton.instance.PostScreenshotToTwitter(System.Convert.ToBase64String(image.EncodeToPNG()),this,isBack);
     }
 
     public void postThisTotwitter()
@@ -272,11 +273,17 @@ public class screenshot : MonoBehaviour
         outputText.text = "Uploading to Twitter...";
         if (mediaIDs.Count > 1)
         {
-            twitterButton.instance.postMe(statusInput.text, mediaIDs[0] + "," + mediaIDs[1],outputText);
+            //If you're trying to post two of the same thing for some bizzare reason
+            if (mediaIDs[0].Value == mediaIDs[1].Value)
+                twitterButton.instance.postMe(statusInput.text, mediaIDs[0].Key, outputText);
+            else if (mediaIDs[0].Value && !mediaIDs[1].Value)
+                twitterButton.instance.postMe(statusInput.text, mediaIDs[1].Key + "," + mediaIDs[0].Key, outputText);
+            else
+                twitterButton.instance.postMe(statusInput.text, mediaIDs[0].Key + "," + mediaIDs[1].Key, outputText);
         }
         else
         {
-            twitterButton.instance.postMe(statusInput.text, mediaIDs[0],outputText);
+            twitterButton.instance.postMe(statusInput.text, mediaIDs[0].Key,outputText);
         }
     }
 

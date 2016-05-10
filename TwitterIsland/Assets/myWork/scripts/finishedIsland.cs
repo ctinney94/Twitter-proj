@@ -196,18 +196,22 @@ public class finishedIsland : MonoBehaviour
     {
         if (Camera.main != null)
         {
+            var camControls =  Camera.main.GetComponent<cameraOrbitControls>();
+            if (!camControls.screenshotMode)
             //Change target to this
-            Camera.main.GetComponent<cameraOrbitControls>().newTarget = transform.position;
+            {
+                camControls.newTarget = transform.position;
 
-            //If this island is not the currently selected island, update the UI to display new info
-            if (Camera.main.GetComponent<cameraOrbitControls>().currentIsland != islandIndex)
-                updateUI();
+                //If this island is not the currently selected island, update the UI to display new info
+                if (camControls.currentIsland != islandIndex)
+                    updateUI();
 
-            Camera.main.GetComponent<cameraOrbitControls>().currentIsland = islandIndex;
-            Camera.main.GetComponent<cameraOrbitControls>().newTargetOffset = Vector3.zero;
+                camControls.currentIsland = islandIndex;
+                camControls.newTargetOffset = Vector3.zero;
 
-            //Change world light shadow strength to that appropriate of the island
-            worldLight.GetComponent<lighting>().newShadowStrength = blackness;
+                //Change world light shadow strength to that appropriate of the island
+                worldLight.GetComponent<lighting>().newShadowStrength = blackness;
+            }
             //worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }
 

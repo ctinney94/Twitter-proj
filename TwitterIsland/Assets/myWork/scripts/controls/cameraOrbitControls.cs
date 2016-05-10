@@ -13,6 +13,7 @@ public class cameraOrbitControls : MonoBehaviour
     public int currentIsland = 0;
     public List<TextMesh> textMeshObjects = new List<TextMesh>();
 
+    public bool screenshotMode { get;  set; }
     public Transform target;
     public Vector3 targetOffset;
     public float distance = 0;
@@ -86,8 +87,7 @@ public class cameraOrbitControls : MonoBehaviour
     {
         foreach (TextMesh t in textMeshObjects)
         {
-            t.color = (toggle) ? Color.white : new Color(1, 1, 1, 0);
-            t.richText = toggle;
+            t.GetComponent<MeshRenderer>().enabled = toggle;
         }
     }
 

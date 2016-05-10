@@ -1,4 +1,12 @@
 ====================
+	1.04		
+====================
+- Screenshot postcards added!
+	Take pictures, caption them and upload to Twitter!
+- Time of day slider (only available in screenshot mode)
+
+
+====================
 	1.03		
 ====================
 - Added valentine seagull
