@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class gullCam : MonoBehaviour {
-
+    
     public List<gullMaker> gullCollections = new List<gullMaker>();
     public Button thisButton;
     void Awake()
@@ -22,15 +22,15 @@ public class gullCam : MonoBehaviour {
         thisButton.onClick.Invoke();
     }
 
-	public void cutToGullCam()
+	public void cutToGullCam(int dir)
     {
         //Enter GULL CAM view
-        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].gullCam();
+        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].gullCam(dir);
     }
 
     public void exitGullCam()
     {
         //Exit view
-        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].exitGullCam();
+        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].inGullCam =false;
     }
 }

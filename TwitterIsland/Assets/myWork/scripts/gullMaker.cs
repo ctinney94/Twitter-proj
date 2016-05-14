@@ -8,22 +8,22 @@ using UnityEngine.UI;
 
 public class gullMaker : MonoBehaviour {
 
-    int gulls = 0;
-    GameObject gull, birthdayGull, valentineSeagull;
-    GameObject islandMenus, gullcam;
+    int gulls = 0,gullIndex;
+    public GameObject gull, birthdayGull, valentineSeagull;
+    public GameObject exitButton, dummyCameraParent;
     public List<GameObject> myGulls = new List<GameObject>();
     public Material SecretWaluigiSkin;
-    public AudioClip[] gullNoises;
-    
+    public AudioClip[] gullNoises,WaluigiNoises,partyWhistle;
+    public bool inGullCam;
+
+    public Vector3 GullCamOffset = new Vector3(7.2f, 11.81f, -27);
+    public Vector3 GullCamOffsetRotation = new Vector3(8.75f, 9.65f, 8.75f);
+
     void Awake()
     {
         //Set up references
-        islandMenus = GameObject.Find("Island menus");
-        gullcam = GameObject.Find("Gullcam");
+        exitButton = GameObject.Find("exitGullCamButton");
         GameObject.Find("Gull cam!").GetComponent<gullCam>().gullCollections.Add(this);
-        gull = Resources.Load("gull") as GameObject;
-        birthdayGull = Resources.Load("gull_birthday") as GameObject;
-        valentineSeagull = Resources.Load("gull_valentine") as GameObject;
     }
 
     public void reloadGulls(string text)
@@ -134,34 +134,67 @@ public class gullMaker : MonoBehaviour {
         }
     }
 
-    public void gullCam()
+    bool allowSwitch;
+    void Update()
     {
+        if (inGullCam)
+        {
+            //Lerp main camera position + rotation
+            Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, dummyCameraParent.transform.position, Time.deltaTime * 3);
+            Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, dummyCameraParent.transform.rotation, Time.deltaTime * 3);
+            if (Input.GetKeyDown(KeyCode.Joystick1Button1))
+                exitGullCam();
+
+            if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > 0 && allowSwitch)
+                gullCam(Input.GetAxis("SwitchIsland") > 0 ? 1 : -1);
+
+            if (myGulls.Count > 1)
+            {
+                if (Vector3.Distance(Camera.main.transform.position, dummyCameraParent.transform.position) < 2.75f)
+                    allowSwitch = true;
+            }
+        }
+    }
+
+    void allowMove()
+    {
+        allowSwitch = true;
+    }
+
+
+    public void gullCam(int dir)
+    {
+        allowSwitch = false;
+        Invoke("allowMove",1);
         if (myGulls.Count != 0)
         {
-            var audio = gullcam.GetComponent<AudioSource>();
-            audio.PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
-            islandMenus.SetActive(false);
-            gullcam.SetActive(true);
-
-            //Grab the camera, disable island menu canvas, enable a new one
-            Camera.main.GetComponent<cameraOrbitControls>().enabled = false;
-
-
-            int randomGull = Random.Range(0, myGulls.Count);
-            if (myGulls.Count > 2)
+            if (dir > 0)
             {
-                //Make sure the new seagull isn't the same as the old one
-                while (Camera.main.transform.parent == myGulls[randomGull].transform)
-                    randomGull = Random.Range(0, myGulls.Count);
+                gullIndex++;
+                if (gullIndex > myGulls.Count - 1)
+                    gullIndex = 0;
+            }
+            else
+            {
+                gullIndex--;
+                if (gullIndex < 0)
+                    gullIndex = myGulls.Count - 1;
             }
 
+            inGullCam = true;
+
+            if (myGulls[gullIndex].name == "Waluigi Chips")
+                soundManager.instance.GetComponent<AudioSource>().PlayOneShot(WaluigiNoises[Random.Range(0, WaluigiNoises.Length)]);
+            else
+                soundManager.instance.GetComponent<AudioSource>().PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
+
             //Move the camera to look at the seagull
-            Camera.main.transform.parent = myGulls[randomGull].transform;
-            Camera.main.transform.localPosition = new Vector3(7.2f, 11.81f, -27);
-            Camera.main.transform.localRotation = Quaternion.Euler(new Vector3(8.75f, 9.65f, 8.75f));
+            dummyCameraParent.transform.parent = myGulls[gullIndex].transform;
+            dummyCameraParent.transform.transform.localPosition = GullCamOffset;
+            dummyCameraParent.transform.localRotation = Quaternion.Euler(GullCamOffsetRotation);
 
             //Set text for UI element
-            GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + Camera.main.transform.parent.name;
+            GameObject.Find("Current gull:").GetComponent<Text>().text = "Current Gull: " + myGulls[gullIndex].name;
         }
         else
             exitGullCam();
@@ -169,9 +202,7 @@ public class gullMaker : MonoBehaviour {
 
     public void exitGullCam()
     {
-        islandMenus.SetActive(true);
-        gullcam.GetComponent<Canvas>().enabled=false;
-        Camera.main.transform.parent = null;
-        Camera.main.GetComponent<cameraOrbitControls>().enabled = true;
+        inGullCam = false;
+        exitButton.GetComponent<Button>().onClick.Invoke();
     }
 }

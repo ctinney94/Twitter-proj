@@ -39,7 +39,7 @@ public class twitterButton : MonoBehaviour {
     public Twitter.RequestTokenResponse m_RequestTokenResponse;
     Twitter.AccessTokenResponse m_AccessTokenResponse;
 
-    void Start()
+    void Awake()
     {
         m_instance = this;
         LoadTwitterUserInfo();

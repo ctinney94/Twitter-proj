@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 97c3b3e476521f1478b54199e7140dd0
-timeCreated: 1462923769
+timeCreated: 1463048553
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -9,6 +9,11 @@ TextureImporter:
     21300004: xbox_X
     21300006: xbox_Y
     21300008: xbox_back
+    21300010: xbox_start
+    21300012: xbox_LT
+    21300014: xbox_RT
+    21300016: xbox_RB
+    21300018: xbox_LB
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -150,6 +155,85 @@ TextureImporter:
         - {x: -29, y: -31}
         - {x: 29, y: -31}
         - {x: 29, y: 31}
+    - name: xbox_start
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 449
+        width: 58
+        height: 62
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -29, y: 31}
+        - {x: -29, y: -31}
+        - {x: 29, y: -31}
+        - {x: 29, y: 31}
+    - name: xbox_LT
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 389
+        width: 52
+        height: 55
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -26, y: 27.5}
+        - {x: -26, y: -16.5}
+        - {x: -18, y: -27.5}
+        - {x: 26, y: -27.5}
+        - {x: 26, y: 27.5}
+    - name: xbox_RT
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 389
+        width: 52
+        height: 55
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -23, y: 27.5}
+        - {x: -26, y: 24.5}
+        - {x: -26, y: -27.5}
+        - {x: 25, y: -27.5}
+        - {x: 26, y: -18.5}
+        - {x: 26, y: 27.5}
+    - name: xbox_RB
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 457
+        width: 62
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -31, y: 22.5}
+        - {x: -31, y: -22.5}
+        - {x: 31, y: -22.5}
+        - {x: 31, y: 22.5}
+    - name: xbox_LB
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 457
+        width: 62
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -31, y: 22.5}
+        - {x: -31, y: -22.5}
+        - {x: 28, y: -22.5}
+        - {x: 31, y: -19.5}
+        - {x: 31, y: 22.5}
     outline: []
   spritePackingTag: 
   userData: 

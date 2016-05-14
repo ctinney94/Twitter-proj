@@ -106,6 +106,7 @@ public class cameraOrbitControls : MonoBehaviour
                     gullCamButton.GetComponent<Image>().enabled = true;
                     gullCamButton.GetComponent<Button>().enabled = true;
                     gullCamButton.GetComponentInChildren<Text>().enabled = true;
+                    gullCamButton.GetComponentsInChildren<Image>()[1].enabled = true;
                 }
             }
             else
@@ -115,6 +116,7 @@ public class cameraOrbitControls : MonoBehaviour
                     gullCamButton.GetComponent<Image>().enabled = false;
                     gullCamButton.GetComponent<Button>().enabled = false;
                     gullCamButton.GetComponentInChildren<Text>().enabled = false;
+                    gullCamButton.GetComponentsInChildren<Image>()[1].enabled = false;
                 }
             }
 
@@ -136,6 +138,7 @@ public class cameraOrbitControls : MonoBehaviour
                 gullCamButton.GetComponent<Image>().enabled = false;
                 gullCamButton.GetComponent<Button>().enabled = false;
                 gullCamButton.GetComponentInChildren<Text>().enabled = false;
+                gullCamButton.GetComponentsInChildren<Image>()[1].enabled = false;
                 if (islands.Count > 0)
                 {
                     LeftArrow.SetActive(false);
@@ -230,7 +233,7 @@ public class cameraOrbitControls : MonoBehaviour
         #endregion
 
         #region 360 controls
-        //Orbit camera
+        //Orbit camera with right analog stick
         if (Mathf.Abs(Input.GetAxis("JoypadVertical"))>0.1f || Mathf.Abs(Input.GetAxis("JoypadHorizontal")) > 0.1f)
         {
             xDeg -= Input.GetAxis("JoypadHorizontal") * xSpeed * 0.02f;
@@ -242,11 +245,17 @@ public class cameraOrbitControls : MonoBehaviour
             desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
         }   
 
-        if (Input.GetKeyDown(KeyCode.Joystick1Button0))
+        //Press A to go for a walk about
+        if (Input.GetKeyDown(KeyCode.Joystick1Button0) && pauseManager.instance.allTheCanvases.activeSelf && currentIsland > 0)
         {
-            FPSobject.SetActive(true);
-            FPSobject.GetComponent<FPSmovement>().enter();
+            if (!twitterButton.instance.running)
+            {
+                FPSobject.SetActive(true);
+                FPSobject.GetComponent<FPSmovement>().enter();
+            }
         }
+
+        //DPAD left/right to switch between islands
         if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > .1f && !moving)
         {
             moving = true;
