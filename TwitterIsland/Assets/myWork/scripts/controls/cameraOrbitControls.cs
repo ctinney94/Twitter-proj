@@ -16,7 +16,9 @@ public class cameraOrbitControls : MonoBehaviour
     public GameObject FPSobject;
 
     public bool screenshotMode { get;  set; }
+    public Button ScreenshotEnterButton, ScreenshotExitButton;
     public Transform target;
+    [HideInInspector]
     public Vector3 targetOffset;
     public float distance = 0;
     float maxDistance = 150;
@@ -243,26 +245,43 @@ public class cameraOrbitControls : MonoBehaviour
             yDeg = ClampAngle(yDeg, yMinLimit, yMaxLimit);
             // set camera rotation f
             desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
-        }   
+        }
 
         //Press A to go for a walk about
-        if (Input.GetKeyDown(KeyCode.Joystick1Button0) && pauseManager.instance.allTheCanvases.activeSelf && currentIsland > 0)
+        if (!screenshotMode)
         {
-            if (!twitterButton.instance.running)
+            if (Input.GetKeyDown(KeyCode.Joystick1Button0) && pauseManager.instance.allTheCanvases.activeSelf && currentIsland > 0)
             {
-                FPSobject.SetActive(true);
-                FPSobject.GetComponent<FPSmovement>().enter();
+                if (!twitterButton.instance.running)
+                {
+                    FPSobject.SetActive(true);
+                    FPSobject.GetComponent<FPSmovement>().enter();
+                }
+            }
+            //DPAD left/right to switch between islands
+            if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > .1f && !moving)
+            {
+                moving = true;
+                if (transform.rotation.eulerAngles.y < 90 || transform.rotation.eulerAngles.y > 270)
+                    changeTarget((Input.GetAxis("SwitchIsland") > 0 ? 1 : -1));
+                else
+                    changeTarget((Input.GetAxis("SwitchIsland") > 0 ? -1 : 1));
             }
         }
 
-        //DPAD left/right to switch between islands
-        if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > .1f && !moving)
+
+        if (Input.GetKeyDown(KeyCode.Joystick1Button4))
         {
-            moving = true;
-            if (transform.rotation.eulerAngles.y < 90 || transform.rotation.eulerAngles.y > 270)
-            changeTarget((Input.GetAxis("SwitchIsland") > 0 ? 1 : -1));
+            if (screenshotMode)
+            {
+                ScreenshotExitButton.onClick.Invoke();
+                screenshotMode = false;
+            }
             else
-                changeTarget((Input.GetAxis("SwitchIsland") > 0 ? -1 : 1));
+            {
+                ScreenshotEnterButton.onClick.Invoke();
+                screenshotMode = true;
+            }
         }
 
         //Zoom with triggers

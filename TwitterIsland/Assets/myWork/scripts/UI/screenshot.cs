@@ -11,6 +11,8 @@ public class screenshot : MonoBehaviour
     public Image[] imagesToTurnOff;
     public Text[] textToTurnOff;
 
+    public AudioClip[] postcardFlickingSounds;
+
     public List<KeyValuePair<string,bool>> mediaIDs = new List<KeyValuePair<string, bool>>();
 
     public Image screencap, postcardTopper,dummyBackground,stamp;
@@ -18,15 +20,23 @@ public class screenshot : MonoBehaviour
     public GameObject FinalThingBeforeUpload;
     public GameObject[] postcardButtons;
     public InputField statusInput;
-    public Button galleryViewButton, galleryExitButton, leftBtn, rightBtn;
+    public Button galleryViewButton, galleryExitButton, leftBtn, rightBtn,takeScreenshotBtn;
     public Image displayScreenshots;
     List<Texture2D> screenshots = new List<Texture2D>();
 
     bool lerp;
+    bool inGalleryMode;
+    bool allowSwitch=true;
+
     void Awake()
     {
         lerpScale = screencap.rectTransform.sizeDelta;
         lerpPos = screencap.rectTransform.localPosition;
+    }
+    
+    void allowSwitchT()
+    {
+        allowSwitch = true;
     }
 
     // Update is called once per frame
@@ -35,6 +45,48 @@ public class screenshot : MonoBehaviour
         galleryViewButton.interactable = (screenshots.Count > 0) ? true : false;
         rightBtn.interactable = (screenshots.Count > 1 && currentImage  < screenshots.Count-1) ? true:false;
 
+        #region 360 controls
+        if (inGalleryMode)
+        {
+            if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > .1f && allowSwitch)
+            {
+                if (Input.GetAxis("SwitchIsland") > 0 && rightBtn.interactable)
+                {
+                    allowSwitch = false;
+                    Invoke("allowSwitchT", 0.1f);
+                    changeImage(1);
+                }
+                else if (Input.GetAxis("SwitchIsland") < 0 && leftBtn.interactable)
+                {
+                    allowSwitch = false;
+                    Invoke("allowSwitchT", 0.1f);
+                    changeImage(-1);
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.Joystick1Button1))
+            {
+                ExitGallery();
+            }
+        }
+
+        if (takeScreenshotBtn.gameObject.activeSelf)
+        {
+            if (takeScreenshotBtn.enabled && Input.GetKeyDown(KeyCode.Joystick1Button5))
+            {
+                takeScreenshotBtn.onClick.Invoke();
+            }
+        }
+
+        if (galleryViewButton.interactable && galleryViewButton.IsActive() && galleryViewButton.gameObject.activeSelf)
+        {
+            if (Input.GetKeyDown(KeyCode.Joystick1Button0))
+            {
+                galleryViewButton.onClick.Invoke();
+            }
+        }
+        #endregion
+
+        #region screenshot photo effect
         if (flashImage.enabled)
         {
             Color currentCol = flashImage.color;
@@ -55,6 +107,7 @@ public class screenshot : MonoBehaviour
                 screencap.DOFade(0, 1);
             }
         }
+        #endregion
     }
 
     public void takeScreenshot()
@@ -67,6 +120,7 @@ public class screenshot : MonoBehaviour
     #region Gallery view
     public void enterGallery()
     {
+        inGalleryMode = true;
         foreach (Image i in imagesToTurnOff)
         {
             i.enabled = false;
@@ -96,6 +150,7 @@ public class screenshot : MonoBehaviour
     int currentImage = 0;
     public void changeImage(int dir)
     {
+        soundManager.instance.playSound(postcardFlickingSounds[Random.Range(0, postcardFlickingSounds.Length)]);
         currentImage += dir;
         currentImage = (currentImage < 0) ? 0 : currentImage;
         currentImage = (currentImage == screenshots.Count) ? screenshots.Count - 1 : currentImage;
@@ -112,6 +167,7 @@ public class screenshot : MonoBehaviour
 
     public void ExitGallery()
     {
+        inGalleryMode = false;
         foreach (Image i in imagesToTurnOff)
         {
             i.enabled = true;
@@ -136,8 +192,7 @@ public class screenshot : MonoBehaviour
         dummyBackground.DOFade(0.5f, 0);
     }
     #endregion
-
-
+    
     public void postThePostcard(bool skipBack)
     {
         StopCoroutine("capturePostCardBack");
@@ -224,6 +279,8 @@ public class screenshot : MonoBehaviour
         screencap.GetComponentsInParent<RectTransform>()[1].sizeDelta = new Vector2(Screen.width, Screen.height);
         screencap.GetComponentsInParent<Image>()[1].enabled = true;
 
+        GameObject.Find("Info UI").GetComponent<Canvas>().enabled = false;
+
         //Repeat screen capture process
         yield return new WaitForEndOfFrame();
         Texture2D newScreenshot = CaptureScreenPixels();
@@ -243,6 +300,7 @@ public class screenshot : MonoBehaviour
         {
             t.enabled = true;
         }
+        GameObject.Find("Info UI").GetComponent<Canvas>().enabled = true;
         screencap.GetComponentsInParent<Image>()[1].enabled = false;
         screencap.rectTransform.localRotation = Quaternion.Euler(0, 0, Random.Range(-5f, 5f));
 

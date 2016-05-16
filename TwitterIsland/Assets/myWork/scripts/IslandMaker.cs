@@ -18,6 +18,7 @@ public class IslandMaker : MonoBehaviour
     [SerializeField]
     public bool enableNoise { get; set; }
 
+    [HideInInspector]
     public float meshScale = .1f, 
         hexScale = .2f, 
         favs = 1, 
@@ -315,17 +316,21 @@ public class IslandMaker : MonoBehaviour
     //Probs out of date
     IEnumerator CreateIslandDELAY()
     {
+        #region all that islands creating shit
+        //If nothing's been done yet
         if (hexs[0].GetComponent<HexInfo>().heightValue == 0)
         {
-            //Find pals
+            //Find bordering hexagons
             detectHexEdges();
+
+            //For each hexagon...
             for (int i = 0; i < hexs.Count; i++)
             {
                 //Add weightings to the island based on the number of hexs between itself and the edge of the mesh
                 hexs[i].GetComponent<HexInfo>().hexWeighter(hexs.Count);
             }
 
-            //Find the highest point on the map (the hex with the largest [least] value
+            //Find the highest point on the map (the hex with the largest height value)
             for (int i = 0; i < hexs.Count; i++)
             {
                 if (hexs[i].GetComponent<HexInfo>().heightValue > largestHeightValue)
@@ -333,37 +338,42 @@ public class IslandMaker : MonoBehaviour
             }
             for (int i = 0; i < hexs.Count; i++)
             {
-                //Add some height to the hexs
-                yield return new WaitForSeconds(0.0001f);
-                hexs[i].GetComponent<HexInfo>().addHeight(largestHeightValue, favs, hexs.Count,enableNoise);
+                //Add some height to the hexs using the previously obtained value and # of likes/favs
+                hexs[i].GetComponent<HexInfo>().addHeight(largestHeightValue, favs, hexs.Count, enableNoise);
             }
         }
-        
-        //Smooth island out
+
+        yield return new WaitForSeconds(1);
+
+        //Smooth out the island
+        //For each hex created...
         for (int i = hexs.Count - 1; i > -1; i--)
         {
-            yield return new WaitForSeconds(0.0001f);
+            //For each vertice of the hexagon...
             for (int j = 0; j < 7; j++)
             {
+                //If there's a camp on this hex, get rid of it.
                 if (hexs[i].GetComponent<HexInfo>().camp != null)
                     Destroy(hexs[i].GetComponent<HexInfo>().camp);
 
-                hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
+                //Smooth current vertex
+                hexs[i].GetComponent<HexInfo>().smoothVertex(j);
             }
-            //Update collision mesh
+            //Update mesh
             hexs[i].GetComponent<MeshCollider>().sharedMesh = hexs[i].GetComponent<MeshFilter>().mesh;
         }
 
         //Colour the hexs based on position
         for (int i = 0; i < hexs.Count; i++)
-        {
-            yield return new WaitForSeconds(0.0001f);
             hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue);
-        }
+
+        setPentVisibility(false);
+        #endregion
+
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;
 
-        //Find highest point on map
+        //Find highest point on current island
         for (int i = 0; i < hexs.Count; i++)
         {
             if (hexs[i].GetComponent<HexInfo>().heightValue == largestHeightValue)
@@ -379,15 +389,17 @@ public class IslandMaker : MonoBehaviour
                 }
             }
         }
-
-        //Place flag at top point!
+        //Place flag at the highest point of the island
         if (flag != null)
             Destroy(flag);
 
         flag = Instantiate(flagPrefab) as GameObject;
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
-        //flag.GetComponent<Renderer>().material.mainTexture = avatar;
-        flag.GetComponent<MeshRenderer>().material.SetTexture("_Main", avatar);
+        flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
+
+        //If the current user is verified, try makign a dirt path and hut
+        if (verified)
+            dirtPath();
     }
 
     public bool verified;

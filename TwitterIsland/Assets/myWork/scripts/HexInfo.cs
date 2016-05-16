@@ -578,6 +578,70 @@ public class HexInfo : MonoBehaviour
         }
     }
 
+    public void smoothVertex(int vertNum)
+    {
+        if (vertNum != 6)
+        {
+            int otherHex = vertNum + 5;
+            if (otherHex > 5)
+                otherHex -= 6;
+
+            //Vertex index for correlating point on HexA
+            int HexAVertNum = vertNum + 4;
+            if (HexAVertNum > 5)
+                HexAVertNum -= 6;
+            //Vertex index for correlating point on HexB
+            int HexBVertNum = vertNum + 2;
+            if (HexBVertNum > 5)
+                HexBVertNum -= 6;
+
+            if (pals[vertNum] && pals[otherHex])
+            {
+                HexInfo hexA = pals[vertNum].GetComponent<HexInfo>();
+                HexInfo hexB = pals[otherHex].GetComponent<HexInfo>();
+
+                //Need to factor in location position
+                Vector3 avg = transform.position + getVerts()[vertNum];
+
+                avg += (hexA.getVerts()[HexAVertNum] + hexA.transform.position);
+                avg += (hexB.getVerts()[HexBVertNum] + hexB.transform.position);
+                //float avg = hexA.getVerts()[HexAVertNum].y + hexB.getVerts()[HexBVertNum].y + getVerts()[vertNum].y;
+
+                avg /= 3;
+                Debug.Log(avg);
+                moveVert(vertNum, avg, Color.black);
+                hexA.moveVert(HexAVertNum, avg, Color.black);
+                hexB.moveVert(HexBVertNum, avg, Color.black);
+            }
+            else if (pals[otherHex])
+            {
+                var borderHex = pals[otherHex].GetComponent<HexInfo>();
+                moveVert(vertNum, -0.5f, wetSand);
+                borderHex.moveVert(HexBVertNum, -0.5f, wetSand);
+            }
+            else if (pals[vertNum])
+            {
+                var borderHex = pals[vertNum].GetComponent<HexInfo>();
+                moveVert(vertNum, -0.5f, wetSand);
+                borderHex.moveVert(HexAVertNum, -0.5f, wetSand);
+            }
+            else
+            {
+                //This is a beach border
+                moveVert(vertNum, -0.5f, wetSand);
+            }
+        }
+        else
+        {
+            Vector3 avg=getVerts()[vertNum]/2;
+            for (int i = 0; i < 6; i++)
+                avg += getVerts()[i];
+
+            avg /= 6;
+            moveVert(vertNum, avg, Color.black);
+        }
+    }
+
     //Used for colouring vertices for a dirt path
     //Also determines direction of path
     public void dirtPath(int start, float maxLeast, int length, IslandMaker caller)
@@ -642,7 +706,7 @@ public class HexInfo : MonoBehaviour
                     temp -= 6;
                 if (randomDir == temp)
                     randomDir = start;
-                
+
                 //This chosen direction is too steep, choose another one.
                 if (pals[randomDir].GetComponent<HexInfo>().getVerts()[6].y > getVerts()[6].y + .8f)
                 {
@@ -705,7 +769,7 @@ public class HexInfo : MonoBehaviour
                 newPointy = (newPointy + getVerts()[6]) / 2;
                 camp.transform.position = newPointy + transform.position;
                 camp.transform.Rotate(new Vector3(0, 150 + (60 * start), 0));
-                
+
                 //Get the each part from the prefab
                 var hut = camp.GetComponentInChildren<hut>().gameObject;
                 var campfire = camp.GetComponentInChildren<campfire>().gameObject;
@@ -724,7 +788,7 @@ public class HexInfo : MonoBehaviour
                 //Position the campsite more appropriately given the uneven ground
                 hut.transform.position = new Vector3(hut.transform.position.x, transform.position.y + newPointy.y, hut.transform.position.z);
                 campfire.transform.position = transform.position + getVerts()[6];
-                
+
                 campfire.transform.parent = hut.transform;
                 caller.camps.Add(hut);
 
@@ -783,11 +847,31 @@ public class HexInfo : MonoBehaviour
         //Recalculate mesh bounds and normals
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
+    }
 
-        //Don't need this for the time being
-        /*DestroyImmediate(GetComponent<MeshCollider>());
-        MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
-        meshCollider.sharedMesh = mesh;*/
+    public void moveVert(int vertNum, Vector3 newPos, Color newColour)
+    {
+        newPos -= transform.position;
+        //Grab the current vertices
+        Mesh mesh = GetComponent<MeshFilter>().mesh;
+        Vector3[] oldVerts = mesh.vertices;
+
+        //Set new position
+        oldVerts[vertNum] = newPos;        
+        #region vertex colours
+        if (newColour != Color.black)
+        {
+            newColours[vertNum] = newColour;
+            mesh.colors = newColours;
+        }
+        #endregion
+
+        //Set the mesh vertices to the new vertices
+        mesh.vertices = oldVerts;
+
+        //Recalculate mesh bounds and normals
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
     }
 
     void OnDestroy()

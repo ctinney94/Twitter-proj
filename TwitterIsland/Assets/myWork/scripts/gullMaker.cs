@@ -184,9 +184,9 @@ public class gullMaker : MonoBehaviour {
             inGullCam = true;
 
             if (myGulls[gullIndex].name == "Waluigi Chips")
-                soundManager.instance.GetComponent<AudioSource>().PlayOneShot(WaluigiNoises[Random.Range(0, WaluigiNoises.Length)]);
+                soundManager.instance.playSound(WaluigiNoises[Random.Range(0, WaluigiNoises.Length)]);
             else
-                soundManager.instance.GetComponent<AudioSource>().PlayOneShot(gullNoises[Random.Range(0, gullNoises.Length)]);
+                soundManager.instance.playSound(gullNoises[Random.Range(0, gullNoises.Length)]);
 
             //Move the camera to look at the seagull
             dummyCameraParent.transform.parent = myGulls[gullIndex].transform;

@@ -13,8 +13,14 @@ public class gullCam : MonoBehaviour {
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Joystick1Button3) && thisButton.enabled && thisButton.interactable)
-            EnterGullCam();
+        if (Camera.main)
+        {
+            if (!Camera.main.GetComponent<cameraOrbitControls>().screenshotMode)
+            {
+                if (Input.GetKeyDown(KeyCode.Joystick1Button3) && thisButton.enabled && thisButton.interactable)
+                    EnterGullCam();
+            }
+        }
     }
 
     public void EnterGullCam()
@@ -22,7 +28,7 @@ public class gullCam : MonoBehaviour {
         thisButton.onClick.Invoke();
     }
 
-	public void cutToGullCam(int dir)
+    public void cutToGullCam(int dir)
     {
         //Enter GULL CAM view
         gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].gullCam(dir);

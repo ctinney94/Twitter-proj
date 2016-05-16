@@ -10,9 +10,16 @@ public class soundManager : MonoBehaviour {
         get { return m_instance; }
     }
     #endregion
+    AudioSource audioComponent;
+
+    public void playSound(AudioClip sound)
+    {
+        audioComponent.PlayOneShot(sound);
+    }
 
     void Start ()
     {
+        audioComponent = GetComponent<AudioSource>();
         m_instance = this;
 	}
 	
