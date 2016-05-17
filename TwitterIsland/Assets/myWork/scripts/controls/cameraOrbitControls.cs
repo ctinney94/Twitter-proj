@@ -11,12 +11,11 @@ public class cameraOrbitControls : MonoBehaviour
 {
     public List<GameObject> islands = new List<GameObject>();
     public int currentIsland = 0;
-    public List<TextMesh> textMeshObjects = new List<TextMesh>();
 
     public GameObject FPSobject;
+    public AudioSource windSound;
 
-    public bool screenshotMode { get;  set; }
-    public Button ScreenshotEnterButton, ScreenshotExitButton;
+    #region variables for orbit controls
     public Transform target;
     [HideInInspector]
     public Vector3 targetOffset;
@@ -40,16 +39,21 @@ public class cameraOrbitControls : MonoBehaviour
     private Quaternion rotation;
     private Vector3 position;
 
+    public Vector3 newTarget;
     Transform dummyTarget;
     public Vector3 newTargetOffset;
+    #endregion
 
-    //UI tings
+    #region  UI tings
     public GameObject gullCamButton,walkAroundButton,LeftArrow,RightArrow;
 
+    public bool screenshotMode { get;  set; }
+    public Button ScreenshotEnterButton, ScreenshotExitButton;
+    public List<TextMesh> textMeshObjects = new List<TextMesh>();
+    #endregion
+
     void Start() { Init(); }
-    void OnEnable() { Init(); }
-    
-    public Vector3 newTarget;
+    void OnEnable() { Init(); }    
 
     //Change the camera target to a different island
     public void changeTarget(int direction)
@@ -182,12 +186,13 @@ public class cameraOrbitControls : MonoBehaviour
         xDeg = Vector3.Angle(Vector3.right, transform.right);
         yDeg = Vector3.Angle(Vector3.up, transform.up);
     }
-
+    
     bool moving;
 
     //Camera logic on LateUpdate to only update after all character movement logic has been handled. 
     void LateUpdate()
     {
+        windSound.volume = Mathf.Lerp(0.05f * soundManager.instance.maxVolume, .3f*soundManager.instance.maxVolume, distance/maxDistance);
         //Lerp camera position to target
         target.position = Vector3.Lerp(target.position, newTarget + newTargetOffset, Time.deltaTime * 5);
         if (target.position == newTarget + newTargetOffset)
@@ -301,6 +306,7 @@ public class cameraOrbitControls : MonoBehaviour
         // For smoothing of the zoom, lerp distance
         currentDistance = Mathf.Lerp(currentDistance, desiredDistance, Time.deltaTime * zoomDampening);
 
+        distance = currentDistance;
         //Do the same for rotating
         currentRotation = transform.rotation;
         rotation = Quaternion.Lerp(currentRotation, desiredRotation, Time.deltaTime * zoomDampening);

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class soundManager : MonoBehaviour {
 
@@ -11,6 +12,8 @@ public class soundManager : MonoBehaviour {
     }
     #endregion
     AudioSource audioComponent;
+    public List<AudioSource> managedComponents = new List<AudioSource>();
+    public float maxVolume=1;
 
     public void playSound(AudioClip sound)
     {
@@ -22,9 +25,14 @@ public class soundManager : MonoBehaviour {
         audioComponent = GetComponent<AudioSource>();
         m_instance = this;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+
+    public void setNewVolume(float newVol)
+    {
+        maxVolume = newVol;
+        for (int i=0; i < managedComponents.Count;i++)
+        { 
+            managedComponents[i].volume = newVol;
+        }
+        audioComponent.volume = newVol;
+    }
 }

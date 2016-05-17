@@ -16,6 +16,9 @@
 		_WaveSpeed ("WaveSpeed", Range (0.01, 10.0)) = 2.5
 	}
 	SubShader {
+			Blend SrcAlpha OneMinusSrcAlpha
+			Tags{ "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+			//ZWrite Off
 		Pass {		
 			CGPROGRAM
 			#pragma target 3.0

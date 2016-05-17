@@ -746,16 +746,16 @@ public class IslandMaker : MonoBehaviour
         island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
 
+        //Tag as Island
+        lastIsland.tag = "Island";
+
+        //This (sometimes) crashes everything when included
+        #region disaster code
         //Set up a sphere collider we can use to reposition islands if other islands enter the sphere.
         /*SphereCollider sc = lastIsland.AddComponent<SphereCollider>();
         sc.isTrigger = true;
         sc.center = Vector3.zero;
         sc.radius = meshScale * 2;*/
-
-        //Tag as Island
-        lastIsland.tag = "Island";
-
-        //This (sometimes) crashes everything when included
 
         /*var val = 250;
         Debug.Log("oh shit here we go");
@@ -768,7 +768,21 @@ public class IslandMaker : MonoBehaviour
                 lastIsland.transform.position = new Vector3(Random.Range(-val, val), 0, Random.Range(-val, val));
             }
         }*/
-        camps.Clear();
-    }
         #endregion
+
+        camps.Clear();
+
+        AudioSource waveSounds = lastIsland.AddComponent<AudioSource>();
+        soundManager.instance.managedComponents.Add(waveSounds);
+        waveSounds.playOnAwake = false;
+        waveSounds.clip = waveNoises;
+        waveSounds.spatialBlend = 1;
+        waveSounds.loop = true;
+        waveSounds.minDistance = meshScale * 2;
+        waveSounds.maxDistance = meshScale * 4;
+        waveSounds.rolloffMode = AudioRolloffMode.Linear;
+        waveSounds.Play();
+    }
+    public AudioClip waveNoises;
+    #endregion
 }
