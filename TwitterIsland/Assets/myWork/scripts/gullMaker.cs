@@ -15,7 +15,7 @@ public class gullMaker : MonoBehaviour {
     public Material SecretWaluigiSkin;
     public AudioClip[] gullNoises,WaluigiNoises,partyWhistle;
     public bool inGullCam;
-
+    public string[] gullNames;
     public Vector3 GullCamOffset = new Vector3(7.2f, 11.81f, -27);
     public Vector3 GullCamOffsetRotation = new Vector3(8.75f, 9.65f, 8.75f);
 
@@ -23,7 +23,7 @@ public class gullMaker : MonoBehaviour {
     {
         //Set up references
         exitButton = GameObject.Find("exitGullCamButton");
-        GameObject.Find("Gull cam!").GetComponent<gullCam>().gullCollections.Add(this);
+        gullCam.instance.gullCollections.Add(this);
     }
 
     public void reloadGulls(string text)
@@ -57,22 +57,13 @@ public class gullMaker : MonoBehaviour {
 
     void makeGulls(int gulls, string input)
     {
-        List<string> gullNames = new List<string>();
-        using (StreamReader sr = new StreamReader("Assets/myWork/gullNames.txt"))
-        {
-            while (!sr.EndOfStream)
-            {
-                gullNames.Add(sr.ReadLine() + " Chips");
-            }
-        }
-
         for (int i = 0; i < gulls; i++)
         {
             GameObject gullyGuy = Instantiate(gull);
-            int theChosenGull = Random.Range(0, gullNames.Count - 1);
-            gullyGuy.name = gullNames[theChosenGull];
-            gullNames.Remove(gullNames[theChosenGull]);
+            int theChosenGull = Random.Range(0, gullNames.Length - 1);
+            gullyGuy.name = gullNames[theChosenGull];//Make sure we don't use the same gull name
             gullyGuy.transform.parent = gameObject.transform;
+            gullyGuy.tag = "VanillaGull";
             myGulls.Add(gullyGuy);
         }
         #region Special gulls!
@@ -88,17 +79,19 @@ public class gullMaker : MonoBehaviour {
         if (input.Contains("birthday"))
         {
             GameObject gullyGuy = Instantiate(birthdayGull);
-            int theChosenGull = Random.Range(0, gullNames.Count - 1);
+            int theChosenGull = Random.Range(0, gullNames.Length - 1);
             gullyGuy.name = gullNames[theChosenGull];
             gullyGuy.transform.parent = gameObject.transform;
+            gullyGuy.tag = "BirthdayGull";
             myGulls.Add(gullyGuy);
         }
         if (input.Contains("love") || input.Contains("valentine"))
         {
             GameObject gullyGuy = Instantiate(valentineSeagull);
-            int theChosenGull = Random.Range(0, gullNames.Count - 1);
+            int theChosenGull = Random.Range(0, gullNames.Length - 1);
             gullyGuy.name = gullNames[theChosenGull];
             gullyGuy.transform.parent = gameObject.transform;
+            gullyGuy.tag = "ValentineGull";
             myGulls.Add(gullyGuy);
         }
         #endregion
@@ -109,18 +102,7 @@ public class gullMaker : MonoBehaviour {
             gull.GetComponent<gull>().offset = o * (360 / myGulls.Count);
             gull.GetComponent<Animator>().SetFloat("offset", Random.value);
             gull.GetComponent<Animator>().SetFloat("speed", Random.Range(0.75f, 1.4f));
-            gull.tag = "gull";
             o++;
-        }
-    }
-
-    void destoryGulls()
-    {
-        GameObject[] gulls = GameObject.FindGameObjectsWithTag("gull");
-        for (int i = 0; i < gulls.Length; i++)
-        {
-            //gullNames.Add(gulls[i].name);
-            Destroy(gulls[i]);
         }
     }
 
@@ -146,7 +128,7 @@ public class gullMaker : MonoBehaviour {
                 exitGullCam();
 
             if (Mathf.Abs(Input.GetAxis("SwitchIsland")) > 0 && allowSwitch)
-                gullCam(Input.GetAxis("SwitchIsland") > 0 ? 1 : -1);
+                updateGullCam(Input.GetAxis("SwitchIsland") > 0 ? 1 : -1);
 
             if (myGulls.Count > 1)
             {
@@ -160,9 +142,8 @@ public class gullMaker : MonoBehaviour {
     {
         allowSwitch = true;
     }
-
-
-    public void gullCam(int dir)
+    
+    public void updateGullCam(int dir)
     {
         allowSwitch = false;
         Invoke("allowMove",1);
@@ -186,7 +167,12 @@ public class gullMaker : MonoBehaviour {
             if (myGulls[gullIndex].name == "Waluigi Chips")
                 soundManager.instance.playSound(WaluigiNoises[Random.Range(0, WaluigiNoises.Length)]);
             else
-                soundManager.instance.playSound(gullNoises[Random.Range(0, gullNoises.Length)]);
+            {
+                if (myGulls[gullIndex].tag == "BirthdayGull")
+                    soundManager.instance.playSound(partyWhistle[Random.Range(0, partyWhistle.Length)]);
+                else
+                    soundManager.instance.playSound(gullNoises[Random.Range(0, gullNoises.Length)]);
+            }
 
             //Move the camera to look at the seagull
             dummyCameraParent.transform.parent = myGulls[gullIndex].transform;

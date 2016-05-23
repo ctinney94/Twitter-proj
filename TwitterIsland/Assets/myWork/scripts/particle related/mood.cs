@@ -16,9 +16,12 @@ public class mood : MonoBehaviour
     public ParticleSystem rainbowA, rainbowB, rainbowC, rainbowD;
     public GameObject flag;
     lighting worldLight;
+    public AudioSource rainSound;
+    public Renderer shadow;
 
     void Awake()
     {
+        soundManager.instance.managedComponents.Add(rainSound);
         worldLight = GameObject.Find("WorldLight").GetComponent<lighting>();
     }
 
@@ -33,14 +36,6 @@ public class mood : MonoBehaviour
             if (flag.name.EndsWith(" " + currIslnd))
             {
                 UpdateParticles(transform.localScale.x * 7);
-
-                //Update shadow strength for lighting
-                //Create dark shadows for sad island with clouds
-                //No shadows for happy island!
-                if (moodness > 0)
-                    worldLight.newShadowStrength = 0;
-                else
-                    worldLight.newShadowStrength = Mathf.Clamp(-1 * moodness, 0, .7f);
             }
             else if (flag.name.EndsWith(" " + (currIslnd + 1)))
             {
@@ -62,6 +57,14 @@ public class mood : MonoBehaviour
                 rainbowC.enableEmission = false;
                 rainbowD.enableEmission = false;
             }
+
+                //Update shadow strength for lighting
+                //Create dark shadows for sad island with clouds
+                //No shadows for happy island!
+                if (moodness > 0)
+                    shadow.material.color = new Color(0, 0, 0, 0);
+                else
+                    shadow.material.color = new Color(0, 0, 0, -1*moodness);
         }
     }
     
@@ -71,21 +74,28 @@ public class mood : MonoBehaviour
         //All this multiplication and division by 7 is not all pointless
         //IslandMaker.cs uses meshScale as an input for this.
         //SO DON'T FUCK IT UP.
+
+        rainSound.minDistance = scale * 1.5f;
+        rainSound.maxDistance = scale*3;
+
         transform.localScale = new Vector3(scale / 7, scale / 7, scale / 7);
+
+        if (flag != null)
+        {
+            //Pop the fireworks up the top of the island
+            fireworks.transform.position = flag.transform.position;
+            rainSound.gameObject.transform.position = flag.transform.position;
+
+            //Rainbows too
+            rainbowA.transform.position = flag.transform.position + new Vector3(-3.75f, -.25f, -0);
+            rainbowB.transform.position = flag.transform.position + new Vector3(-7.5f, -1.5f, -0);
+            rainbowC.transform.position = flag.transform.position + new Vector3(-15f, -2.75f, -0);
+            rainbowD.transform.position = flag.transform.position + new Vector3(-22.5f, -4, -0);
+        }
+
         if (moodness > 0)
         {
-            if (flag != null)
-            {
-                //Pop the fireworks up the top of the island
-                fireworks.transform.position = flag.transform.position;
-
-                //Rainbows too
-                rainbowA.transform.position = flag.transform.position + new Vector3(-3.75f, -.25f, -0);
-                rainbowB.transform.position = flag.transform.position + new Vector3(-7.5f, -1.5f, -0);
-                rainbowC.transform.position = flag.transform.position + new Vector3(-15f, -2.75f, -0);
-                rainbowD.transform.position = flag.transform.position + new Vector3(-22.5f, -4, -0);
-            }
-
+            rainSound.Stop();
             //If we're really happy, enable fireworks!
             if (moodness > 0.75f)
                 fireworks.enableEmission = true;
@@ -130,6 +140,9 @@ public class mood : MonoBehaviour
             cloud.enableEmission = true;
             lightning.enableEmission = true;
             rain.enableEmission = true;
+            
+            lightning.GetComponent<AudioSource>().minDistance = scale * 1.5f;
+            lightning.GetComponent<AudioSource>().maxDistance = scale * 3;
 
             var temp = -1 * moodness;//turn this back into a positive so maths can happen.
 
@@ -137,7 +150,14 @@ public class mood : MonoBehaviour
             //Darker clouds, more rain, clouds and lightning for the more negative tweets
             Color cloudClour = Color.Lerp(Color.white, Color.black, temp * 0.85f);
             cloud.GetComponent<Renderer>().material.SetColor("_TintColor", cloudClour);
-   
+            
+            if (temp > .55f && !rainSound.isPlaying)
+            {
+                rainSound.Play();
+            }
+            else if (temp < .55f)
+                rainSound.Stop();
+
             rain.emissionRate = (10 * (temp - 0.5f)) + (scale * scale * 2 * (temp - 0.5f));
             lightning.emissionRate = scale * (temp - 0.6f);
             cloud.emissionRate = scale * scale * temp;

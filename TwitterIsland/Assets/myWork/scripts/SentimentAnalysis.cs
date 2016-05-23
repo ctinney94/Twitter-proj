@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 
 public class SentimentAnalysis : MonoBehaviour {

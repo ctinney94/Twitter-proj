@@ -3,11 +3,14 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class gullCam : MonoBehaviour {
-    
+
+    public static gullCam instance;
+
     public List<gullMaker> gullCollections = new List<gullMaker>();
     public Button thisButton;
     void Awake()
     {
+        instance = this;
         thisButton = GetComponent<Button>();
         thisButton.enabled = false;
     }
@@ -31,7 +34,7 @@ public class gullCam : MonoBehaviour {
     public void cutToGullCam(int dir)
     {
         //Enter GULL CAM view
-        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].gullCam(dir);
+        gullCollections[Camera.main.GetComponent<cameraOrbitControls>().currentIsland-1].updateGullCam(dir);
     }
 
     public void exitGullCam()

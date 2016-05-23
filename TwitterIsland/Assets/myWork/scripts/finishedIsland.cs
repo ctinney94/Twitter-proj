@@ -13,7 +13,6 @@ public class finishedIsland : MonoBehaviour
     //See mood/sentiment analysis scripts for more info
     [Range(0, 0.85f)]
     public float blackness = 0;
-    Light worldLight;
 
     //The tweet associated with this island
     public Twitter.API.Tweet thisTweet;
@@ -29,7 +28,6 @@ public class finishedIsland : MonoBehaviour
     public void WakeUp()
     {
         //Set up references
-        worldLight = GameObject.Find("WorldLight").GetComponent<Light>();
         tweetText = new GameObject("Tweet text");
         tweetText.transform.parent = transform;
 
@@ -210,7 +208,6 @@ public class finishedIsland : MonoBehaviour
                 camControls.newTargetOffset = Vector3.zero;
 
                 //Change world light shadow strength to that appropriate of the island
-                worldLight.GetComponent<lighting>().newShadowStrength = blackness;
             }
             //worldLight.GetComponent<lighting>().newTimeOfDay = (float)thisTweet.dateTime.Hour / 24;
         }

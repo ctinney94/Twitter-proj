@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 //This is the island builder class
 //It handles the size and shape of the pentagonal object used to create islands
@@ -14,6 +13,8 @@ public class IslandMaker : MonoBehaviour
     public static Texture2D avatar;
     GameObject particles;
     public SentimentAnalysis SA;
+    public TextAsset gullNamesFile;
+    string[] gullNames;
 
     [SerializeField]
     public bool enableNoise { get; set; }
@@ -36,7 +37,7 @@ public class IslandMaker : MonoBehaviour
 
     #region Initialization
     void Start()
-	{
+    {
         enableNoise = true;
         MeshSetup();
         //Fill this pentagon in with hexagons.
@@ -484,6 +485,7 @@ public class IslandMaker : MonoBehaviour
             Destroy(flag);
 
         flag = Instantiate(flagPrefab) as GameObject;
+        soundManager.instance.managedComponents.Add(flag.GetComponent<AudioSource>());
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
 
@@ -745,10 +747,7 @@ public class IslandMaker : MonoBehaviour
         //Initialize island
         island.WakeUp();
         island.blackness = particles.GetComponent<mood>().blackness;
-
-        //Tag as Island
-        lastIsland.tag = "Island";
-
+        
         //This (sometimes) crashes everything when included
         #region disaster code
         //Set up a sphere collider we can use to reposition islands if other islands enter the sphere.

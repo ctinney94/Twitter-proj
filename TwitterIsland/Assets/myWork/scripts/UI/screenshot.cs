@@ -12,7 +12,7 @@ public class screenshot : MonoBehaviour
     public Text[] textToTurnOff;
 
     public AudioClip[] postcardFlickingSounds;
-
+    [SerializeField]
     public List<KeyValuePair<string,bool>> mediaIDs = new List<KeyValuePair<string, bool>>();
 
     public Image screencap, postcardTopper,dummyBackground,stamp;

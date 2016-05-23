@@ -2,11 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System;
-using System.Text;
-using System.Net;
-using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 public class twitterButton : MonoBehaviour {
 
@@ -29,7 +25,10 @@ public class twitterButton : MonoBehaviour {
     public bool verified;
     public Text userInfo, authError;
     public bool running;
-    
+
+    public TextAsset gullNamesFile;
+    string[] gullNames;
+
     //New API related things required for screenshot posting
     const string PLAYER_PREFS_TWITTER_USER_ID = "TwitterUserID";
     const string PLAYER_PREFS_TWITTER_USER_SCREEN_NAME = "TwitterUserScreenName";
@@ -41,6 +40,8 @@ public class twitterButton : MonoBehaviour {
 
     void Awake()
     {
+        gullNames = Regex.Split(gullNamesFile.text, "\n");
+        
         m_instance = this;
         LoadTwitterUserInfo();
     }
@@ -141,6 +142,7 @@ public class twitterButton : MonoBehaviour {
 
             //Add the seagulls in
             GameObject gulls = Instantiate(gulley) as GameObject;
+            gulls.GetComponent<gullMaker>().gullNames = gullNames;
             gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].Text);
 
             yield return new WaitForSeconds(.75f);
