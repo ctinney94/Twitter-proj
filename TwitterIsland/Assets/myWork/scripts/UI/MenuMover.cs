@@ -5,7 +5,7 @@ using DG.Tweening;
 
 public class MenuMover : MonoBehaviour {
 
-    public GameObject menuBit;
+    public GameObject islandInfoUI,zoomUI,switchIslandUI,welcomeUI;
     public GameObject sizeGO, heightGO;
     public string m_displayName, m_text,timeAgo;
     float m_size, m_height;
@@ -20,9 +20,9 @@ public class MenuMover : MonoBehaviour {
     void Update()
     {
         #region Slider lerping
-        if (menuBit.activeSelf)
+        if (islandInfoUI.activeSelf)
         {
-            if (menuBit.GetComponent<Image>().color.a > .4 && lerp)
+            if (islandInfoUI.GetComponent<Image>().color.a > .4 && lerp)
             {
                 lerpHeight = Mathf.Lerp(lerpHeight, m_height, Time.deltaTime * 2);
                 lerpSize = Mathf.Lerp(lerpSize, m_size, Time.deltaTime * 2);
@@ -32,7 +32,7 @@ public class MenuMover : MonoBehaviour {
                 sizeGO.GetComponentInChildren<Text>().text = "" + Mathf.FloorToInt(lerpSize);
                 sizeGO.GetComponent<Slider>().value = lerpSize - Mathf.FloorToInt(lerpSize);
             }
-            else if (menuBit.GetComponent<Image>().color.a < .05f)
+            else if (islandInfoUI.GetComponent<Image>().color.a < .05f)
             {
                 heightGO.GetComponentInChildren<Text>().text = "0";
                 heightGO.GetComponent<Slider>().value = 0;
@@ -41,25 +41,51 @@ public class MenuMover : MonoBehaviour {
             }
         }
         #endregion
-        if (Input.GetKeyDown(KeyCode.Joystick1Button2))
+        
+        if (Mathf.Abs(Input.GetAxis("JoypadZoom")) > .0f)
         {
-            menuBit.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
+            if (zoomUI.GetComponent<Image>().color.a ==.8f)
+            {
+                Invoke("fadeOutZoomUI",2);
+            }
+        }
+
+            if (Input.GetKeyDown(KeyCode.Joystick1Button2))
+        {
+            if (welcomeUI.activeSelf)
+            {
+                welcomeUI.SetActive(false);
+                Invoke("fadeInZoomUI", 2.5f);
+            }
+
+            islandInfoUI.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
                 "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
                 "\n\nSentiment: " + "<size=16>       </size>";
             fade(0);
         }
     }
 
+    void fadeOutZoomUI()
+    {
+        zoomUI.GetComponent<Image>().DOFade(0, 1);
+        zoomUI.GetComponentsInChildren<Image>()[1].DOFade(0, 1);
+    }
+    void fadeInZoomUI()
+    {
+        zoomUI.GetComponent<Image>().DOFade(0.8f, 1);
+        zoomUI.GetComponentsInChildren<Image>()[1].DOFade(.8f, 1);
+    }
+
     public void updateUI(Twitter.API.Tweet newTweet, float sentiment, float height, float size)
     {
-        menuBit.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
+        islandInfoUI.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
             "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
             "\n\nSentiment: " + "<size=16>       </size>";
 
 
         StopCoroutine(revert(newTweet, sentiment));
 
-        menuBit.SetActive(true);
+        islandInfoUI.SetActive(true);
 
         //Fade out everything
         fade(0);
@@ -265,7 +291,7 @@ public class MenuMover : MonoBehaviour {
             sent += "negative</color>";
         #endregion
 
-        Text uiText = menuBit.GetComponentInChildren<Text>();
+        Text uiText = islandInfoUI.GetComponentInChildren<Text>();
             uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
                 "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
                 "\n\nSentiment: " + "<size=16>       </size>";
@@ -282,9 +308,9 @@ public class MenuMover : MonoBehaviour {
 
     void fade(int inOut)
     {
-        menuBit.GetComponentsInChildren<Text>()[0].DOFade(inOut, .75f);
-        menuBit.GetComponentsInChildren<Text>()[2].DOFade(inOut, .75f);
-        menuBit.GetComponent<Image>().DOFade((inOut > 0) ? .5f : 0, .75f);
+        islandInfoUI.GetComponentsInChildren<Text>()[0].DOFade(inOut, .75f);
+        islandInfoUI.GetComponentsInChildren<Text>()[2].DOFade(inOut, .75f);
+        islandInfoUI.GetComponent<Image>().DOFade((inOut > 0) ? .5f : 0, .75f);
 
         Image[] images = sizeGO.GetComponentsInChildren<Image>();
         foreach (Image i in images)

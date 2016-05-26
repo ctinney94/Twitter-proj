@@ -5,6 +5,8 @@
 	- UI buttons have new images attached and are lso different colours now
 - Gullcam no longer cuts to a random gull, instead gulls can now be cycled through
 - Added pause screen
+- Added volume slider
+- Added loads of new sounds
 
 
 ====================
