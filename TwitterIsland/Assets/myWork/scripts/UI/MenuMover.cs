@@ -41,16 +41,16 @@ public class MenuMover : MonoBehaviour {
             }
         }
         #endregion
-        
+
         if (Mathf.Abs(Input.GetAxis("JoypadZoom")) > .0f)
         {
-            if (zoomUI.GetComponent<Image>().color.a ==.8f)
+            if (zoomUI.GetComponent<Image>().color.a == .8f)
             {
-                Invoke("fadeOutZoomUI",2);
+                Invoke("fadeOutZoomUI", 2);
             }
         }
 
-            if (Input.GetKeyDown(KeyCode.Joystick1Button2))
+        if (Input.GetKeyDown(KeyCode.Joystick1Button2))
         {
             if (welcomeUI.activeSelf)
             {

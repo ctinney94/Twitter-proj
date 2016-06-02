@@ -43,6 +43,14 @@ public class FPSmovement : MonoBehaviour {
             float rotY = CrossPlatformInputManager.GetAxis("Mouse Y") * mouseSensitivity;
             gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
             cameraObject.transform.rotation *= Quaternion.Euler(-rotY, 0f, 0f);
+
+            if (Vector3.Dot(cameraObject.transform.up, Vector3.down) > 0)
+            {
+                if (Mathf.Abs(cameraObject.transform.localRotation.eulerAngles.x - 270) < Mathf.Abs(cameraObject.transform.localRotation.eulerAngles.x - 90))
+                    cameraObject.transform.localRotation = Quaternion.Euler(270, cameraObject.transform.localRotation.eulerAngles.y, cameraObject.transform.localRotation.eulerAngles.z);
+                else
+                    cameraObject.transform.localRotation = Quaternion.Euler(90, cameraObject.transform.localRotation.eulerAngles.y, cameraObject.transform.localRotation.eulerAngles.z);
+            }
         }
 
         if (Mathf.Abs(Input.GetAxis("JoypadVertical")) > 0.1f || Mathf.Abs(Input.GetAxis("JoypadHorizontal")) > 0.1f)
@@ -51,15 +59,15 @@ public class FPSmovement : MonoBehaviour {
             float rotY = CrossPlatformInputManager.GetAxis("JoypadVertical") * mouseSensitivity;
             gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
             cameraObject.transform.rotation *= Quaternion.Euler(rotY, 0f, 0f);
-        }
-        if (Mathf.Abs(Input.GetAxis("JoypadVertical")) > 0.1f || Mathf.Abs(Input.GetAxis("JoypadHorizontal")) > 0.1f)
-        {
-            float rotX = CrossPlatformInputManager.GetAxis("JoypadHorizontal") * mouseSensitivity;
-            float rotY = CrossPlatformInputManager.GetAxis("JoypadVertical") * mouseSensitivity;
-            gameObject.transform.localRotation *= Quaternion.Euler(0f, rotX, 0f);
-            cameraObject.transform.rotation *= Quaternion.Euler(rotY, 0f, 0f);
-        }
 
+            if (Vector3.Dot(cameraObject.transform.up, Vector3.down) > 0)
+            {
+                if (Mathf.Abs(cameraObject.transform.localRotation.eulerAngles.x - 270) < Mathf.Abs(cameraObject.transform.localRotation.eulerAngles.x - 90))
+                    cameraObject.transform.localRotation = Quaternion.Euler(270, cameraObject.transform.localRotation.eulerAngles.y, cameraObject.transform.localRotation.eulerAngles.z);
+                else
+                    cameraObject.transform.localRotation = Quaternion.Euler(90, cameraObject.transform.localRotation.eulerAngles.y, cameraObject.transform.localRotation.eulerAngles.z);
+            }
+        }
         if (Input.GetKeyDown(KeyCode.Tab))
             mouse = !mouse;
         
