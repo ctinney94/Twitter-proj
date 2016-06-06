@@ -667,7 +667,7 @@ public class IslandMaker : MonoBehaviour
         //now do particle related things
         particles = Instantiate(particlePrefab) as GameObject;
         particles.GetComponent<mood>().flag = flag;
-        particles.GetComponent<mood>().moodness = SA.getSAValue(THETWEET.Text);
+        particles.GetComponent<mood>().moodness = SA.getSAValue(THETWEET.text);
         particles.GetComponent<mood>().UpdateParticles(meshScale);
 
         #region combine mesh

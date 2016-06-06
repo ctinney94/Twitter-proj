@@ -15,9 +15,11 @@ public class FPSmovement : MonoBehaviour {
     public float moveSpeed = 0.1f;
     public GameObject cameraObject, mainCam, IslslandHuD;
     public bool allowJetpack;
+    public Canvas FPCanvas;
     
     public void enter()
     {
+        FPCanvas.enabled = true;
         int currentFlag = mainCam.GetComponent<cameraOrbitControls>().currentIsland;
         IslslandHuD.SetActive(false);
         mainCam.SetActive(false);
@@ -128,6 +130,7 @@ public class FPSmovement : MonoBehaviour {
         
         if (Input.GetKey(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button6))
         {
+            FPCanvas.enabled = false;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             IslslandHuD.SetActive(true);

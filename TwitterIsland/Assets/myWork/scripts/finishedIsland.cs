@@ -45,13 +45,13 @@ public class finishedIsland : MonoBehaviour
         meshy.transform.position = GameObject.Find("flagpole " + islandIndex).transform.position + new Vector3(0,1,0);
         meshy.fontSize = 50;
         //Scale the character size of the text mesh based on number of re-tweets
-        meshy.characterSize = Mathf.Clamp(nums.findRank(thisTweet.RTs,false) / 20,0.25f,1);
+        meshy.characterSize = Mathf.Clamp(nums.findRank(thisTweet.retweet_count,false) / 20,0.25f,1);
         //Format the tweet text appropriately for display
-        FormatString(thisTweet.Text, meshy);
+        FormatString(thisTweet.text, meshy);
 
         //Find the height and size rank for the associated tweet
-        sizeRank = nums.findRank(thisTweet.RTs, false);
-        heightRank =nums.findRank(thisTweet.Favs,true);
+        sizeRank = nums.findRank(thisTweet.retweet_count, false);
+        heightRank =nums.findRank(thisTweet.favorite_count,true);
     }
 
     //Rotate and scale text mesh displayed tweet above island
@@ -99,7 +99,7 @@ public class finishedIsland : MonoBehaviour
                 if (!tweetText.GetComponent<TextMesh>().richText)
                 {
                     //Get the original text back
-                    FormatString(thisTweet.Text, meshy);
+                    FormatString(thisTweet.text, meshy);
                     tweetText.GetComponent<TextMesh>().richText = true;
                 }
             }

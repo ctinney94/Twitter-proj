@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 using System.Collections;
 using DG.Tweening;
 
-public class MenuMover : MonoBehaviour {
+public class MenuMover : MonoBehaviour
+{
 
-    public GameObject islandInfoUI,zoomUI,switchIslandUI,welcomeUI;
+    public GameObject islandInfoUI, zoomUI, switchIslandUI, welcomeUI;
     public GameObject sizeGO, heightGO;
-    public string m_displayName, m_text,timeAgo;
+    public string m_displayName, m_text, timeAgo;
     float m_size, m_height;
     float lerpSize, lerpHeight;
     bool lerp;
 
-	void Start ()
+    void Start()
     {
         DOTween.Init(false, true, LogBehaviour.ErrorsOnly);
     }
@@ -59,7 +61,7 @@ public class MenuMover : MonoBehaviour {
             }
 
             islandInfoUI.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
-                "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
+                "\n\n<size=24><i>" + timeAgo + " </i>ago</size>" +
                 "\n\nSentiment: " + "<size=16>       </size>";
             fade(0);
         }
@@ -79,7 +81,7 @@ public class MenuMover : MonoBehaviour {
     public void updateUI(Twitter.API.Tweet newTweet, float sentiment, float height, float size)
     {
         islandInfoUI.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
-            "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
+            "\n\n<size=24><i>" + timeAgo + " </i>ago</size>" +
             "\n\nSentiment: " + "<size=16>       </size>";
 
 
@@ -95,13 +97,13 @@ public class MenuMover : MonoBehaviour {
         lerp = false;
         m_height = height;
         m_size = size;
-        m_displayName = newTweet.DisplayName;
-        m_text = newTweet.Text.Replace("\\n", '\n' + "");
+        m_displayName = newTweet.screen_name;
+        m_text = newTweet.text.Replace("\\n", '\n' + "");
 
         //Calculate time between tweet post and now
         #region time between now and post
         int MonthInt = 0;
-        switch (newTweet.dateTime.Month)
+        switch (newTweet.FormattedDateTime.Month)
         {
             case "Jan":
                 MonthInt = 1;
@@ -145,14 +147,14 @@ public class MenuMover : MonoBehaviour {
             + ((System.DateTime.Now.Month - 1) * 30)
             + System.DateTime.Now.Day)
             -
-            (((newTweet.dateTime.Year - 1) * 365)
+            (((newTweet.FormattedDateTime.Year - 1) * 365)
             + ((MonthInt - 1) * 30)
-            + newTweet.dateTime.Day);
+            + newTweet.FormattedDateTime.Day);
 
         if (difference == 0)
         {
             //Posted today!
-            float hours = System.DateTime.Now.Hour - newTweet.dateTime.Hour;
+            float hours = System.DateTime.Now.Hour - newTweet.FormattedDateTime.Hour;
             if (hours >= 22)
                 timeAgo = "almost a day";
             else if (hours >= 5)
@@ -167,7 +169,7 @@ public class MenuMover : MonoBehaviour {
             {
                 float mins = ((System.DateTime.Now.Hour * 60) + System.DateTime.Now.Minute)
                     -
-                    (newTweet.dateTime.Hour * 60 + newTweet.dateTime.Minute);
+                    (newTweet.FormattedDateTime.Hour * 60 + newTweet.FormattedDateTime.Minute);
                 if (mins > 54)
                     timeAgo = "about an hour";
                 else if (mins > 5)
@@ -189,7 +191,7 @@ public class MenuMover : MonoBehaviour {
             {
                 //This must be yesturday
                 //Hours between now, and when the tweet was posted
-                float h = System.DateTime.Now.Hour + (24 - newTweet.dateTime.Hour);
+                float h = System.DateTime.Now.Hour + (24 - newTweet.FormattedDateTime.Hour);
                 if (h > 24)
                     timeAgo = "about a day";
                 else
@@ -199,7 +201,7 @@ public class MenuMover : MonoBehaviour {
                         timeAgo = h + " hours";
                     else
                     {
-                        float minutes = System.DateTime.Now.Minute - newTweet.dateTime.Minute;
+                        float minutes = System.DateTime.Now.Minute - newTweet.FormattedDateTime.Minute;
                     }
                 }
             }
@@ -292,19 +294,19 @@ public class MenuMover : MonoBehaviour {
         #endregion
 
         Text uiText = islandInfoUI.GetComponentInChildren<Text>();
-            uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
-                "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
-                "\n\nSentiment: " + "<size=16>       </size>";
+        uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
+            "\n\n<size=24><i>" + timeAgo + " </i>ago</size>" +
+            "\n\nSentiment: " + "<size=16>       </size>";
 
         //Fade in the everything
         fade(1);
 
         yield return new WaitForSeconds(1.25f);
         uiText.text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
-            "<size=24>\n\n<i>" + timeAgo + " </i>ago</size>" +
+            "\n\n<size=24><i>" + timeAgo + " </i>ago</size>" +
             "\n\nSentiment: " + "<size=16>" + sent + "</size>";
-
     }
+
 
     void fade(int inOut)
     {

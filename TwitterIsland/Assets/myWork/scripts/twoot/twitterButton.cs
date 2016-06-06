@@ -14,6 +14,8 @@ public class twitterButton : MonoBehaviour {
     }
     #endregion
 
+    public Twitter.API.TwitterUserInfo testObject;
+
     public string consumerKey, consumerSecret;
     public Button postScreenshotButton;
     public int tweetsToGrab;
@@ -129,27 +131,26 @@ public class twitterButton : MonoBehaviour {
             //Find size + height rank
             //Also set up variables/references
             numbersToSliders nums = GameObject.Find("numbersToSliders").GetComponent<numbersToSliders>();
-            IslandMaker.favs = nums.favs(tweets[i].Favs);
-            IslandMaker.meshScale = nums.RTs(tweets[i].RTs);
+            IslandMaker.favs = nums.favs(tweets[i].favorite_count);
+            IslandMaker.meshScale = nums.RTs(tweets[i].retweet_count);
             IslandMaker.verified = verified;
             IslandMaker.avatar = avatarImage;
 
             //Begin the island creation process, consult IslandMaker.cs for details
-            IslandMaker.updateHexs(tweets[i].Text);
+            IslandMaker.updateHexs(tweets[i].text);
             
             //Give it a moment to make the island
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(.8f);
 
             //Add the seagulls in
             GameObject gulls = Instantiate(gulley) as GameObject;
             gulls.GetComponent<gullMaker>().gullNames = gullNames;
-            gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].Text);
+            gulls.GetComponent<gullMaker>().reloadGulls(tweets[i].text);
 
-            yield return new WaitForSeconds(.75f);
+            yield return new WaitForSeconds(.3f);
 
             //Take the created island, and put it somewhere else, merging the appropriate elements
             IslandMaker.mergeIsland(gulls, tweets[i]);
-            yield return new WaitForSeconds(.25f);
         }
 
         //Now we've made all the islands, get rid of the tweet data used

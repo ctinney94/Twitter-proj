@@ -61,7 +61,7 @@ public class gullMaker : MonoBehaviour {
         {
             GameObject gullyGuy = Instantiate(gull);
             int theChosenGull = Random.Range(0, gullNames.Length - 1);
-            gullyGuy.name = gullNames[theChosenGull];//Make sure we don't use the same gull name
+            gullyGuy.name = gullNames[theChosenGull] + " Chips";//Make sure we don't use the same gull name
             gullyGuy.transform.parent = gameObject.transform;
             gullyGuy.tag = "VanillaGull";
             myGulls.Add(gullyGuy);
@@ -80,7 +80,7 @@ public class gullMaker : MonoBehaviour {
         {
             GameObject gullyGuy = Instantiate(birthdayGull);
             int theChosenGull = Random.Range(0, gullNames.Length - 1);
-            gullyGuy.name = gullNames[theChosenGull];
+            gullyGuy.name = gullNames[theChosenGull]+" Chips";
             gullyGuy.transform.parent = gameObject.transform;
             gullyGuy.tag = "BirthdayGull";
             myGulls.Add(gullyGuy);

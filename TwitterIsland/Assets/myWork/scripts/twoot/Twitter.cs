@@ -122,7 +122,7 @@ namespace Twitter
 
             if (!string.IsNullOrEmpty(web.error))
             {
-                errorText.text= web.error;
+                errorText.text = web.error;
                 errorText.enabled = true;
                 Debug.Log(string.Format("GetAccessToken - failed. error : {0}", web.error));
             }
@@ -162,7 +162,7 @@ namespace Twitter
             AddDefaultOAuthParams(parameters, consumerKey, consumerSecret);
             parameters.Add("oauth_callback", "oob");
 
-            var headers = new Dictionary<string,string>();
+            var headers = new Dictionary<string, string>();
             headers["Authorization"] = GetFinalOAuthHeader("POST", RequestTokenURL, parameters);
 
             return new WWW(RequestTokenURL, form.data, headers);
@@ -200,8 +200,8 @@ namespace Twitter
 
         //Data types used for tweet data as well as detailed time info
         #region screenshotDoing
-            
-        public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response,screenshot secondaryCaller,bool isBack)
+
+        public static IEnumerator PostScreenshot(string encodedImage, string consumerKey, string consumerSecret, AccessTokenResponse response, screenshot secondaryCaller, bool isBack)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("media_data", encodedImage);
@@ -217,13 +217,13 @@ namespace Twitter
             headers["Content-Transfer-Encoding"] = "base64";
             WWW web = new WWW("https://upload.twitter.com/1.1/media/upload.json", form.data, headers);
             yield return web;
-            
+
             if (web.error != "Null")
             {
                 string mediaID = web.text.Remove(web.text.IndexOf(','), web.text.Length - web.text.IndexOf(','));
                 mediaID = mediaID.Remove(0, 12);
                 Debug.Log("Upload complete - " + mediaID);
-                secondaryCaller.mediaIDs.Add(new KeyValuePair<string, bool>(mediaID,isBack));
+                secondaryCaller.mediaIDs.Add(new KeyValuePair<string, bool>(mediaID, isBack));
             }
             else
             {
@@ -231,7 +231,7 @@ namespace Twitter
             }
         }
 
-        public static IEnumerator PostTweet(string text, string mediaID, string consumerKey, string consumerSecret, AccessTokenResponse response,Text outputText)
+        public static IEnumerator PostTweet(string text, string mediaID, string consumerKey, string consumerSecret, AccessTokenResponse response, Text outputText)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("status", text);
@@ -279,13 +279,48 @@ namespace Twitter
         [System.Serializable]
         public class Tweet
         {
-            public tw_DateTime dateTime;
-            public string Text;
-            public string ID;
-            public string UserID;
-            public string DisplayName;
-            public int RTs;
-            public int Favs;
+            public string created_at;
+            public string id;
+            public string text;
+            public string screen_name;
+            public int retweet_count;
+            public int favorite_count;
+            public tw_DateTime FormattedDateTime;
+            /*public bool truncated;
+            public string source;
+            public int in_reply_to_status_id;
+            public int in_reply_to_user_id;
+            public string in_reply_to_screen_name;
+            public bool is_quote_status;
+            public string geo;
+            public string coordinates;
+            public string place;
+            public bool retweeted;
+            public bool favourited;
+            public string contributors;*/
+        }
+
+        [System.Serializable]
+        public class TwitterUserInfo
+        {
+            public string id;
+            public string name;
+            public string screen_name;
+            public string profile_location;
+            public string description;
+            public string url;
+            public int followers_count;
+            public int friends_count;
+            public string created_at;
+            public int favourites_count;
+            public string utc_offset;
+            public string time_zone;
+            public bool geo_enabled;
+            public bool verified;
+            public int statuses_count;
+            public string lang;
+            public Tweet status;
+            public string profile_image_url;
         }
 
         //Grab a selection of tweets from a user
@@ -297,7 +332,7 @@ namespace Twitter
 
             //DO AN API CALL
             //For this program, the parameters used below will likely need to be changed bar username and # of tweets to pull
-            WWW web = new WWW("https://api.twitter.com/1.1/statuses/"+"user"+"_timeline.json?screen_name=" + name + "&count=" + count + "&trim_user=1" + "&include_rts=0&exclude_replies=true&contributor_details=false", null, headers);
+            WWW web = new WWW("https://api.twitter.com/1.1/statuses/" + "user" + "_timeline.json?screen_name=" + name + "&count=" + count + "&trim_user=1" + "&include_rts=0&exclude_replies=true&contributor_details=false", null, headers);
 
             while (!web.isDone)
             {
@@ -316,8 +351,8 @@ namespace Twitter
                 //We good
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
 
-                //Find user mentions sections of tweet
-                List<string> mentions = extractData(web.text, ",\"user_mentions\":", ",\"urls\":");
+                //Remove this bit 'cause it's more trouble than it's worth.
+                List<string> mentions = extractData(web.text, ",\"entities\":", ",\"source\":");
                 //If detected, remove.
                 string extractMe;
                 if (ammendOutputText == null)
@@ -325,83 +360,158 @@ namespace Twitter
                 else
                     extractMe = ammendOutputText;
 
-                //Extract relevant data from web response
-                Debug.Log(extractMe);
-                List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
-                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
-                List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
-                List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
-                List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
-                List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
+                string[] delim = { "},{" };
+                string[] pls = extractMe.Split(delim, StringSplitOptions.None);
 
-                //This is what will be used to create islands
-                List<Tweet> tweets = new List<Tweet>();
-
-                //For each detected tweet
-                for (int i = 0; i < text.Count; i++)
+                Debug.Log(pls.Length);
+                foreach (string s in pls)
                 {
-                    //Create a new tweet
-                    Tweet thisTweet = new Tweet();
+                    string temp = s;
+                    Debug.Log(temp);
 
-                    #region dateTime formatting
-                    string temp = "";
-                    List<string> date = new List<string>();
-                    for (int k = 0; k < dateTime[i].Length; k++)
-                    {
-                        if (dateTime[i][k] != ' ')
-                            temp += dateTime[i][k];
-                        else
-                        {
-                            date.Add(temp);
-                            temp = "";
-                        }
+                    if (temp.StartsWith("["))                    
+                        temp=temp.Remove(0, 1);
+                    
+                    if (temp.EndsWith("]") || temp.EndsWith("}}"))                    
+                        temp = temp.Remove(temp.Length - 1, 1);
 
-                        if (k == dateTime[i].Length - 1)
-                            date.Add(temp);
-                    }
-                    temp = "";
-                    List<string> timeOfDay = new List<string>();
-                    for (int k = 0; k < date[3].Length; k++)
-                    {
-                        if (date[3][k] != ':')
-                            temp += date[3][k];
-                        else
-                        {
-                            timeOfDay.Add(temp);
-                            temp = "";
-                        }
+                    if (!temp.EndsWith("}"))
+                        temp += "}";
 
-                        if (k == date[3].Length - 1)
-                            timeOfDay.Add(temp);
-                    }
-
-                    tw_DateTime time = new tw_DateTime();
-                    time.Weekday = date[0];
-                    time.Month = date[1];
-                    time.Day = int.Parse(date[2]);
-                    time.Hour = int.Parse(timeOfDay[0]);
-                    time.Minute = int.Parse(timeOfDay[1]);
-                    time.Second = int.Parse(timeOfDay[2]);
-                    time.Year = int.Parse(date[5]);
-                    time.Offset = date[4];
-                    #endregion
-
-                    //Add data to tweet
-                    thisTweet.dateTime = time;
-                    thisTweet.Text = text[i];
-                    thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
-                    thisTweet.RTs = int.Parse(RTs[i]);
-                    thisTweet.Favs = int.Parse(favs[i]);
-                    thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
-                    thisTweet.DisplayName = currentDisplayName;
-
-                    //Add tweet
-                    tweets.Add(thisTweet);
+                    if (!temp.StartsWith("{"))
+                        temp = "{" + temp;
+                    
+                    Debug.Log(temp);
+                    Tweet newTweet = JsonUtility.FromJson<Tweet>(temp);
+                    newTweet.FormattedDateTime = formatDateTime(newTweet.created_at);
+                    newTweet.screen_name = currentDisplayName;
+                    caller.tweets.Add(newTweet);
                 }
-                //Send the tweet data back to the button used to call this function
-                caller.tweets = tweets;
-                ammendOutputText = null;
+
+                #region old method of data extraction
+                /*
+                                List<string> dateTime = extractData(extractMe, "{\"created_at\":\"", "\",\"id\":");
+                                List<string> text = extractData(extractMe, ",\"text\":\"", "\",\"truncated\":");
+                                List<string> favs = extractData(extractMe, "\"favorite_count\":", ",\"favorited\":");
+                                List<string> RTs = extractData(extractMe, "\"retweet_count\":", ",\"favorite_count\":");
+                                List<string> userID = extractData(extractMe, "\"user\":{\"id\":", "\"},\"geo\":");
+                                List<string> tweetID = extractData(extractMe, ",\"id\":", "\",\"text\":");
+
+                                //This is what will be used to create islands
+                                List<Tweet> tweets = new List<Tweet>();
+
+                                //For each detected tweet
+                                for (int i = 0; i < text.Count; i++)
+                                {
+                                    //Create a new tweet
+                                    Tweet thisTweet = new Tweet();
+
+                                    #region dateTime formatting
+                                    string temp = "";
+                                    List<string> date = new List<string>();
+                                    for (int k = 0; k < dateTime[i].Length; k++)
+                                    {
+                                        if (dateTime[i][k] != ' ')
+                                            temp += dateTime[i][k];
+                                        else
+                                        {
+                                            date.Add(temp);
+                                            temp = "";
+                                        }
+
+                                        if (k == dateTime[i].Length - 1)
+                                            date.Add(temp);
+                                    }
+                                    temp = "";
+                                    List<string> timeOfDay = new List<string>();
+                                    for (int k = 0; k < date[3].Length; k++)
+                                    {
+                                        if (date[3][k] != ':')
+                                            temp += date[3][k];
+                                        else
+                                        {
+                                            timeOfDay.Add(temp);
+                                            temp = "";
+                                        }
+
+                                        if (k == date[3].Length - 1)
+                                            timeOfDay.Add(temp);
+                                    }
+
+                                    tw_DateTime time = new tw_DateTime();
+                                    time.Weekday = date[0];
+                                    time.Month = date[1];
+                                    time.Day = int.Parse(date[2]);
+                                    time.Hour = int.Parse(timeOfDay[0]);
+                                    time.Minute = int.Parse(timeOfDay[1]);
+                                    time.Second = int.Parse(timeOfDay[2]);
+                                    time.Year = int.Parse(date[5]);
+                                    time.Offset = date[4];
+                                    #endregion
+
+                                    //Add data to tweet
+                                    thisTweet.dateTime = time;
+                                    thisTweet.Text = text[i];
+                                    thisTweet.UserID = userID[i].Substring(0, userID[i].IndexOf(",\"id_str"));
+                                    thisTweet.RTs = int.Parse(RTs[i]);
+                                    thisTweet.Favs = int.Parse(favs[i]);
+                                    thisTweet.ID = tweetID[i].Substring(0, tweetID[i].IndexOf(",\"id_str"));
+                                    thisTweet.DisplayName = currentDisplayName;
+
+                                    //Add tweet
+                                    tweets.Add(thisTweet);
+                                }
+                                //Send the tweet data back to the button used to call this function
+                                caller.tweets = tweets;
+                                ammendOutputText = null;*/
+                #endregion
             }
+        }
+
+        public static tw_DateTime formatDateTime(string dateTime)
+        {
+            string temp = "";
+            List<string> date = new List<string>();
+            for (int k = 0; k < dateTime.Length; k++)
+            {
+                if (dateTime[k] != ' ')
+                    temp += dateTime[k];
+                else
+                {
+                    date.Add(temp);
+                    temp = "";
+                }
+
+                if (k == dateTime.Length - 1)
+                    date.Add(temp);
+            }
+            temp = "";
+            List<string> timeOfDay = new List<string>();
+            for (int k = 0; k < date[3].Length; k++)
+            {
+                if (date[3][k] != ':')
+                    temp += date[3][k];
+                else
+                {
+                    timeOfDay.Add(temp);
+                    temp = "";
+                }
+
+                if (k == date[3].Length - 1)
+                    timeOfDay.Add(temp);
+            }
+
+            Twitter.API.tw_DateTime time = new Twitter.API.tw_DateTime();
+            time.Weekday = date[0];
+            time.Month = date[1];
+            time.Day = int.Parse(date[2]);
+            time.Hour = int.Parse(timeOfDay[0]);
+            time.Minute = int.Parse(timeOfDay[1]);
+            time.Second = int.Parse(timeOfDay[2]);
+            time.Year = int.Parse(date[5]);
+            time.Offset = date[4];
+
+            return time;
         }
 
         //Retrieve user profile information
@@ -413,7 +523,7 @@ namespace Twitter
 
             //DO AN API CALL
             //For this program, the parameters used below will likely need to be changed bar username and # of tweets to pull
-            WWW web = new WWW("https://api.twitter.com/1.1/users/show.json?screen_name=" + name+ "&include_entities=false", null, headers);
+            WWW web = new WWW("https://api.twitter.com/1.1/users/show.json?screen_name=" + name + "&include_entities=false", null, headers);
 
             while (!web.isDone)
             {
@@ -430,30 +540,22 @@ namespace Twitter
             }
             else
             {
+                TwitterUserInfo test = JsonUtility.FromJson<TwitterUserInfo>(web.text);
+                caller.testObject = test;
+
+                if (test.screen_name == " ")
+                    test.screen_name = "Somebody with a non-ascii name";
+
+                caller.verified = test.verified;
+                test.profile_image_url = test.profile_image_url.Remove(test.profile_image_url.IndexOf("_normal"), 7);
+                caller.StartCoroutine(twitterButton.setAvatar(test.profile_image_url));
+                currentDisplayName = test.screen_name;
                 //We good
                 GameObject.Find("Error Text").GetComponent<Text>().text = "";
-                Debug.Log(web.text);
-                //Extract data from web response               
-                List<string> URL = extractData(web.text, ",\"profile_image_url\":\"", "\",\"profile_image_url_https\":");
-                List<string> verified = extractData(web.text, ",\"verified\":", ",\"statuses_count\":");
-                List<string> displayName = extractData(web.text, ",\"name\":\"", "\",\"screen_name\":");
-
-                //Output display name
-                if (displayName[0] != " ")
-                    currentDisplayName = displayName[0];
-                else
-                    currentDisplayName = "Somebody with a non-ascii name";
-                
-                //Output verified status of current user
-                caller.verified = Convert.ToBoolean(verified[0]);
-                //Format avatar URL to retrieve full size image
-                URL[0] = URL[0].Remove(URL[0].IndexOf("_normal"), 7);
-                //Create a texture from the users avatar (grab from URL)
-                caller.StartCoroutine(twitterButton.setAvatar(URL[0]));
             }
         }
         #endregion
-        
+
         //Used for extracting data from API response
         public static List<string> extractData(string outputText, string start, string end)
         {
@@ -461,7 +563,7 @@ namespace Twitter
             List<int> startPos = new List<int>();
             List<int> stopPos = new List<int>();
             int i = 0;
-            while ((i=outputText.IndexOf(start,i))!=-1)
+            while ((i = outputText.IndexOf(start, i)) != -1)
             {
                 startPos.Add(i);
                 i++;
@@ -484,8 +586,8 @@ namespace Twitter
             if (startPos.Count != stopPos.Count)
                 startPos.Remove(startPos[startPos.Count - 1]);//Try fixing
 
-            
-            for (int j = startPos.Count-1; j>-1;j--)
+
+            for (int j = startPos.Count - 1; j > -1; j--)
             {
                 string output = "";
                 for (int c = startPos[j]; c < stopPos[j]; c++)
@@ -493,7 +595,7 @@ namespace Twitter
                     output += outputText[c];
                 }
 
-                if (start != ",\"user_mentions\":")
+                if (start != ",\"entities\":")
                 {
                     #region Format output string
                     output = output.Replace(start, "");
@@ -524,11 +626,11 @@ namespace Twitter
                 {
                     //Remove text from original input and return
                     //Remove each section of the string STARTING AT THE END AND WORKING BACK
-                    outputText = outputText.Remove(startPos[j] + 1, output.Length + start.Length - 1);
+                    outputText = outputText.Remove(startPos[j] + 1, output.Length);// + start.Length - 1);
                     output = null;
                     ammendOutputText = outputText;
                 }
-                
+
                 returnMe.Add(output);
             }
             return returnMe;
@@ -536,7 +638,7 @@ namespace Twitter
 
         //Used with above function
         public static string ammendOutputText = null;
-        
+
         #region OAuth Help Methods
         // The below help methods are modified from "WebRequestBuilder.cs" in Twitterizer(http://www.twitterizer.net/).
         // Here is its license.
