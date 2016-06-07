@@ -362,12 +362,10 @@ namespace Twitter
 
                 string[] delim = { "},{" };
                 string[] pls = extractMe.Split(delim, StringSplitOptions.None);
-
-                Debug.Log(pls.Length);
+                
                 foreach (string s in pls)
                 {
                     string temp = s;
-                    Debug.Log(temp);
 
                     if (temp.StartsWith("["))                    
                         temp=temp.Remove(0, 1);
@@ -381,7 +379,6 @@ namespace Twitter
                     if (!temp.StartsWith("{"))
                         temp = "{" + temp;
                     
-                    Debug.Log(temp);
                     Tweet newTweet = JsonUtility.FromJson<Tweet>(temp);
                     newTweet.FormattedDateTime = formatDateTime(newTweet.created_at);
                     newTweet.screen_name = currentDisplayName;
