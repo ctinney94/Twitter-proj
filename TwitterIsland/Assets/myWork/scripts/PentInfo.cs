@@ -345,7 +345,7 @@ public class PentInfo : MonoBehaviour
         for (int i = 0; i < hexs.Count; i++)
         {
             yield return new WaitForSeconds(0.0001f);
-            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
+            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue,false);
         }
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;
@@ -416,7 +416,7 @@ public class PentInfo : MonoBehaviour
 
         //Colour the hexs based on position
         for (int i = 0; i < hexs.Count; i++)
-            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue);
+            hexs[i].GetComponent<HexInfo>().heightColour(LargestLowestValue,false);
 
         float highestPoint = 0;
         Vector3 flagPos = Vector3.zero;

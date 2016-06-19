@@ -16,8 +16,8 @@ public class IslandMaker : MonoBehaviour
     public TextAsset gullNamesFile;
     string[] gullNames;
 
-    [SerializeField]
     public bool enableNoise { get; set; }
+    public bool enableHexBlending { get; set; }
 
     [HideInInspector]
     public float meshScale = .1f, 
@@ -304,10 +304,10 @@ public class IslandMaker : MonoBehaviour
             Destroy(itemsToDestroy[j]);
         }
         itemsToDestroy.Clear();
-        //StartCoroutine(CreateIslandDELAY());
+        StartCoroutine(CreateIslandDELAY());
 
         //Let's make an island
-        Invoke("CreateIsland", .5f);
+        //Invoke("CreateIsland", .5f);
     }
 
     [HideInInspector]
@@ -344,8 +344,6 @@ public class IslandMaker : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(1);
-
         //Smooth out the island
         //For each hex created...
         for (int i = hexs.Count - 1; i > -1; i--)
@@ -358,7 +356,7 @@ public class IslandMaker : MonoBehaviour
                     Destroy(hexs[i].GetComponent<HexInfo>().camp);
 
                 //Smooth current vertex
-                hexs[i].GetComponent<HexInfo>().smoothVertex(j);
+                hexs[i].GetComponent<HexInfo>().interlopeCorner(j);
             }
             //Update mesh
             hexs[i].GetComponent<MeshCollider>().sharedMesh = hexs[i].GetComponent<MeshFilter>().mesh;
@@ -366,7 +364,7 @@ public class IslandMaker : MonoBehaviour
 
         //Colour the hexs based on position
         for (int i = 0; i < hexs.Count; i++)
-            hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue);
+            hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue,enableHexBlending);
 
         setPentVisibility(false);
         #endregion
@@ -395,12 +393,15 @@ public class IslandMaker : MonoBehaviour
             Destroy(flag);
 
         flag = Instantiate(flagPrefab) as GameObject;
+        soundManager.instance.managedComponents.Add(flag.GetComponent<AudioSource>());
+        soundManager.instance.setNewVolume(soundManager.instance.maxVolume);
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
 
         //If the current user is verified, try makign a dirt path and hut
         if (verified)
             dirtPath();
+        yield return null;
     }
 
     public bool verified;
@@ -456,7 +457,7 @@ public class IslandMaker : MonoBehaviour
 
         //Colour the hexs based on position
         for (int i = 0; i < hexs.Count; i++)
-            hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue);
+            hexs[i].GetComponent<HexInfo>().heightColour(largestHeightValue,enableHexBlending);
 
         setPentVisibility(false);
         #endregion
@@ -486,6 +487,7 @@ public class IslandMaker : MonoBehaviour
 
         flag = Instantiate(flagPrefab) as GameObject;
         soundManager.instance.managedComponents.Add(flag.GetComponent<AudioSource>());
+        soundManager.instance.setNewVolume(soundManager.instance.maxVolume);
         flag.transform.position = flagPos + new Vector3(0, -.05f, 0);
         flag.GetComponentsInChildren<Renderer>()[1].material.mainTexture = avatar;
 
@@ -662,7 +664,7 @@ public class IslandMaker : MonoBehaviour
     public List<GameObject> camps = new List<GameObject>();
     
     //Combine all the hexagon objects together into a single island game object
-    public void mergeIsland(GameObject gulls, Twitter.API.Tweet THETWEET)
+    public IEnumerator mergeIsland(GameObject gulls, Twitter.API.Tweet THETWEET)
     {
         //now do particle related things
         particles = Instantiate(particlePrefab) as GameObject;
@@ -773,6 +775,7 @@ public class IslandMaker : MonoBehaviour
 
         AudioSource waveSounds = lastIsland.AddComponent<AudioSource>();
         soundManager.instance.managedComponents.Add(waveSounds);
+        soundManager.instance.setNewVolume(soundManager.instance.maxVolume);
         waveSounds.playOnAwake = false;
         waveSounds.clip = waveNoises;
         waveSounds.spatialBlend = 1;
@@ -781,6 +784,7 @@ public class IslandMaker : MonoBehaviour
         waveSounds.maxDistance = meshScale * 4;
         waveSounds.rolloffMode = AudioRolloffMode.Linear;
         waveSounds.Play();
+        yield return null;
     }
     public AudioClip waveNoises;
     #endregion

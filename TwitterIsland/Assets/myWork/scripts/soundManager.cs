@@ -20,6 +20,12 @@ public class soundManager : MonoBehaviour {
         audioComponent.PlayOneShot(sound);
     }
 
+    void Update()
+    {
+        if (m_instance == null)
+            m_instance = this;
+    }
+
     void Start ()
     {
         audioComponent = GetComponent<AudioSource>();

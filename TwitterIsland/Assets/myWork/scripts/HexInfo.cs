@@ -251,7 +251,7 @@ public class HexInfo : MonoBehaviour
     }
 
     //Add colour values to vertices based on height and gradient values
-    public void heightColour(float maxLeast)
+    public void heightColour(float maxLeast, bool blending)
     {
         //NOTE:
         //Using a value of -99 in the moveVert() method won't move the vertex
@@ -273,11 +273,27 @@ public class HexInfo : MonoBehaviour
             //If the vertex y value is lower than 0.6
             if (getVerts()[i].y < 0.6f)
             {
-                //Colour the vertice yellow to create a sandy beach
-                if (ran > 0.25f)
-                    moveVert(i, -99, sand);
+                if (blending)
+                {
+                    if (ran > 0.25f)
+                        moveVert(i, -99, sand);
+                    else
+                        moveVert(i, -99, Color.Lerp(Color.white, sand, 0.75f));
+                }
                 else
-                    moveVert(i, -99, Color.Lerp(Color.white, sand, 0.75f));
+                {
+                    //Then for each vertex of the hexagon
+                    for (int j = 0; j < 7; j++)
+                    {
+                        //Colour the vertex grey or brown to represent a slope
+                        if (ran > 0.25f)
+                            moveVert(j, -99, sand);
+                        else
+                            moveVert(j, -99, Color.Lerp(Color.white, sand, 0.75f));
+
+                    }
+                    i = 99;
+                }
             }
         }
 
@@ -310,7 +326,21 @@ public class HexInfo : MonoBehaviour
         for (int i = 0; i < 7; i++)
         {
             if (getVerts()[i].y > 10f)
-                moveVert(i, -99, Color.white);
+            {
+                if (blending)
+                {
+                    moveVert(i, -99, Color.white);
+                }
+                else
+                {
+                    //Then for each vertex of the hexagon
+                    for (int j = 0; j < 7; j++)
+                    {
+                        moveVert(j, -99, Color.white);
+                    }
+                    i = 99;
+                }
+            }
         }
     }
 
@@ -351,7 +381,6 @@ public class HexInfo : MonoBehaviour
         }
         //Old code for centre vert
         //var newColy = (getColors()[0] + getColors()[1] + getColors()[2] + getColors()[3] + getColors()[4] + getColors()[5]) / 6;
-
     }
 
     //Joins the vertices of different hexagons together

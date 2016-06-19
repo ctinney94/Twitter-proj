@@ -150,7 +150,8 @@ public class twitterButton : MonoBehaviour {
             yield return new WaitForSeconds(.3f);
 
             //Take the created island, and put it somewhere else, merging the appropriate elements
-            IslandMaker.mergeIsland(gulls, tweets[i]);
+            //IslandMaker.mergeIsland(gulls, tweets[i]);
+            StartCoroutine(IslandMaker.mergeIsland(gulls, tweets[i]));
         }
 
         //Now we've made all the islands, get rid of the tweet data used

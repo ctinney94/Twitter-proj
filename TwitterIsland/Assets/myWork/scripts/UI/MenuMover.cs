@@ -83,8 +83,7 @@ public class MenuMover : MonoBehaviour
         islandInfoUI.GetComponentInChildren<Text>().text = m_displayName + " tweeted;\n" + "<size=20>" + m_text + "</size>" +
             "\n\n<size=24><i>" + timeAgo + " </i>ago</size>" +
             "\n\nSentiment: " + "<size=16>       </size>";
-
-
+        
         StopCoroutine(revert(newTweet, sentiment));
 
         islandInfoUI.SetActive(true);

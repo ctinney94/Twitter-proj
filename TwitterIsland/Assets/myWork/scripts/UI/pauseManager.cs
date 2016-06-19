@@ -6,7 +6,7 @@ public class pauseManager : MonoBehaviour
 {
     public static pauseManager instance;
 
-    int cursorIndex = 0;
+    int cursorIndex;
     public GameObject allTheCanvases, pointer, pauseScreen;
     public GameObject[] menuItems;
     public Color highlightColour;
@@ -20,21 +20,18 @@ public class pauseManager : MonoBehaviour
     void Update()
     {
         #region Enter/exit pause mode
-        if (Camera.main)
+        if ((Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button7)))
         {
-            if (allTheCanvases.activeSelf)
+            if (Camera.main)
             {
-                if (!twitterButton.instance.running)
+                if (allTheCanvases.activeSelf)
                 {
-                    if ((Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button7)))
+                    if (!twitterButton.instance.running)
                     {
                         pauseUnpause(allTheCanvases.activeSelf);
                     }
                 }
-            }
-            else
-            {
-                if ((Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button7)))
+                else
                 {
                     pauseUnpause(allTheCanvases.activeSelf);
                 }
@@ -119,7 +116,7 @@ public class pauseManager : MonoBehaviour
         allowCursorMove = b;
         if (b)
         {
-            Time.timeScale = 0;
+            Time.timeScale = 0f;
             allTheCanvases.SetActive(false);
             pointer.SetActive(false);
             pauseScreen.SetActive(true);
